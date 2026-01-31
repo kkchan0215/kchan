@@ -1,85 +1,99 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>글 게시판</title>
-  <style>
-    /* 보라톤 배경/글씨 스타일 */
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f3e5f5; color: #4a148c; }
-    header { background: #ce93d8; padding: 10px; margin-bottom: 20px; color: white; }
-    button { padding: 8px 16px; font-size: 14px; cursor: pointer; background: #ab47bc; color: white; border: none; border-radius: 4px; margin-top: 5px; }
-    button:hover { background: #8e24aa; }
-    input, textarea { padding: 5px; margin-bottom: 10px; width: 300px; border: 1px solid #ce93d8; border-radius: 4px; }
-    section { margin-bottom: 30px; }
-    .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; }
-    .post h3 { margin: 0 0 5px 0; }
-    .like-btn { color: #4a148c; cursor: pointer; margin-left: 5px; }
-    #adminSection { display: none; margin-bottom: 20px; }
-  </style>
-  <script>
-    // 🔹 관리자 계정 (미리 설정)
-    const ADMIN_ID = "kkchan0215";
-    const ADMIN_PW = "kk215gksk!!^^";
+<meta charset="UTF-8">
+<title>글 게시판</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f3e5f5; color: #4a148c; }
+  header { background: #ce93d8; padding: 10px; margin-bottom: 20px; color: white; }
+  button { padding: 8px 16px; font-size: 14px; cursor: pointer; background: #ab47bc; color: white; border: none; border-radius: 4px; margin-top: 5px; }
+  button:hover { background: #8e24aa; }
+  input, textarea { padding: 5px; margin-bottom: 10px; width: 300px; border: 1px solid #ce93d8; border-radius: 4px; }
+  section { margin-bottom: 30px; }
+  .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; position: relative; }
+  .post h3 { margin: 0 0 5px 0; }
+  .like-btn { color: #4a148c; cursor: pointer; margin-left: 5px; }
+  .delete-btn { color: red; cursor: pointer; position: absolute; top: 10px; right: 10px; font-size: 12px; }
+</style>
+<script>
+  // 🔹 사용자 및 관리자 정보
+  const ADMIN_ID = "kkchan0215";
+  const ADMIN_PW = "kk215gksk!!^^";
+  let currentUser = null; // 현재 로그인 사용자 (간단히 이름 저장)
 
-    let isAdmin = false;
+  // 회원가입 버튼 (에러 없음)
+  function signUp() {
+    const name = prompt("사용자 이름을 입력하세요");
+    if (!name) return;
+    currentUser = name;
+    alert(`환영합니다, ${currentUser}! ✅`);
+  }
 
-    // 회원가입 버튼 클릭 시 에러 없음
-    function signUp() {
-      alert("회원가입 버튼 눌렀음 ✅ 에러 없음");
-      console.log("회원가입 클릭 - 에러 없음");
+  // 관리자 로그인
+  function adminLogin() {
+    const id = prompt("관리자 아이디 입력");
+    const pw = prompt("관리자 비밀번호 입력");
+
+    if(id === ADMIN_ID && pw === ADMIN_PW) {
+      currentUser = ADMIN_ID;
+      alert("관리자 로그인 성공! 🎉");
+    } else {
+      alert("아이디 또는 비밀번호 틀림 ❌");
+    }
+  }
+
+  // 글 작성 (모든 사람 가능)
+  function addPost() {
+    if(!currentUser) {
+      alert("글을 작성하려면 먼저 회원가입 또는 관리자 로그인 해주세요!");
+      return;
     }
 
-    // 관리자 로그인
-    function adminLogin() {
-      const id = prompt("관리자 아이디 입력");
-      const pw = prompt("관리자 비밀번호 입력");
+    const title = prompt("제목을 입력하세요");
+    if (!title) return;
 
-      if(id === ADMIN_ID && pw === ADMIN_PW) {
-        isAdmin = true;
-        alert("관리자 로그인 성공! 🎉");
-        document.getElementById("adminSection").style.display = "block";
-      } else {
-        alert("아이디 또는 비밀번호 틀림 ❌");
+    const content = prompt("내용을 입력하세요");
+    if (!content) return;
+
+    const feed = document.getElementById("feed");
+
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+    postDiv.dataset.author = currentUser; // 작성자 정보 저장
+
+    postDiv.innerHTML = `
+      <h3>${title}</h3>
+      <p>${content}</p>
+      <span class="like-btn" onclick="likePost(this)">👍 0</span>
+      <span class="delete-btn" onclick="deletePost(this)">삭제</span>
+    `;
+
+    feed.insertBefore(postDiv, feed.firstChild);
+  }
+
+  // 좋아요 기능
+  function likePost(el) {
+    let text = el.textContent;
+    let parts = text.split(" ");
+    let count = parseInt(parts[1]) || 0;
+    count++;
+    el.textContent = `👍 ${count}`;
+  }
+
+  // 글 삭제 기능
+  function deletePost(el) {
+    const postDiv = el.parentElement;
+    const author = postDiv.dataset.author;
+
+    if(currentUser === ADMIN_ID || currentUser === author) {
+      if(confirm("정말 삭제하시겠습니까?")) {
+        postDiv.remove();
       }
+    } else {
+      alert("삭제 권한이 없습니다 ❌");
     }
-
-    // 글 작성
-    function addPost() {
-      if(!isAdmin) {
-        alert("글 작성은 관리자만 가능합니다 🔒");
-        return;
-      }
-
-      const title = prompt("제목을 입력하세요");
-      if (!title) return;
-
-      const content = prompt("내용을 입력하세요");
-      if (!content) return;
-
-      const feed = document.getElementById("feed");
-
-      const postDiv = document.createElement("div");
-      postDiv.className = "post";
-
-      postDiv.innerHTML = `
-        <h3>${title}</h3>
-        <p>${content}</p>
-        <span class="like-btn" onclick="likePost(this)">👍 0</span>
-      `;
-
-      // 피드 맨 위에 추가
-      feed.insertBefore(postDiv, feed.firstChild);
-    }
-
-    // 좋아요 기능
-    function likePost(el) {
-      let text = el.textContent; 
-      let parts = text.split(" ");
-      let count = parseInt(parts[1]) || 0;
-      count++;
-      el.textContent = `👍 ${count}`;
-    }
-  </script>
+  }
+</script>
 </head>
 <body>
   <header>
@@ -87,27 +101,21 @@
     <button onclick="adminLogin()">관리자 로그인</button>
   </header>
 
-  <!-- 회원가입 섹션 -->
   <section>
     <h2>회원가입</h2>
-    <input type="email" placeholder="이메일 입력" /><br>
-    <input type="password" placeholder="비밀번호 입력" /><br>
-    <button onclick="signUp()">회원가입</button>
+    <button onclick="signUp()">회원가입 / 이름 설정</button>
   </section>
 
-  <!-- 관리자 전용 글쓰기 버튼 -->
-  <section id="adminSection">
-    <h2>글쓰기 (관리자 전용)</h2>
+  <section>
+    <h2>글쓰기</h2>
     <button onclick="addPost()">글쓰기</button>
   </section>
 
-  <!-- 피드 섹션 -->
   <section>
     <h2>피드</h2>
     <div id="feed">
-      <!-- 작성한 글이 여기에 피드형으로 추가됨 -->
+      <!-- 글들이 여기에 피드형으로 추가됨 -->
     </div>
   </section>
 </body>
 </html>
-
