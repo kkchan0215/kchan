@@ -13,26 +13,50 @@ button { padding:5px 10px; cursor:pointer; margin:2px; }
 .like-btn { color:purple; cursor:pointer; margin-left:5px; }
 .comment { margin-left:15px; font-size:14px; }
 header button { margin-right:5px; }
+.section-box { border:1px solid #ba68c8; padding:10px; border-radius:5px; margin-bottom:10px; background:#f8bbd0; }
+#message { color:green; font-weight:bold; margin-bottom:10px; }
+.group button { margin:2px; }
 </style>
 </head>
 <body>
 
 <header>
-<h1>나만의 일기장 </h1>
-<button onclick="showSignUp()">회원가입</button>
-<button onclick="showLogin()">로그인</button>
+<h1>나만의 일기장</h1>
+<button onclick="showLoginBox()">로그인</button>
+<button onclick="showSignUpBox()">회원가입</button>
 <button onclick="logout()">로그아웃</button>
 <span id="currentUser"></span>
 </header>
 
-<section>
+<div id="message"></div>
+
+<!-- 회원가입 -->
+<section class="section-box" id="signupBox" style="display:none;">
+<h2>회원가입</h2>
+<input type="text" id="signupUsername" placeholder="닉네임">
+<input type="password" id="signupPassword" placeholder="비밀번호">
+<button onclick="signUp()">회원가입</button>
+</section>
+
+<!-- 로그인 -->
+<section class="section-box" id="loginBox" style="display:none;">
+<h2>로그인</h2>
+<input type="text" id="loginUsername" placeholder="닉네임">
+<input type="password" id="loginPassword" placeholder="비밀번호">
+<button onclick="login()">로그인</button>
+</section>
+
+<!-- 그룹 -->
+<section class="section-box">
 <h2>그룹(앨범) 만들기</h2>
 <input type="text" id="groupName" placeholder="그룹 이름 입력">
 <button onclick="createGroup()">그룹 생성</button>
 <div id="groups"></div>
+<button onclick="showAllPosts()">전체 보기</button>
 </section>
 
-<section>
+<!-- 글쓰기 -->
+<section class="section-box">
 <h2>글쓰기</h2>
 <select id="groupSelect"></select>
 <input type="text" id="postTitle" placeholder="제목 입력">
@@ -41,7 +65,8 @@ header button { margin-right:5px; }
 <button onclick="submitPost()">글 작성</button>
 </section>
 
-<section>
+<!-- 피드 -->
+<section class="section-box">
 <h2>피드</h2>
 <div id="feed"></div>
 </section>
@@ -52,6 +77,7 @@ let users = JSON.parse(localStorage.getItem('users')||'[]');
 let posts = JSON.parse(localStorage.getItem('posts')||'[]');
 let groups = JSON.parse(localStorage.getItem('groups')||'[]');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
+let currentGroupFilter = null; // 현재 선택된 그룹
 
 // ------------------- 저장 -------------------
 function saveUsers(){ localStorage.setItem('users', JSON.stringify(users)); }
@@ -66,6 +92,7 @@ function updateHeader(){
 function updateGroupSelect(){
   const select = document.getElementById('groupSelect');
   select.innerHTML = '';
+  if(!currentUser) return;
   groups.forEach(g=>{
     if(g.owner===currentUser.username){
       const option = document.createElement('option');
@@ -78,24 +105,31 @@ function updateGroupSelect(){
 function renderGroups(){
   const div = document.getElementById('groups');
   div.innerHTML='';
+  if(!currentUser) return;
   groups.forEach(g=>{
     if(g.owner===currentUser.username){
-      const d = document.createElement('div');
-      d.className='group';
-      d.textContent = g.name;
-      div.appendChild(d);
+      const btn = document.createElement('button');
+      btn.textContent = g.name;
+      btn.onclick = () => { currentGroupFilter = g.id; renderFeed(); };
+      div.appendChild(btn);
     }
   });
 }
+function showAllPosts(){ currentGroupFilter=null; renderFeed(); }
+
 function renderFeed(){
   const feed = document.getElementById('feed');
   feed.innerHTML='';
-  posts.forEach(p=>{
+  let filteredPosts = posts;
+  if(currentGroupFilter){
+    filteredPosts = posts.filter(p => p.groupId === currentGroupFilter);
+  }
+  filteredPosts.forEach(p=>{
     const div = document.createElement('div');
     div.className='post';
     div.id = p.id;
     div.innerHTML = `
-      ${currentUser.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
+      ${currentUser?.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
       <strong>${p.title}</strong> <span>by ${p.username}</span> <span>(${groups.find(g=>g.id===p.groupId)?.name||'무소속'})</span>
       <p>${p.content}</p>
       ${p.imageUrl?`<img src="${p.imageUrl}">`:''}
@@ -108,7 +142,6 @@ function renderFeed(){
         <div id="comments-${p.id}"></div>
       </div>
     `;
-    // 댓글 렌더
     const commentsDiv = div.querySelector(`#comments-${p.id}`);
     p.comments.forEach(c=>{
       const cDiv = document.createElement('div');
@@ -120,31 +153,59 @@ function renderFeed(){
   });
 }
 
-// ------------------- 회원가입/로그인 -------------------
-function showSignUp(){
-  const username = prompt("사용할 닉네임 입력");
-  const pw = prompt("비밀번호 입력");
-  if(!username||!pw) return;
+// ------------------- 메시지 -------------------
+function showMessage(msg){
+  const el = document.getElementById('message');
+  el.textContent = msg;
+  setTimeout(()=>{ el.textContent=''; }, 3000);
+}
+
+// ------------------- 회원가입 -------------------
+function showSignUpBox(){
+  document.getElementById('signupBox').style.display='block';
+  document.getElementById('loginBox').style.display='none';
+}
+function signUp(){
+  const username = document.getElementById('signupUsername').value.trim();
+  const pw = document.getElementById('signupPassword').value.trim();
+  if(!username||!pw) return alert("닉네임과 비밀번호 입력!");
   if(users.find(u=>u.username===username)) return alert("이미 존재하는 닉네임!");
   users.push({username,password:pw});
   saveUsers();
-  alert("회원가입 완료!");
+  document.getElementById('signupUsername').value='';
+  document.getElementById('signupPassword').value='';
+  showMessage('회원가입 완료되었습니다 ✅');
 }
 
-function showLogin(){
-  const username = prompt("닉네임 입력");
-  const pw = prompt("비밀번호 입력");
+// ------------------- 로그인 -------------------
+function showLoginBox(){
+  document.getElementById('loginBox').style.display='block';
+  document.getElementById('signupBox').style.display='none';
+}
+function login(){
+  const username = document.getElementById('loginUsername').value.trim();
+  const pw = document.getElementById('loginPassword').value.trim();
   const user = users.find(u=>u.username===username && u.password===pw);
-  if(!user) return alert("아이디/비밀번호 오류");
+  if(!user) return alert("닉네임/비밀번호 오류");
   currentUser = user;
+  saveCurrentUser();
+  document.getElementById('loginUsername').value='';
+  document.getElementById('loginPassword').value='';
+  updateHeader();
+  updateGroupSelect();
+  renderGroups();
+  showMessage('로그인 완료되었습니다 ✅');
+}
+
+// ------------------- 로그아웃 -------------------
+function logout(){
+  currentUser=null;
   saveCurrentUser();
   updateHeader();
   updateGroupSelect();
   renderGroups();
-  alert("로그인 성공!");
+  showMessage('로그아웃 완료 ✅');
 }
-
-function logout(){ currentUser=null; saveCurrentUser(); updateHeader(); updateGroupSelect(); renderGroups(); }
 
 // ------------------- 그룹 -------------------
 function createGroup(){
@@ -217,11 +278,12 @@ function addComment(id){
   renderFeed();
 }
 
-// 초기 렌더
+// ------------------- 초기 렌더 -------------------
 updateHeader();
 updateGroupSelect();
 renderGroups();
 renderFeed();
 </script>
+
 </body>
 </html>
