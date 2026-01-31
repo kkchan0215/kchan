@@ -8,6 +8,7 @@
   header { background: #ce93d8; padding: 10px; margin-bottom: 20px; color: white; }
   button { padding: 8px 16px; font-size: 14px; cursor: pointer; background: #ab47bc; color: white; border: none; border-radius: 4px; margin-top: 5px; }
   button:hover { background: #8e24aa; }
+  input, textarea { padding: 5px; margin-bottom: 10px; width: 100%; border: 1px solid #ce93d8; border-radius: 4px; }
   section { margin-bottom: 30px; }
   .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; position: relative; }
   .post h3 { margin: 0 0 5px 0; }
@@ -32,55 +33,59 @@
     border-radius: 8px;
     color: #4a148c;
   }
-  .modal-content input, .modal-content textarea {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 5px;
-    border: 1px solid #ce93d8;
-    border-radius: 4px;
-  }
 </style>
 <script>
-  const ADMIN_ID = "kkchan0215";
-  const ADMIN_PW = "kk215gksk!!^^";
-  let currentUser = null;
+  // 🔹 로컬 회원 DB
+  const users = {}; // {id: {pw: '비밀번호', nickname: '닉네임'}}
+  const ADMIN_ID = "admin";
+  const ADMIN_PW = "1234";
+  users[ADMIN_ID] = {pw: ADMIN_PW, nickname: "관리자"};
+
+  let currentUser = null; // 로그인한 사용자 아이디
 
   // 회원가입
   function signUp() {
-    const nickname = prompt("닉네임을 입력하세요");
-    if (!nickname) return;
-    currentUser = nickname;
-    alert(`환영합니다, ${currentUser}! ✅`);
+    const id = prompt("회원가입할 아이디를 입력하세요");
+    if(!id || users[id]) {
+      alert("아이디가 이미 존재하거나 입력이 잘못되었습니다 ❌");
+      return;
+    }
+
+    const pw = prompt("비밀번호를 설정하세요");
+    if(!pw) return;
+
+    const nickname = prompt("닉네임을 설정하세요");
+    if(!nickname) return;
+
+    users[id] = {pw: pw, nickname: nickname};
+    alert(`회원가입 완료! 아이디: ${id}, 닉네임: ${nickname}`);
   }
 
-  // 관리자 로그인
-  function adminLogin() {
-    const id = prompt("관리자 아이디 입력");
-    const pw = prompt("관리자 비밀번호 입력");
-
-    if(id === ADMIN_ID && pw === ADMIN_PW) {
-      currentUser = ADMIN_ID;
-      alert("관리자 로그인 성공! 🎉");
+  // 로그인
+  function login() {
+    const id = prompt("아이디 입력");
+    const pw = prompt("비밀번호 입력");
+    if(users[id] && users[id].pw === pw) {
+      currentUser = id;
+      alert(`${users[id].nickname}님 로그인 성공! ✅`);
     } else {
       alert("아이디 또는 비밀번호 틀림 ❌");
     }
   }
 
-  // 글쓰기 모달 열기
+  // 글쓰기 모달
   function openPostModal() {
     if(!currentUser) {
-      alert("글 작성하려면 먼저 회원가입 또는 관리자 로그인 해주세요!");
+      alert("로그인 후 글쓰기 가능!");
       return;
     }
     document.getElementById("postModal").style.display = "block";
   }
 
-  // 글쓰기 모달 닫기
   function closePostModal() {
     document.getElementById("postModal").style.display = "none";
   }
 
-  // 글 추가
   function submitPost() {
     const titleInput = document.getElementById("postTitle");
     const contentInput = document.getElementById("postContent");
@@ -97,7 +102,7 @@
     postDiv.dataset.author = currentUser;
 
     postDiv.innerHTML = `
-      <div class="author">작성자: ${currentUser}</div>
+      <div class="author">작성자: ${users[currentUser].nickname}</div>
       <h3>${title}</h3>
       <p>${content}</p>
       <span class="like-btn" onclick="likePost(this)">👍 0</span>
@@ -106,13 +111,12 @@
 
     feed.insertBefore(postDiv, feed.firstChild);
 
-    // 모달 닫기 및 입력 초기화
     titleInput.value = "";
     contentInput.value = "";
     closePostModal();
   }
 
-  // 좋아요 기능
+  // 좋아요
   function likePost(el) {
     let text = el.textContent;
     let parts = text.split(" ");
@@ -121,7 +125,7 @@
     el.textContent = `👍 ${count}`;
   }
 
-  // 글 삭제 기능
+  // 삭제
   function deletePost(el) {
     const postDiv = el.parentElement;
     const author = postDiv.dataset.author;
@@ -134,7 +138,7 @@
     }
   }
 
-  // 모달 클릭 시 닫기
+  // 모달 바깥 클릭 시 닫기
   window.onclick = function(event) {
     const modal = document.getElementById("postModal");
     if(event.target == modal) {
@@ -146,20 +150,16 @@
 <body>
   <header>
     <h1>글 게시판</h1>
-    <button onclick="adminLogin()">관리자 로그인</button>
+    <button onclick="login()">로그인</button>
+    <button onclick="signUp()">회원가입</button>
   </header>
-
-  <section>
-    <h2>회원가입</h2>
-    <button onclick="signUp()">회원가입 / 닉네임 설정</button>
-  </section>
 
   <section>
     <h2>글쓰기</h2>
     <button onclick="openPostModal()">글쓰기</button>
   </section>
 
-  <!-- 모달 창 -->
+  <!-- 모달 -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <h3>새 글 작성</h3>
@@ -172,9 +172,7 @@
 
   <section>
     <h2>피드</h2>
-    <div id="feed">
-      <!-- 글들이 피드형으로 표시 -->
-    </div>
+    <div id="feed"></div>
   </section>
 </body>
 </html>
