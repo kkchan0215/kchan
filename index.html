@@ -12,6 +12,7 @@
   section { margin-bottom: 30px; }
   .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; position: relative; }
   .post h3 { margin: 0 0 5px 0; }
+  .author { font-size: 12px; font-weight: bold; margin-bottom: 5px; }
   .like-btn { color: #4a148c; cursor: pointer; margin-left: 5px; }
   .delete-btn { color: red; cursor: pointer; position: absolute; top: 10px; right: 10px; font-size: 12px; }
 </style>
@@ -19,13 +20,13 @@
   // 🔹 사용자 및 관리자 정보
   const ADMIN_ID = "kkchan0215";
   const ADMIN_PW = "kk215gksk!!^^";
-  let currentUser = null; // 현재 로그인 사용자 (간단히 이름 저장)
+  let currentUser = null; // 현재 로그인 사용자 (닉네임 또는 관리자)
 
-  // 회원가입 버튼 (에러 없음)
+  // 회원가입 버튼 (닉네임 설정, 에러 없음)
   function signUp() {
-    const name = prompt("사용자 이름을 입력하세요");
-    if (!name) return;
-    currentUser = name;
+    const nickname = prompt("닉네임을 입력하세요");
+    if (!nickname) return;
+    currentUser = nickname;
     alert(`환영합니다, ${currentUser}! ✅`);
   }
 
@@ -42,10 +43,10 @@
     }
   }
 
-  // 글 작성 (모든 사람 가능)
+  // 글 작성
   function addPost() {
     if(!currentUser) {
-      alert("글을 작성하려면 먼저 회원가입 또는 관리자 로그인 해주세요!");
+      alert("글을 작성하려면 회원가입 또는 관리자 로그인 해주세요!");
       return;
     }
 
@@ -59,9 +60,10 @@
 
     const postDiv = document.createElement("div");
     postDiv.className = "post";
-    postDiv.dataset.author = currentUser; // 작성자 정보 저장
+    postDiv.dataset.author = currentUser;
 
     postDiv.innerHTML = `
+      <div class="author">작성자: ${currentUser}</div>
       <h3>${title}</h3>
       <p>${content}</p>
       <span class="like-btn" onclick="likePost(this)">👍 0</span>
@@ -103,7 +105,7 @@
 
   <section>
     <h2>회원가입</h2>
-    <button onclick="signUp()">회원가입 / 이름 설정</button>
+    <button onclick="signUp()">회원가입 / 닉네임 설정</button>
   </section>
 
   <section>
