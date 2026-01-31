@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -36,7 +36,6 @@ header button { margin-right:5px; }
 
 <div id="message"></div>
 
-<!-- 회원가입 -->
 <section class="section-box" id="signupBox" style="display:none;">
 <h2>회원가입</h2>
 <input type="text" id="signupUsername" placeholder="닉네임">
@@ -44,7 +43,6 @@ header button { margin-right:5px; }
 <button id="signupSubmit">회원가입</button>
 </section>
 
-<!-- 로그인 -->
 <section class="section-box" id="loginBox" style="display:none;">
 <h2>로그인</h2>
 <input type="text" id="loginUsername" placeholder="닉네임">
@@ -52,7 +50,6 @@ header button { margin-right:5px; }
 <button id="loginSubmit">로그인</button>
 </section>
 
-<!-- 그룹 -->
 <section class="section-box">
 <h2>그룹(앨범) 만들기</h2>
 <input type="text" id="groupName" placeholder="그룹 이름 입력">
@@ -61,23 +58,24 @@ header button { margin-right:5px; }
 <button id="allPostsBtn">전체 보기</button>
 </section>
 
-<!-- 글쓰기 -->
 <section class="section-box">
 <h2>글쓰기</h2>
 <select id="groupSelect"></select>
 <input type="text" id="postTitle" placeholder="제목 입력">
 <textarea id="postContent" rows="3" placeholder="내용 입력"></textarea>
 <input type="file" id="postImage">
+<img id="previewImage" style="max-width:100%; display:none; margin-bottom:10px; border-radius:5px;">
 <button id="submitPostBtn">글 작성</button>
 </section>
 
-<!-- 피드 -->
 <section class="section-box">
 <h2>피드</h2>
 <div id="feed" class="feed"></div>
 </section>
 
 <script>
+document.addEventListener('DOMContentLoaded', function(){
+
 // ------------------- 데이터 -------------------
 let users = JSON.parse(localStorage.getItem('users')||'[]');
 let posts = JSON.parse(localStorage.getItem('posts')||'[]');
@@ -91,7 +89,14 @@ function savePosts(){ localStorage.setItem('posts', JSON.stringify(posts)); }
 function saveGroups(){ localStorage.setItem('groups', JSON.stringify(groups)); }
 function saveCurrentUser(){ localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
 
-// ------------------- UI 업데이트 -------------------
+// ------------------- 메시지 -------------------
+function showMessage(msg){
+  const el = document.getElementById('message');
+  el.textContent = msg;
+  setTimeout(()=>{ el.textContent=''; }, 3000);
+}
+
+// ------------------- UI -------------------
 function updateHeader(){ 
   document.getElementById('currentUser').textContent = currentUser ? `로그인: ${currentUser.username}` : '';
 }
@@ -150,26 +155,14 @@ function renderFeed(){
       <div id="comments-${p.id}">${commentsHtml}</div>
     `;
     feed.appendChild(div);
+
+    // Enter로 댓글 작성
+    const input = document.getElementById(`commentInput-${p.id}`);
+    input.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ addComment(p.id); }
+    });
   });
 }
-
-// ------------------- 메시지 -------------------
-function showMessage(msg){
-  const el = document.getElementById('message');
-  el.textContent = msg;
-  setTimeout(()=>{ el.textContent=''; }, 3000);
-}
-
-// ------------------- 이벤트 -------------------
-document.getElementById('signupBtn').onclick = ()=>{ document.getElementById('signupBox').style.display='block'; document.getElementById('loginBox').style.display='none'; };
-document.getElementById('loginBtn').onclick = ()=>{ document.getElementById('loginBox').style.display='block'; document.getElementById('signupBox').style.display='none'; };
-document.getElementById('logoutBtn').onclick = logout;
-
-document.getElementById('signupSubmit').onclick = signUp;
-document.getElementById('loginSubmit').onclick = login;
-document.getElementById('createGroupBtn').onclick = createGroup;
-document.getElementById('allPostsBtn').onclick = showAllPosts;
-document.getElementById('submitPostBtn').onclick = submitPost;
 
 // ------------------- 회원가입/로그인 -------------------
 function signUp(){
@@ -181,7 +174,7 @@ function signUp(){
   saveUsers();
   document.getElementById('signupUsername').value='';
   document.getElementById('signupPassword').value='';
-  showMessage('회원가입 완료되었습니다 ✅');
+  showMessage('회원가입 완료 ✅');
 }
 
 function login(){
@@ -197,7 +190,7 @@ function login(){
   updateGroupSelect();
   renderGroups();
   renderFeed();
-  showMessage('로그인 완료되었습니다 ✅');
+  showMessage('로그인 완료 ✅');
 }
 
 function logout(){
@@ -207,7 +200,7 @@ function logout(){
   updateGroupSelect();
   renderGroups();
   renderFeed();
-  showMessage('로그아웃 완료 ✅');
+  showMessage('로그아웃 ✅');
 }
 
 // ------------------- 그룹 -------------------
@@ -245,6 +238,7 @@ function submitPost(){
   document.getElementById('postTitle').value='';
   document.getElementById('postContent').value='';
   document.getElementById('postImage').value='';
+  document.getElementById('previewImage').style.display='none';
 }
 
 function addPost(title, content, imageUrl, groupId){
@@ -281,12 +275,28 @@ function addComment(id){
   renderFeed();
 }
 
+// ------------------- 사진 미리보기 -------------------
+document.getElementById('postImage').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const preview = document.getElementById('previewImage');
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+  } else { preview.style.display='none'; }
+});
+
 // ------------------- 초기 렌더 -------------------
 updateHeader();
 updateGroupSelect();
 renderGroups();
 renderFeed();
 
+});
 </script>
+
 </body>
 </html>
