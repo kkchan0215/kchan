@@ -2,23 +2,59 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>찬의 사이트</title>
+<title>찬의 블로그</title>
 <style>
-body{font-family:sans-serif;background:#f2f2f2;text-align:center;margin:0}
-header{background:#4CAF50;color:white;padding:30px;font-size:28px}
-section{margin:40px;background:white;padding:20px;border-radius:10px}
+body{font-family:sans-serif;background:#f2f2f2;margin:0;text-align:center}
+header{background:#4CAF50;color:white;padding:25px;font-size:26px}
+section{background:white;margin:20px;padding:20px;border-radius:10px}
+input, textarea{width:80%;padding:10px;margin:5px;border-radius:5px;border:1px solid #ccc}
+button{padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer}
+.post{border-top:1px solid #ddd;margin-top:15px;padding-top:10px;text-align:left}
 </style>
 </head>
 <body>
-<header>🌟 안녕하세요 🌟</header>
+
+<header>🌟 나의 블로그 🌟</header>
+
 <section>
-<h2>소개</h2>
-<p>여기는 내가 직접 만든 나만의 공간!</p>
+<h2>글 쓰기</h2>
+<input type="text" id="title" placeholder="제목 입력"><br>
+<textarea id="content" rows="4" placeholder="내용 입력"></textarea><br>
+<button onclick="addPost()">글 추가</button>
 </section>
+
 <section>
-<h2>사진</h2>
-<img src="https://picsum.photos/300">
+<h2>작성된 글</h2>
+<div id="posts"></div>
 </section>
+
+<script>
+function addPost(){
+  const title=document.getElementById("title").value;
+  const content=document.getElementById("content").value;
+  if(title===""||content===""){alert("제목과 내용을 입력하세요!");return;}
+
+  const post={title,content};
+  let posts=JSON.parse(localStorage.getItem("posts"))||[];
+  posts.unshift(post);
+  localStorage.setItem("posts",JSON.stringify(posts));
+  displayPosts();
+
+  document.getElementById("title").value="";
+  document.getElementById("content").value="";
+}
+
+function displayPosts(){
+  const posts=JSON.parse(localStorage.getItem("posts"))||[];
+  const container=document.getElementById("posts");
+  container.innerHTML="";
+  posts.forEach(p=>{
+    container.innerHTML+=`<div class="post"><h3>${p.title}</h3><p>${p.content}</p></div>`;
+  });
+}
+
+displayPosts();
+</script>
+
 </body>
 </html>
-
