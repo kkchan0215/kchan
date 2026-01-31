@@ -15,6 +15,7 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 .delete-btn{background:#ff6b6b;margin-top:8px}
 .time{font-size:12px;color:#555;margin-top:8px}
 .author{font-size:13px;color:#333;margin-top:5px}
+.link-btn{background:#999;margin-top:5px}
 </style>
 </head>
 <body>
@@ -25,6 +26,14 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
   <input type="text" id="loginId" placeholder="아이디">
   <input type="password" id="loginPw" placeholder="비밀번호">
   <button onclick="login()">로그인</button>
+  <button class="link-btn" onclick="showSignup()">회원가입</button>
+</div>
+
+<div class="box" id="signupBox" style="display:none">
+  <input type="text" id="newId" placeholder="새 아이디">
+  <input type="password" id="newPw" placeholder="새 비밀번호">
+  <button onclick="signup()">가입하기</button>
+  <button class="link-btn" onclick="showLogin()">로그인 화면으로</button>
 </div>
 
 <div class="box" id="writeBox" style="display:none">
@@ -43,35 +52,54 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 const ADMIN_ID="admin";
 const ADMIN_PW="강차니k215";
 
-function login(){
-  const id=document.getElementById("loginId").value.trim();
-  const pw=document.getElementById("loginPw").value.trim();
+function showSignup(){
+  loginBox.style.display="none";
+  signupBox.style.display="block";
+}
+function showLogin(){
+  signupBox.style.display="none";
+  loginBox.style.display="block";
+}
+
+function signup(){
+  const id=newId.value.trim();
+  const pw=newPw.value.trim();
   if(!id||!pw){alert("입력하세요");return;}
+  let users=JSON.parse(localStorage.getItem("users"))||{};
+  if(users[id]){alert("이미 존재하는 아이디");return;}
+  users[id]=pw;
+  localStorage.setItem("users",JSON.stringify(users));
+  alert("가입 완료!");
+  showLogin();
+}
+
+function login(){
+  const id=loginId.value.trim();
+  const pw=loginPw.value.trim();
+  let users=JSON.parse(localStorage.getItem("users"))||{};
 
   if(id===ADMIN_ID && pw===ADMIN_PW){
     localStorage.setItem("user",JSON.stringify({id,isAdmin:true}));
-  }else{
+  }else if(users[id]===pw){
     localStorage.setItem("user",JSON.stringify({id,isAdmin:false}));
+  }else{
+    alert("로그인 실패");
+    return;
   }
   showUser();
 }
 
-function logout(){
-  localStorage.removeItem("user");
-  location.reload();
-}
-
-function getUser(){
-  return JSON.parse(localStorage.getItem("user"));
-}
+function logout(){localStorage.removeItem("user");location.reload();}
+function getUser(){return JSON.parse(localStorage.getItem("user"));}
 
 function showUser(){
   const user=getUser();
   if(!user)return;
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("writeBox").style.display="block";
-  document.getElementById("welcome").innerText="로그인: "+user.id;
-  if(user.isAdmin)document.getElementById("adminBtn").style.display="block";
+  loginBox.style.display="none";
+  signupBox.style.display="none";
+  writeBox.style.display="block";
+  welcome.innerText="로그인: "+user.id;
+  if(user.isAdmin)adminBtn.style.display="block";
 }
 
 function addPost(){
@@ -85,8 +113,7 @@ function addPost(){
   posts.unshift(post);
   localStorage.setItem("posts",JSON.stringify(posts));
   displayPosts();
-  document.getElementById("title").value="";
-  document.getElementById("content").value="";
+  title.value="";content.value="";
 }
 
 function displayPosts(){
@@ -126,17 +153,16 @@ function deleteAllPosts(){
 function openDetail(i){
   const posts=JSON.parse(localStorage.getItem("posts"))||[];
   const p=posts[i];
-  const detail=document.getElementById("detailView");
-  detail.innerHTML=`<h2>${p.title}</h2><div class="author">${p.author}</div><p>${p.content}</p><div class="time">${p.time}</div><button onclick="closeDetail()">닫기</button>`;
-  detail.style.display="block";
-  document.getElementById("feed").style.display="none";
-  document.getElementById("writeBox").style.display="none";
+  detailView.innerHTML=`<h2>${p.title}</h2><div class="author">${p.author}</div><p>${p.content}</p><div class="time">${p.time}</div><button onclick="closeDetail()">닫기</button>`;
+  detailView.style.display="block";
+  feed.style.display="none";
+  writeBox.style.display="none";
 }
 
 function closeDetail(){
-  document.getElementById("detailView").style.display="none";
-  document.getElementById("feed").style.display="block";
-  document.getElementById("writeBox").style.display="block";
+  detailView.style.display="none";
+  feed.style.display="block";
+  writeBox.style.display="block";
 }
 
 showUser();
