@@ -13,8 +13,6 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 .card{background:#e6d6ff;padding:15px;margin-bottom:15px;border-radius:15px}
 .detail{background:#f8f2ff;padding:20px;margin:20px auto;width:90%;max-width:600px;border-radius:15px;display:none}
 .delete-btn{background:#ff6b6b;margin-top:8px}
-.time{font-size:12px;color:#555;margin-top:8px}
-.author{font-size:13px;color:#333;margin-top:5px}
 .link-btn{background:#999;margin-top:5px}
 </style>
 </head>
@@ -49,24 +47,18 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 <div class="detail" id="detailView"></div>
 
 <script>
-const ADMIN_ID="admin";
-const ADMIN_PW="강차니k215";
+const ADMIN_ACCOUNT_ID="kangchan215";   // 👑 관리자 아이디
+const ADMIN_PASSWORD="kk215gksk!!^^";       // 👑 관리자 전용 비번
 
-function showSignup(){
-  loginBox.style.display="none";
-  signupBox.style.display="block";
-}
-function showLogin(){
-  signupBox.style.display="none";
-  loginBox.style.display="block";
-}
+function showSignup(){loginBox.style.display="none";signupBox.style.display="block";}
+function showLogin(){signupBox.style.display="none";loginBox.style.display="block";}
 
 function signup(){
   const id=newId.value.trim();
   const pw=newPw.value.trim();
   if(!id||!pw){alert("입력하세요");return;}
   let users=JSON.parse(localStorage.getItem("users"))||{};
-  if(users[id]){alert("이미 존재하는 아이디");return;}
+  if(users[id]){alert("이미 존재");return;}
   users[id]=pw;
   localStorage.setItem("users",JSON.stringify(users));
   alert("가입 완료!");
@@ -78,14 +70,18 @@ function login(){
   const pw=loginPw.value.trim();
   let users=JSON.parse(localStorage.getItem("users"))||{};
 
-  if(id===ADMIN_ID && pw===ADMIN_PW){
-    localStorage.setItem("user",JSON.stringify({id,isAdmin:true}));
+  let isAdmin=false;
+
+  if(id===ADMIN_ACCOUNT_ID && pw===ADMIN_PASSWORD){
+    isAdmin=true;
   }else if(users[id]===pw){
-    localStorage.setItem("user",JSON.stringify({id,isAdmin:false}));
+    isAdmin=false;
   }else{
     alert("로그인 실패");
     return;
   }
+
+  localStorage.setItem("user",JSON.stringify({id,isAdmin}));
   showUser();
 }
 
@@ -107,7 +103,6 @@ function addPost(){
   const title=document.getElementById("title").value.trim();
   const content=document.getElementById("content").value.trim();
   if(!title||!content){alert("입력하세요");return;}
-
   const post={author:user.id,title,content,time:new Date().toLocaleString()};
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.unshift(post);
@@ -117,16 +112,14 @@ function addPost(){
 }
 
 function displayPosts(){
-  const feed=document.getElementById("feed");
   const posts=JSON.parse(localStorage.getItem("posts"))||[];
   feed.innerHTML="";
   posts.forEach((p,i)=>{
     feed.innerHTML+=`
       <div class="card">
         <h3 onclick="openDetail(${i})">${p.title}</h3>
-        <div class="author">작성자: ${p.author}</div>
+        <div>작성자: ${p.author}</div>
         <p onclick="openDetail(${i})">${p.content.substring(0,40)}...</p>
-        <div class="time">${p.time}</div>
         <button class="delete-btn" onclick="deletePost(${i},'${p.author}')">삭제</button>
       </div>`;
   });
@@ -153,7 +146,7 @@ function deleteAllPosts(){
 function openDetail(i){
   const posts=JSON.parse(localStorage.getItem("posts"))||[];
   const p=posts[i];
-  detailView.innerHTML=`<h2>${p.title}</h2><div class="author">${p.author}</div><p>${p.content}</p><div class="time">${p.time}</div><button onclick="closeDetail()">닫기</button>`;
+  detailView.innerHTML=`<h2>${p.title}</h2><div>${p.author}</div><p>${p.content}</p><button onclick="closeDetail()">닫기</button>`;
   detailView.style.display="block";
   feed.style.display="none";
   writeBox.style.display="none";
