@@ -4,50 +4,102 @@
 <meta charset="UTF-8">
 <title>글 게시판</title>
 <style>
-body{font-family:sans-serif;background:#eef1f5;margin:0}
-header{background:#4CAF50;color:white;padding:20px;text-align:center;font-size:24px}
-
-.write-box{
-  background:white;margin:15px auto;padding:15px;
-  width:90%;max-width:500px;border-radius:12px;
+body{
+  font-family:sans-serif;
+  background:linear-gradient(135deg,#f3e8ff,#e0ccff);
+  margin:0
 }
 
-input, textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ccc}
-button{width:100%;padding:10px;background:#4CAF50;color:white;border:none;border-radius:8px}
+header{
+  background:#b388ff;
+  color:white;
+  padding:20px;
+  text-align:center;
+  font-size:24px
+}
 
-.feed{width:90%;max-width:500px;margin:10px auto}
+.write-box{
+  background:#f8f2ff;
+  margin:15px auto;
+  padding:15px;
+  width:90%;
+  max-width:500px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08)
+}
+
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:10px;
+  border:1px solid #d6b3ff
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#b388ff;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-size:16px
+}
+
+.feed{
+  width:90%;
+  max-width:500px;
+  margin:10px auto
+}
 
 .card{
-  background:white;padding:15px;margin-bottom:15px;
-  border-radius:15px;box-shadow:0 4px 8px rgba(0,0,0,0.08);
-  cursor:pointer;
+  background:#e6d6ff;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  cursor:pointer
 }
 
 .detail{
-  background:white;padding:20px;margin:20px auto;
-  width:90%;max-width:600px;border-radius:15px;
-  display:none;
+  background:#f8f2ff;
+  padding:20px;
+  margin:20px auto;
+  width:90%;
+  max-width:600px;
+  border-radius:15px;
+  display:none
 }
 
-.back{margin-top:10px;background:#777}
-.time{font-size:12px;color:gray;margin-top:8px}
+.back{
+  margin-top:10px;
+  background:#9575cd
+}
+
+.time{
+  font-size:12px;
+  color:#555;
+  margin-top:8px
+}
 </style>
 </head>
 <body>
 
-<header>🌟 글 게시판 🌟</header>
+<header>💜 글 게시판 💜</header>
 
 <div class="write-box" id="writeBox">
   <input type="text" id="title" placeholder="제목">
-  <textarea id="content" rows="3" placeholder="내용을 입력하세요"></textarea>
+  <textarea id="content" rows="3" placeholder="무슨 일이 있었나요?"></textarea>
   <button onclick="addPost()">게시하기</button>
 </div>
 
 <div class="feed" id="feed"></div>
-
 <div class="detail" id="detailView"></div>
 
 <script>
+const titleInput=document.getElementById("title");
+const contentInput=document.getElementById("content");
+
 function addPost(){
   const title=titleInput.value;
   const content=contentInput.value;
@@ -60,9 +112,6 @@ function addPost(){
   displayPosts();
   titleInput.value="";contentInput.value="";
 }
-
-const titleInput=document.getElementById("title");
-const contentInput=document.getElementById("content");
 
 function displayPosts(){
   const feed=document.getElementById("feed");
@@ -86,7 +135,7 @@ function openDetail(i){
     <h2>${p.title}</h2>
     <p>${p.content}</p>
     <div class="time">${p.time}</div>
-    <button class="back" onclick="closeDetail()">뒤로가기</button>`;
+    <button class="back" onclick="closeDetail()">닫기</button>`;
   detail.style.display="block";
   document.getElementById("feed").style.display="none";
   document.getElementById("writeBox").style.display="none";
@@ -103,5 +152,3 @@ displayPosts();
 
 </body>
 </html>
-
-
