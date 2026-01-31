@@ -6,11 +6,11 @@
 <style>
 body{font-family:sans-serif;background:linear-gradient(135deg,#f3e8ff,#e0ccff);margin:0}
 header{background:#b388ff;color:white;padding:20px;text-align:center;font-size:24px}
-.write-box{background:#f8f2ff;margin:15px auto;padding:15px;width:90%;max-width:500px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
-input, textarea, select{width:100%;padding:10px;margin:5px 0;border-radius:10px;border:1px solid #d6b3ff}
+.write-box{background:#f8f2ff;margin:15px auto;padding:15px;width:90%;max-width:500px;border-radius:15px}
+input, textarea{width:100%;padding:10px;margin:5px 0;border-radius:10px;border:1px solid #d6b3ff}
 button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border-radius:10px;font-size:16px}
 .feed{width:90%;max-width:500px;margin:10px auto}
-.card{background:#e6d6ff;padding:15px;margin-bottom:15px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.card{background:#e6d6ff;padding:15px;margin-bottom:15px;border-radius:15px}
 .detail{background:#f8f2ff;padding:20px;margin:20px auto;width:90%;max-width:600px;border-radius:15px;display:none}
 .back{margin-top:10px;background:#9575cd}
 .delete-btn{background:#ff6b6b;margin-top:8px}
@@ -24,19 +24,14 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 <header>💜 글 게시판 💜</header>
 
 <div class="admin-box">
+  <button onclick="setAccount()">내 계정 설정</button>
   <button onclick="adminLogin()">관리자 로그인</button>
   <button onclick="deleteAllPosts()" id="adminDeleteBtn" style="display:none;background:#ff3b3b">전체 글 삭제</button>
 </div>
 
 <div class="write-box" id="writeBox">
-  <select id="account">
-    <option value="">계정 선택</option>
-    <option value="가">가 계정</option>
-    <option value="나">나 계정</option>
-    <option value="다">다 계정</option>
-  </select>
   <input type="text" id="title" placeholder="제목">
-  <textarea id="content" rows="3" placeholder="무슨 일이 있었나요?"></textarea>
+  <textarea id="content" rows="3" placeholder="글 내용을 입력하세요"></textarea>
   <button onclick="addPost()">게시하기</button>
 </div>
 
@@ -44,9 +39,20 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 <div class="detail" id="detailView"></div>
 
 <script>
-const ADMIN_PASSWORD="kkchan0215";
+const ADMIN_PASSWORD="강차니k215";
 let isAdmin=false;
-let currentAccount="";
+
+function setAccount(){
+  const id=prompt("사용할 계정 아이디 입력");
+  if(id){
+    localStorage.setItem("myAccount",id);
+    alert("계정 저장됨: "+id);
+  }
+}
+
+function getAccount(){
+  return localStorage.getItem("myAccount")||"";
+}
 
 function adminLogin(){
   const pw=prompt("관리자 비밀번호 입력");
@@ -66,11 +72,12 @@ function deleteAllPosts(){
 }
 
 function addPost(){
-  const account=document.getElementById("account").value;
+  const account=getAccount();
+  if(!account){alert("먼저 계정 설정하세요");return;}
+
   const title=document.getElementById("title").value.trim();
   const content=document.getElementById("content").value.trim();
-
-  if(!account||!title||!content){alert("계정, 제목, 내용을 입력하세요");return;}
+  if(!title||!content){alert("제목과 내용을 입력하세요");return;}
 
   const post={account,title,content,time:new Date().toLocaleString()};
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
@@ -98,8 +105,8 @@ function displayPosts(){
 }
 
 function deletePost(i,account){
-  const current=document.getElementById("account").value;
-  if(!isAdmin && current!==account){alert("자기 계정 글만 삭제 가능");return;}
+  const current=getAccount();
+  if(!isAdmin && current!==account){alert("자기 글만 삭제 가능");return;}
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.splice(i,1);
   localStorage.setItem("posts",JSON.stringify(posts));
@@ -123,7 +130,7 @@ function openDetail(i){
 
 function closeDetail(){
   document.getElementById("detailView").style.display="none";
-  document.getElementByById("feed").style.display="block";
+  document.getElementById("feed").style.display="block";
   document.getElementById("writeBox").style.display="block";
 }
 
