@@ -5,9 +5,9 @@
 <title>나만의 일기장</title>
 <style>
 body { font-family: Arial; padding:20px; background:#f3e5f5; color:#4a148c; }
-input, textarea { width:100%; margin-bottom:10px; padding:5px; }
+input, textarea, select { width:100%; margin-bottom:10px; padding:5px; }
 button { padding:5px 10px; cursor:pointer; margin:2px; }
-.post { border:1px solid #ba68c8; padding:10px; margin-bottom:10px; border-radius:5px; background:#fce4ec; position:relative; }
+.post, .group { border:1px solid #ba68c8; padding:10px; margin-bottom:10px; border-radius:5px; background:#fce4ec; position:relative; }
 .post img { max-width:100%; margin-top:5px; border-radius:5px; }
 .delete-btn { position:absolute; top:5px; right:5px; color:red; cursor:pointer; }
 .like-btn { color:purple; cursor:pointer; margin-left:5px; }
@@ -18,7 +18,7 @@ header button { margin-right:5px; }
 <body>
 
 <header>
-<h1>나만의 일기장</h1>
+<h1>나만의 일기장 </h1>
 <button onclick="showSignUp()">회원가입</button>
 <button onclick="showLogin()">로그인</button>
 <button onclick="logout()">로그아웃</button>
@@ -26,7 +26,15 @@ header button { margin-right:5px; }
 </header>
 
 <section>
+<h2>그룹(앨범) 만들기</h2>
+<input type="text" id="groupName" placeholder="그룹 이름 입력">
+<button onclick="createGroup()">그룹 생성</button>
+<div id="groups"></div>
+</section>
+
+<section>
 <h2>글쓰기</h2>
+<select id="groupSelect"></select>
 <input type="text" id="postTitle" placeholder="제목 입력">
 <textarea id="postContent" rows="3" placeholder="내용 입력"></textarea>
 <input type="file" id="postImage">
@@ -39,77 +47,46 @@ header button { margin-right:5px; }
 </section>
 
 <script>
+// ------------------- 데이터 -------------------
 let users = JSON.parse(localStorage.getItem('users')||'[]');
 let posts = JSON.parse(localStorage.getItem('posts')||'[]');
+let groups = JSON.parse(localStorage.getItem('groups')||'[]');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
 
+// ------------------- 저장 -------------------
 function saveUsers(){ localStorage.setItem('users', JSON.stringify(users)); }
 function savePosts(){ localStorage.setItem('posts', JSON.stringify(posts)); }
+function saveGroups(){ localStorage.setItem('groups', JSON.stringify(groups)); }
 function saveCurrentUser(){ localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
 
+// ------------------- UI 업데이트 -------------------
 function updateHeader(){ 
   document.getElementById('currentUser').textContent = currentUser ? `로그인: ${currentUser.username}` : '';
 }
-updateHeader();
-
-// 회원가입
-function showSignUp(){
-  const username = prompt("사용할 닉네임 입력");
-  const pw = prompt("비밀번호 입력");
-  if(!username||!pw) return;
-  if(users.find(u=>u.username===username)) return alert("이미 존재하는 닉네임!");
-  users.push({username,password:pw});
-  saveUsers();
-  alert("회원가입 완료!");
+function updateGroupSelect(){
+  const select = document.getElementById('groupSelect');
+  select.innerHTML = '';
+  groups.forEach(g=>{
+    if(g.owner===currentUser.username){
+      const option = document.createElement('option');
+      option.value = g.id;
+      option.textContent = g.name;
+      select.appendChild(option);
+    }
+  });
 }
-
-// 로그인
-function showLogin(){
-  const username = prompt("닉네임 입력");
-  const pw = prompt("비밀번호 입력");
-  const user = users.find(u=>u.username===username && u.password===pw);
-  if(!user) return alert("아이디/비밀번호 오류");
-  currentUser = user;
-  saveCurrentUser();
-  updateHeader();
-  alert("로그인 성공!");
+function renderGroups(){
+  const div = document.getElementById('groups');
+  div.innerHTML='';
+  groups.forEach(g=>{
+    if(g.owner===currentUser.username){
+      const d = document.createElement('div');
+      d.className='group';
+      d.textContent = g.name;
+      div.appendChild(d);
+    }
+  });
 }
-
-// 로그아웃
-function logout(){ currentUser=null; saveCurrentUser(); updateHeader(); alert("로그아웃 완료"); }
-
-// 글 작성
-function submitPost(){
-  if(!currentUser) return alert("로그인 필요!");
-  const title = document.getElementById('postTitle').value.trim();
-  const content = document.getElementById('postContent').value.trim();
-  const file = document.getElementById('postImage').files[0];
-  if(!title||!content) return alert("제목과 내용 입력!");
-  
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      addPost(title, content, e.target.result);
-    };
-    reader.readAsDataURL(file);
-  } else {
-    addPost(title, content, '');
-  }
-
-  document.getElementById('postTitle').value='';
-  document.getElementById('postContent').value='';
-  document.getElementById('postImage').value='';
-}
-
-function addPost(title, content, imageUrl){
-  const id = Date.now()+'_'+Math.floor(Math.random()*1000);
-  const post = {id, username:currentUser.username, title, content, imageUrl, likes:0, comments:[]};
-  posts.unshift(post);
-  savePosts();
-  renderFeed();
-}
-
-// 피드 렌더
 function renderFeed(){
   const feed = document.getElementById('feed');
   feed.innerHTML='';
@@ -118,8 +95,8 @@ function renderFeed(){
     div.className='post';
     div.id = p.id;
     div.innerHTML = `
-      ${p.username===currentUser?.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
-      <strong>${p.title}</strong> <span>by ${p.username}</span>
+      ${currentUser.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
+      <strong>${p.title}</strong> <span>by ${p.username}</span> <span>(${groups.find(g=>g.id===p.groupId)?.name||'무소속'})</span>
       <p>${p.content}</p>
       ${p.imageUrl?`<img src="${p.imageUrl}">`:''}
       <div>
@@ -143,6 +120,78 @@ function renderFeed(){
   });
 }
 
+// ------------------- 회원가입/로그인 -------------------
+function showSignUp(){
+  const username = prompt("사용할 닉네임 입력");
+  const pw = prompt("비밀번호 입력");
+  if(!username||!pw) return;
+  if(users.find(u=>u.username===username)) return alert("이미 존재하는 닉네임!");
+  users.push({username,password:pw});
+  saveUsers();
+  alert("회원가입 완료!");
+}
+
+function showLogin(){
+  const username = prompt("닉네임 입력");
+  const pw = prompt("비밀번호 입력");
+  const user = users.find(u=>u.username===username && u.password===pw);
+  if(!user) return alert("아이디/비밀번호 오류");
+  currentUser = user;
+  saveCurrentUser();
+  updateHeader();
+  updateGroupSelect();
+  renderGroups();
+  alert("로그인 성공!");
+}
+
+function logout(){ currentUser=null; saveCurrentUser(); updateHeader(); updateGroupSelect(); renderGroups(); }
+
+// ------------------- 그룹 -------------------
+function createGroup(){
+  if(!currentUser) return alert("로그인 필요!");
+  const name = document.getElementById('groupName').value.trim();
+  if(!name) return alert("그룹 이름 입력!");
+  const id = Date.now()+'_'+Math.floor(Math.random()*1000);
+  groups.push({id, name, owner: currentUser.username});
+  saveGroups();
+  document.getElementById('groupName').value='';
+  updateGroupSelect();
+  renderGroups();
+}
+
+// ------------------- 글쓰기 -------------------
+function submitPost(){
+  if(!currentUser) return alert("로그인 필요!");
+  const title = document.getElementById('postTitle').value.trim();
+  const content = document.getElementById('postContent').value.trim();
+  const groupId = document.getElementById('groupSelect').value;
+  const file = document.getElementById('postImage').files[0];
+  if(!title||!content) return alert("제목과 내용 입력!");
+  
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      addPost(title, content, e.target.result, groupId);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    addPost(title, content, '', groupId);
+  }
+
+  document.getElementById('postTitle').value='';
+  document.getElementById('postContent').value='';
+  document.getElementById('postImage').value='';
+}
+
+function addPost(title, content, imageUrl, groupId){
+  const id = Date.now()+'_'+Math.floor(Math.random()*1000);
+  const post = {id, username:currentUser.username, title, content, imageUrl, groupId, likes:0, comments:[]};
+  posts.unshift(post);
+  savePosts();
+  renderFeed();
+}
+
+// ------------------- 기능 -------------------
 function deletePost(id){
   const post = posts.find(p=>p.id===id);
   if(post.username !== currentUser.username) return alert("본인 글만 삭제 가능!");
@@ -168,8 +217,11 @@ function addComment(id){
   renderFeed();
 }
 
+// 초기 렌더
+updateHeader();
+updateGroupSelect();
+renderGroups();
 renderFeed();
 </script>
-
 </body>
 </html>
