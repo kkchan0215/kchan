@@ -4,84 +4,37 @@
 <meta charset="UTF-8">
 <title>글 게시판</title>
 <style>
-body{
-  font-family:sans-serif;
-  background:linear-gradient(135deg,#f3e8ff,#e0ccff);
-  margin:0
-}
-header{
-  background:#b388ff;
-  color:white;
-  padding:20px;
-  text-align:center;
-  font-size:24px
-}
-.write-box{
-  background:#f8f2ff;
-  margin:15px auto;
-  padding:15px;
-  width:90%;
-  max-width:500px;
-  border-radius:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08)
-}
-input, textarea{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border-radius:10px;
-  border:1px solid #d6b3ff
-}
-button{
-  width:100%;
-  padding:10px;
-  background:#b388ff;
-  color:white;
-  border:none;
-  border-radius:10px;
-  font-size:16px
-}
-.feed{
-  width:90%;
-  max-width:500px;
-  margin:10px auto
-}
-.card{
-  background:#e6d6ff;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
-}
-.detail{
-  background:#f8f2ff;
-  padding:20px;
-  margin:20px auto;
-  width:90%;
-  max-width:600px;
-  border-radius:15px;
-  display:none
-}
-.back{
-  margin-top:10px;
-  background:#9575cd
-}
-.delete-btn{
-  background:#ff6b6b;
-  margin-top:8px
-}
-.time{
-  font-size:12px;
-  color:#555;
-  margin-top:8px
-}
+body{font-family:sans-serif;background:linear-gradient(135deg,#f3e8ff,#e0ccff);margin:0}
+header{background:#b388ff;color:white;padding:20px;text-align:center;font-size:24px}
+.write-box{background:#f8f2ff;margin:15px auto;padding:15px;width:90%;max-width:500px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+input, textarea, select{width:100%;padding:10px;margin:5px 0;border-radius:10px;border:1px solid #d6b3ff}
+button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border-radius:10px;font-size:16px}
+.feed{width:90%;max-width:500px;margin:10px auto}
+.card{background:#e6d6ff;padding:15px;margin-bottom:15px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.detail{background:#f8f2ff;padding:20px;margin:20px auto;width:90%;max-width:600px;border-radius:15px;display:none}
+.back{margin-top:10px;background:#9575cd}
+.delete-btn{background:#ff6b6b;margin-top:8px}
+.admin-box{width:90%;max-width:500px;margin:10px auto;text-align:center}
+.time{font-size:12px;color:#555;margin-top:8px}
+.author{font-size:13px;color:#333;margin-top:5px}
 </style>
 </head>
 <body>
 
 <header>💜 글 게시판 💜</header>
 
+<div class="admin-box">
+  <button onclick="adminLogin()">관리자 로그인</button>
+  <button onclick="deleteAllPosts()" id="adminDeleteBtn" style="display:none;background:#ff3b3b">전체 글 삭제</button>
+</div>
+
 <div class="write-box" id="writeBox">
+  <select id="account">
+    <option value="">계정 선택</option>
+    <option value="가">가 계정</option>
+    <option value="나">나 계정</option>
+    <option value="다">다 계정</option>
+  </select>
   <input type="text" id="title" placeholder="제목">
   <textarea id="content" rows="3" placeholder="무슨 일이 있었나요?"></textarea>
   <button onclick="addPost()">게시하기</button>
@@ -91,20 +44,41 @@ button{
 <div class="detail" id="detailView"></div>
 
 <script>
-const titleInput=document.getElementById("title");
-const contentInput=document.getElementById("content");
+const ADMIN_PASSWORD="kkchan0215";
+let isAdmin=false;
+let currentAccount="";
+
+function adminLogin(){
+  const pw=prompt("관리자 비밀번호 입력");
+  if(pw===ADMIN_PASSWORD){
+    isAdmin=true;
+    alert("관리자 모드 활성화");
+    document.getElementById("adminDeleteBtn").style.display="block";
+  }else alert("비밀번호 틀림");
+}
+
+function deleteAllPosts(){
+  if(!isAdmin)return;
+  if(confirm("모든 글 삭제?")){
+    localStorage.removeItem("posts");
+    displayPosts();
+  }
+}
 
 function addPost(){
-  const title=titleInput.value;
-  const content=contentInput.value;
-  if(!title||!content){alert("제목과 내용을 입력하세요");return;}
+  const account=document.getElementById("account").value;
+  const title=document.getElementById("title").value.trim();
+  const content=document.getElementById("content").value.trim();
 
-  const post={title,content,time:new Date().toLocaleString()};
+  if(!account||!title||!content){alert("계정, 제목, 내용을 입력하세요");return;}
+
+  const post={account,title,content,time:new Date().toLocaleString()};
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.unshift(post);
   localStorage.setItem("posts",JSON.stringify(posts));
   displayPosts();
-  titleInput.value="";contentInput.value="";
+  document.getElementById("title").value="";
+  document.getElementById("content").value="";
 }
 
 function displayPosts(){
@@ -115,14 +89,17 @@ function displayPosts(){
     feed.innerHTML+=`
       <div class="card">
         <h3 onclick="openDetail(${i})">${p.title}</h3>
+        <div class="author">계정: ${p.account}</div>
         <p onclick="openDetail(${i})">${p.content.substring(0,40)}...</p>
         <div class="time">${p.time}</div>
-        <button class="delete-btn" onclick="deletePost(${i})">삭제</button>
+        <button class="delete-btn" onclick="deletePost(${i},'${p.account}')">삭제</button>
       </div>`;
   });
 }
 
-function deletePost(i){
+function deletePost(i,account){
+  const current=document.getElementById("account").value;
+  if(!isAdmin && current!==account){alert("자기 계정 글만 삭제 가능");return;}
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.splice(i,1);
   localStorage.setItem("posts",JSON.stringify(posts));
@@ -135,6 +112,7 @@ function openDetail(i){
   const detail=document.getElementById("detailView");
   detail.innerHTML=`
     <h2>${p.title}</h2>
+    <div class="author">계정: ${p.account}</div>
     <p>${p.content}</p>
     <div class="time">${p.time}</div>
     <button class="back" onclick="closeDetail()">닫기</button>`;
@@ -145,7 +123,7 @@ function openDetail(i){
 
 function closeDetail(){
   document.getElementById("detailView").style.display="none";
-  document.getElementById("feed").style.display="block";
+  document.getElementByById("feed").style.display="block";
   document.getElementById("writeBox").style.display="block";
 }
 
