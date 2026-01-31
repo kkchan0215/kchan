@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -74,7 +74,7 @@ header button { margin-right:5px; }
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(){
+(() => {
 
 // ------------------- 데이터 -------------------
 let users = JSON.parse(localStorage.getItem('users')||'[]');
@@ -84,10 +84,10 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
 let currentGroupFilter = null;
 
 // ------------------- 저장 -------------------
-function saveUsers(){ localStorage.setItem('users', JSON.stringify(users)); }
-function savePosts(){ localStorage.setItem('posts', JSON.stringify(posts)); }
-function saveGroups(){ localStorage.setItem('groups', JSON.stringify(groups)); }
-function saveCurrentUser(){ localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
+const saveUsers = ()=>localStorage.setItem('users', JSON.stringify(users));
+const savePosts = ()=>localStorage.setItem('posts', JSON.stringify(posts));
+const saveGroups = ()=>localStorage.setItem('groups', JSON.stringify(groups));
+const saveCurrentUser = ()=>localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
 // ------------------- 메시지 -------------------
 function showMessage(msg){
@@ -121,7 +121,7 @@ function renderGroups(){
     if(g.owner===currentUser.username){
       const btn = document.createElement('button');
       btn.textContent = g.name;
-      btn.onclick = () => { currentGroupFilter = g.id; renderFeed(); };
+      btn.addEventListener('click', () => { currentGroupFilter = g.id; renderFeed(); });
       div.appendChild(btn);
     }
   });
@@ -141,25 +141,35 @@ function renderFeed(){
     div.id = p.id;
     const commentsHtml = p.comments.map(c=>`<div class="comment">${c.username}: ${c.text}</div>`).join('');
     div.innerHTML = `
-      ${currentUser?.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
+      ${currentUser?.username===p.username?`<div class="delete-btn" data-id="${p.id}">삭제</div>`:''}
       <strong>${p.title}</strong> <span>by ${p.username}</span> <span>(${groups.find(g=>g.id===p.groupId)?.name||'무소속'})</span>
       <p>${p.content}</p>
       ${p.imageUrl?`<img src="${p.imageUrl}">`:''}
       <div>
-        <span class="like-btn" onclick="likePost('${p.id}', this)">👍 ${p.likes}</span>
+        <span class="like-btn" data-id="${p.id}">👍 ${p.likes}</span>
       </div>
       <div class="comment-box">
-        <input type="text" placeholder="댓글 입력" id="commentInput-${p.id}">
-        <button onclick="addComment('${p.id}')">댓글쓰기</button>
+        <input type="text" placeholder="댓글 입력" data-id="${p.id}">
+        <button data-id="${p.id}">댓글쓰기</button>
       </div>
-      <div id="comments-${p.id}">${commentsHtml}</div>
+      <div class="comments-container">${commentsHtml}</div>
     `;
     feed.appendChild(div);
+  });
 
-    // Enter로 댓글 작성
-    const input = document.getElementById(`commentInput-${p.id}`);
-    input.addEventListener('keydown', function(e){
-      if(e.key==='Enter'){ addComment(p.id); }
+  // 이벤트 바인딩 (삭제/좋아요/댓글/Enter)
+  document.querySelectorAll('.delete-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>deletePost(btn.dataset.id));
+  });
+  document.querySelectorAll('.like-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>likePost(btn.dataset.id, btn));
+  });
+  document.querySelectorAll('.comment-box button').forEach(btn=>{
+    btn.addEventListener('click',()=>addComment(btn.dataset.id));
+  });
+  document.querySelectorAll('.comment-box input').forEach(input=>{
+    input.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter') addComment(input.dataset.id);
     });
   });
 }
@@ -266,7 +276,7 @@ function likePost(id, el){
 }
 
 function addComment(id){
-  const input = document.getElementById(`commentInput-${id}`);
+  const input = document.querySelector(`.comment-box input[data-id='${id}']`);
   const text = input.value.trim();
   if(!text) return;
   const post = posts.find(p=>p.id===id);
@@ -289,13 +299,23 @@ document.getElementById('postImage').addEventListener('change', function(e){
   } else { preview.style.display='none'; }
 });
 
+// ------------------- 버튼 이벤트 -------------------
+document.getElementById('signupBtn').addEventListener('click', ()=>{ document.getElementById('signupBox').style.display='block'; document.getElementById('loginBox').style.display='none'; });
+document.getElementById('loginBtn').addEventListener('click', ()=>{ document.getElementById('loginBox').style.display='block'; document.getElementById('signupBox').style.display='none'; });
+document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('signupSubmit').addEventListener('click', signUp);
+document.getElementById('loginSubmit').addEventListener('click', login);
+document.getElementById('createGroupBtn').addEventListener('click', createGroup);
+document.getElementById('allPostsBtn').addEventListener('click', showAllPosts);
+document.getElementById('submitPostBtn').addEventListener('click', submitPost);
+
 // ------------------- 초기 렌더 -------------------
 updateHeader();
 updateGroupSelect();
 renderGroups();
 renderFeed();
 
-});
+})();
 </script>
 
 </body>
