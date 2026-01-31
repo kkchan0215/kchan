@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>글 게시판</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; background: #f3e5f5; color: #4a148c; }
   header { background: #ce93d8; padding: 10px; margin-bottom: 20px; color: white; }
   button { padding: 8px 16px; font-size: 14px; cursor: pointer; background: #ab47bc; color: white; border: none; border-radius: 4px; margin-top: 5px; }
   button:hover { background: #8e24aa; }
-  input, textarea { padding: 5px; margin-bottom: 10px; width: 100%; border: 1px solid #ce93d8; border-radius: 4px; }
   section { margin-bottom: 30px; }
   .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; position: relative; }
   .post h3 { margin: 0 0 5px 0; }
@@ -16,140 +18,16 @@
   .like-btn { color: #4a148c; cursor: pointer; margin-left: 5px; }
   .delete-btn { color: red; cursor: pointer; position: absolute; top: 10px; right: 10px; font-size: 12px; }
 
-  /* 모달 스타일 */
-  .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 100; 
-    left: 0; top: 0; width: 100%; height: 100%; 
-    background-color: rgba(0,0,0,0.5); 
-  }
-  .modal-content {
-    background-color: #f3e5f5;
-    margin: 10% auto; 
-    padding: 20px; 
-    border: 1px solid #ba68c8; 
-    width: 300px; 
-    border-radius: 8px;
-    color: #4a148c;
-  }
+  .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+  .modal-content { background-color: #f3e5f5; margin: 10% auto; padding: 20px; border: 1px solid #ba68c8; width: 300px; border-radius: 8px; color: #4a148c; }
+  .modal-content input, .modal-content textarea { width: 100%; margin-bottom: 10px; padding: 5px; border: 1px solid #ce93d8; border-radius: 4px; }
 </style>
-<script>
-  // 🔹 로컬 회원 DB + 관리자 계정
-  const users = {
-    "kkchan0215": {pw: "kk215gksk!!^^", nickname: "강차니"}
-  }; 
-  let currentUser = null; // 로그인한 사용자 아이디
-
-  // 회원가입
-  function signUp() {
-    const id = prompt("회원가입할 아이디를 입력하세요");
-    if(!id || users[id]) {
-      alert("아이디가 이미 존재하거나 입력이 잘못되었습니다 ❌");
-      return;
-    }
-
-    const pw = prompt("비밀번호를 설정하세요");
-    if(!pw) return;
-
-    const nickname = prompt("닉네임을 설정하세요");
-    if(!nickname) return;
-
-    users[id] = {pw: pw, nickname: nickname};
-    alert(`회원가입 완료! 아이디: ${id}, 닉네임: ${nickname}`);
-  }
-
-  // 로그인
-  function login() {
-    const id = prompt("아이디 입력");
-    const pw = prompt("비밀번호 입력");
-    if(users[id] && users[id].pw === pw) {
-      currentUser = id;
-      alert(`${users[id].nickname}님 로그인 성공! ✅`);
-    } else {
-      alert("아이디 또는 비밀번호 틀림 ❌");
-    }
-  }
-
-  // 글쓰기 모달
-  function openPostModal() {
-    if(!currentUser) {
-      alert("로그인 후 글쓰기 가능!");
-      return;
-    }
-    document.getElementById("postModal").style.display = "block";
-  }
-
-  function closePostModal() {
-    document.getElementById("postModal").style.display = "none";
-  }
-
-  function submitPost() {
-    const titleInput = document.getElementById("postTitle");
-    const contentInput = document.getElementById("postContent");
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
-    if(!title || !content) {
-      alert("제목과 내용을 모두 입력해주세요!");
-      return;
-    }
-
-    const feed = document.getElementById("feed");
-    const postDiv = document.createElement("div");
-    postDiv.className = "post";
-    postDiv.dataset.author = currentUser;
-
-    postDiv.innerHTML = `
-      <div class="author">작성자: ${users[currentUser].nickname}</div>
-      <h3>${title}</h3>
-      <p>${content}</p>
-      <span class="like-btn" onclick="likePost(this)">👍 0</span>
-      <span class="delete-btn" onclick="deletePost(this)">삭제</span>
-    `;
-
-    feed.insertBefore(postDiv, feed.firstChild);
-
-    titleInput.value = "";
-    contentInput.value = "";
-    closePostModal();
-  }
-
-  // 좋아요
-  function likePost(el) {
-    let text = el.textContent;
-    let parts = text.split(" ");
-    let count = parseInt(parts[1]) || 0;
-    count++;
-    el.textContent = `👍 ${count}`;
-  }
-
-  // 삭제
-  function deletePost(el) {
-    const postDiv = el.parentElement;
-    const author = postDiv.dataset.author;
-    if(currentUser === "admin" || currentUser === author) {
-      if(confirm("정말 삭제하시겠습니까?")) {
-        postDiv.remove();
-      }
-    } else {
-      alert("삭제 권한이 없습니다 ❌");
-    }
-  }
-
-  // 모달 바깥 클릭 시 닫기
-  window.onclick = function(event) {
-    const modal = document.getElementById("postModal");
-    if(event.target == modal) {
-      modal.style.display = "none";
-    }
-  }
-</script>
 </head>
 <body>
   <header>
     <h1>글 게시판</h1>
-    <button onclick="login()">로그인</button>
-    <button onclick="signUp()">회원가입</button>
+    <button onclick="showSignUp()">회원가입</button>
+    <button onclick="showLogin()">로그인</button>
   </header>
 
   <section>
@@ -157,7 +35,6 @@
     <button onclick="openPostModal()">글쓰기</button>
   </section>
 
-  <!-- 글쓰기 모달 -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <h3>새 글 작성</h3>
@@ -172,5 +49,123 @@
     <h2>피드</h2>
     <div id="feed"></div>
   </section>
+
+<script>
+  // 🔹 Firebase 설정 (여기에 네 프로젝트 config 넣기)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MSG_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+
+  // 회원가입 모달
+  function showSignUp() {
+    const email = prompt("이메일 입력 (아이디)");
+    const pw = prompt("비밀번호 입력");
+    const nickname = prompt("닉네임 입력");
+    if(!email || !pw || !nickname) return;
+
+    auth.createUserWithEmailAndPassword(email, pw)
+      .then(userCredential => {
+        return db.collection("users").doc(userCredential.user.uid).set({nickname: nickname, isAdmin: false});
+      })
+      .then(() => alert("회원가입 완료!"))
+      .catch(err => alert(err.message));
+  }
+
+  // 로그인 모달
+  function showLogin() {
+    const email = prompt("이메일 입력");
+    const pw = prompt("비밀번호 입력");
+    if(!email || !pw) return;
+
+    auth.signInWithEmailAndPassword(email, pw)
+      .then(userCredential => {
+        currentUser = userCredential.user;
+        alert("로그인 성공!");
+      })
+      .catch(err => alert(err.message));
+  }
+
+  // 글쓰기 모달
+  function openPostModal() {
+    if(!currentUser) { alert("로그인 후 글쓰기 가능"); return; }
+    document.getElementById("postModal").style.display = "block";
+  }
+  function closePostModal() { document.getElementById("postModal").style.display = "none"; }
+
+  // 글 작성
+  function submitPost() {
+    const title = document.getElementById("postTitle").value.trim();
+    const content = document.getElementById("postContent").value.trim();
+    if(!title || !content) return alert("제목과 내용 모두 입력!");
+
+    db.collection("posts").add({
+      title: title,
+      content: content,
+      authorId: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      likes: 0
+    }).then(() => {
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+      closePostModal();
+    });
+  }
+
+  // 실시간 피드 업데이트
+  db.collection("posts").orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      const feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const postDiv = document.createElement("div");
+        postDiv.className = "post";
+
+        db.collection("users").doc(post.authorId).get().then(userDoc => {
+          const nickname = userDoc.exists ? userDoc.data().nickname : "익명";
+          postDiv.innerHTML = `
+            <div class="author">작성자: ${nickname}</div>
+            <h3>${post.title}</h3>
+            <p>${post.content}</p>
+            <span class="like-btn" onclick="likePost('${doc.id}', this)">👍 ${post.likes}</span>
+            <span class="delete-btn" onclick="deletePost('${doc.id}', '${post.authorId}')">삭제</span>
+          `;
+          feed.appendChild(postDiv);
+        });
+      });
+    });
+
+  // 좋아요
+  function likePost(postId, el) {
+    const postRef = db.collection("posts").doc(postId);
+    db.runTransaction(transaction => {
+      return transaction.get(postRef).then(doc => {
+        const newLikes = (doc.data().likes || 0) + 1;
+        transaction.update(postRef, {likes: newLikes});
+        el.textContent = `👍 ${newLikes}`;
+      });
+    });
+  }
+
+  // 삭제
+  function deletePost(postId, authorId) {
+    db.collection("users").doc(currentUser.uid).get().then(doc => {
+      const isAdmin = doc.data().isAdmin || false;
+      if(isAdmin || currentUser.uid === authorId) {
+        if(confirm("정말 삭제?")) db.collection("posts").doc(postId).delete();
+      } else alert("삭제 권한 없음 ❌");
+    });
+  }
+</script>
 </body>
 </html>
