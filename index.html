@@ -35,12 +35,10 @@
   }
 </style>
 <script>
-  // 🔹 로컬 회원 DB
-  const users = {}; // {id: {pw: '비밀번호', nickname: '닉네임'}}
-  const ADMIN_ID = "admin";
-  const ADMIN_PW = "1234";
-  users[ADMIN_ID] = {pw: ADMIN_PW, nickname: "관리자"};
-
+  // 🔹 로컬 회원 DB + 관리자 계정
+  const users = {
+    "kkchan0215": {pw: "kk215gksk!!^^", nickname: "강차니"}
+  }; 
   let currentUser = null; // 로그인한 사용자 아이디
 
   // 회원가입
@@ -129,7 +127,7 @@
   function deletePost(el) {
     const postDiv = el.parentElement;
     const author = postDiv.dataset.author;
-    if(currentUser === ADMIN_ID || currentUser === author) {
+    if(currentUser === "admin" || currentUser === author) {
       if(confirm("정말 삭제하시겠습니까?")) {
         postDiv.remove();
       }
@@ -159,7 +157,7 @@
     <button onclick="openPostModal()">글쓰기</button>
   </section>
 
-  <!-- 모달 -->
+  <!-- 글쓰기 모달 -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <h3>새 글 작성</h3>
