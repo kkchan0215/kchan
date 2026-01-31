@@ -11,7 +11,7 @@
 <style>
 body{font-family:sans-serif;background:#f3ecff;margin:0;padding:20px}
 .card{background:#E6D6FF;padding:15px;margin-bottom:15px;border-radius:15px}
-button{padding:6px 10px;border:none;border-radius:8px;background:#b57cff;color:white;margin-top:5px}
+button{padding:6px 10px;border:none;border-radius:8px;background:#b57cff;color:white;margin-top:5px;cursor:pointer}
 input,textarea{width:100%;margin:5px 0;padding:8px;border-radius:8px;border:1px solid #ccc}
 </style>
 </head>
@@ -36,25 +36,26 @@ input,textarea{width:100%;margin:5px 0;padding:8px;border-radius:8px;border:1px 
 <div id="feed"></div>
 
 <script>
-// 🔥 Firebase 설정값 넣기
 const firebaseConfig = {
-  apiKey: "여기에",
-  authDomain: "여기에",
-  projectId: "여기에",
-  storageBucket: "여기에",
-  messagingSenderId: "여기에",
-  appId: "여기에"
+  apiKey: "여기에넣기",
+  authDomain: "여기에넣기",
+  projectId: "여기에넣기",
+  storageBucket: "여기에넣기",
+  messagingSenderId: "여기에넣기",
+  appId: "여기에넣기"
 };
 firebase.initializeApp(firebaseConfig);
 
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-// ⭐ 관리자 계정 이메일
 const ADMIN_EMAIL="kkchan0215";
-
+const ADMIN_CODE="강차니k215";
 let currentUser=null;
 let currentName="";
+let isAdmin=false;
+
+function safe(t){return (t||"").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
 auth.onAuthStateChanged(async user=>{
   if(user){
@@ -63,12 +64,17 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById("write").style.display="block";
 
     const doc=await db.collection("users").doc(user.uid).get();
-    currentName=doc.data().name;
+    currentName=doc.data()?.name || "익명";
 
     if(user.email===ADMIN_EMAIL){
-      adminDeleteAll.style.display="block";
+      const code=prompt("관리자 비밀번호 입력");
+      if(code===ADMIN_CODE){
+        isAdmin=true;
+        adminDeleteAll.style.display="block";
+      }else{
+        alert("관리자 비밀번호 틀림");
+      }
     }
-
     loadPosts();
   }
 });
@@ -81,9 +87,7 @@ function signup(){
   });
 }
 
-function login(){
-  auth.signInWithEmailAndPassword(email.value,password.value);
-}
+function login(){auth.signInWithEmailAndPassword(email.value,password.value);}
 
 function addPost(){
   db.collection("posts").add({
@@ -94,6 +98,7 @@ function addPost(){
     time:new Date(),
     likes:[]
   });
+  title.value="";content.value="";
 }
 
 function loadPosts(){
@@ -104,15 +109,13 @@ function loadPosts(){
       const p=doc.data();
       feed.innerHTML+=`
       <div class="card">
-        <h3>${p.title}</h3>
-        <p>${p.content}</p>
-        <div>작성자: ${p.name}</div>
+        <h3>${safe(p.title)}</h3>
+        <p>${safe(p.content)}</p>
+        <div>작성자: ${safe(p.name)}</div>
 
-        <button onclick="like('${doc.id}',${JSON.stringify(p.likes||[])})">
-          ❤️ ${p.likes?.length||0}
-        </button>
+        <button onclick="like('${doc.id}')">❤️ ${p.likes?.length||0}</button>
 
-        ${p.uid===currentUser.uid || currentUser.email===ADMIN_EMAIL
+        ${(p.uid===currentUser.uid || isAdmin)
           ? `<button onclick="del('${doc.id}')">삭제</button>`:""}
 
         <div>
@@ -126,31 +129,28 @@ function loadPosts(){
   });
 }
 
-function del(id){
-  db.collection("posts").doc(id).delete();
-}
+function del(id){db.collection("posts").doc(id).delete();}
 
 function deleteAll(){
-  db.collection("posts").get().then(snap=>{
-    snap.forEach(doc=>doc.ref.delete());
-  });
+  db.collection("posts").get().then(snap=>snap.forEach(d=>d.ref.delete()));
 }
 
-function like(id,likes){
+function like(id){
   const ref=db.collection("posts").doc(id);
-  if(likes.includes(currentUser.uid)){
-    ref.update({likes:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)});
-  }else{
-    ref.update({likes:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});
-  }
+  ref.get().then(doc=>{
+    const likes=doc.data().likes||[];
+    if(likes.includes(currentUser.uid)){
+      ref.update({likes:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)});
+    }else{
+      ref.update({likes:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});
+    }
+  });
 }
 
 function addComment(postId){
   const text=document.getElementById("cmt-"+postId).value;
   db.collection("posts").doc(postId).collection("comments").add({
-    text:text,
-    name:currentName,
-    time:new Date()
+    text:text,name:currentName,time:new Date()
   });
 }
 
@@ -161,7 +161,7 @@ function loadComments(postId){
     const box=document.getElementById("comments-"+postId);
     box.innerHTML="";
     snap.forEach(d=>{
-      box.innerHTML+=`<div>💬 ${d.data().name}: ${d.data().text}</div>`;
+      box.innerHTML+=`<div>💬 ${safe(d.data().name)}: ${safe(d.data().text)}</div>`;
     });
   });
 }
