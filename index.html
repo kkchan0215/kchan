@@ -6,15 +6,13 @@
 <style>
 body{font-family:sans-serif;background:linear-gradient(135deg,#f3e8ff,#e0ccff);margin:0}
 header{background:#b388ff;color:white;padding:20px;text-align:center;font-size:24px}
-.write-box{background:#f8f2ff;margin:15px auto;padding:15px;width:90%;max-width:500px;border-radius:15px}
+.box{background:#f8f2ff;margin:15px auto;padding:15px;width:90%;max-width:500px;border-radius:15px}
 input, textarea{width:100%;padding:10px;margin:5px 0;border-radius:10px;border:1px solid #d6b3ff}
 button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border-radius:10px;font-size:16px}
 .feed{width:90%;max-width:500px;margin:10px auto}
 .card{background:#e6d6ff;padding:15px;margin-bottom:15px;border-radius:15px}
 .detail{background:#f8f2ff;padding:20px;margin:20px auto;width:90%;max-width:600px;border-radius:15px;display:none}
-.back{margin-top:10px;background:#9575cd}
 .delete-btn{background:#ff6b6b;margin-top:8px}
-.admin-box{width:90%;max-width:500px;margin:10px auto;text-align:center}
 .time{font-size:12px;color:#555;margin-top:8px}
 .author{font-size:13px;color:#333;margin-top:5px}
 </style>
@@ -23,63 +21,66 @@ button{width:100%;padding:10px;background:#b388ff;color:white;border:none;border
 
 <header>💜 글 게시판 💜</header>
 
-<div class="admin-box">
-  <button onclick="setAccount()">내 계정 설정</button>
-  <button onclick="adminLogin()">관리자 로그인</button>
-  <button onclick="deleteAllPosts()" id="adminDeleteBtn" style="display:none;background:#ff3b3b">전체 글 삭제</button>
+<div class="box" id="loginBox">
+  <input type="text" id="loginId" placeholder="아이디">
+  <input type="password" id="loginPw" placeholder="비밀번호">
+  <button onclick="login()">로그인</button>
 </div>
 
-<div class="write-box" id="writeBox">
+<div class="box" id="writeBox" style="display:none">
+  <div id="welcome"></div>
   <input type="text" id="title" placeholder="제목">
   <textarea id="content" rows="3" placeholder="글 내용을 입력하세요"></textarea>
   <button onclick="addPost()">게시하기</button>
+  <button onclick="logout()" style="background:#999;margin-top:8px">로그아웃</button>
+  <button onclick="deleteAllPosts()" id="adminBtn" style="display:none;background:#ff3b3b;margin-top:8px">전체 글 삭제</button>
 </div>
 
 <div class="feed" id="feed"></div>
 <div class="detail" id="detailView"></div>
 
 <script>
-const ADMIN_PASSWORD="강차니k215";
-let isAdmin=false;
+const ADMIN_ID="admin";
+const ADMIN_PW="강차니k215";
 
-function setAccount(){
-  const id=prompt("사용할 계정 아이디 입력");
-  if(id){
-    localStorage.setItem("myAccount",id);
-    alert("계정 저장됨: "+id);
+function login(){
+  const id=document.getElementById("loginId").value.trim();
+  const pw=document.getElementById("loginPw").value.trim();
+  if(!id||!pw){alert("입력하세요");return;}
+
+  if(id===ADMIN_ID && pw===ADMIN_PW){
+    localStorage.setItem("user",JSON.stringify({id,isAdmin:true}));
+  }else{
+    localStorage.setItem("user",JSON.stringify({id,isAdmin:false}));
   }
+  showUser();
 }
 
-function getAccount(){
-  return localStorage.getItem("myAccount")||"";
+function logout(){
+  localStorage.removeItem("user");
+  location.reload();
 }
 
-function adminLogin(){
-  const pw=prompt("관리자 비밀번호 입력");
-  if(pw===ADMIN_PASSWORD){
-    isAdmin=true;
-    alert("관리자 모드 활성화");
-    document.getElementById("adminDeleteBtn").style.display="block";
-  }else alert("비밀번호 틀림");
+function getUser(){
+  return JSON.parse(localStorage.getItem("user"));
 }
 
-function deleteAllPosts(){
-  if(!isAdmin)return;
-  if(confirm("모든 글 삭제?")){
-    localStorage.removeItem("posts");
-    displayPosts();
-  }
+function showUser(){
+  const user=getUser();
+  if(!user)return;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("writeBox").style.display="block";
+  document.getElementById("welcome").innerText="로그인: "+user.id;
+  if(user.isAdmin)document.getElementById("adminBtn").style.display="block";
 }
 
 function addPost(){
-  const account=getAccount();
-  if(!account){alert("먼저 계정 설정하세요");return;}
-
+  const user=getUser();
   const title=document.getElementById("title").value.trim();
   const content=document.getElementById("content").value.trim();
-  if(!title||!content){alert("제목과 내용을 입력하세요");return;}
+  if(!title||!content){alert("입력하세요");return;}
 
-  const post={account,title,content,time:new Date().toLocaleString()};
+  const post={author:user.id,title,content,time:new Date().toLocaleString()};
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.unshift(post);
   localStorage.setItem("posts",JSON.stringify(posts));
@@ -96,33 +97,37 @@ function displayPosts(){
     feed.innerHTML+=`
       <div class="card">
         <h3 onclick="openDetail(${i})">${p.title}</h3>
-        <div class="author">계정: ${p.account}</div>
+        <div class="author">작성자: ${p.author}</div>
         <p onclick="openDetail(${i})">${p.content.substring(0,40)}...</p>
         <div class="time">${p.time}</div>
-        <button class="delete-btn" onclick="deletePost(${i},'${p.account}')">삭제</button>
+        <button class="delete-btn" onclick="deletePost(${i},'${p.author}')">삭제</button>
       </div>`;
   });
 }
 
-function deletePost(i,account){
-  const current=getAccount();
-  if(!isAdmin && current!==account){alert("자기 글만 삭제 가능");return;}
+function deletePost(i,author){
+  const user=getUser();
+  if(!user.isAdmin && user.id!==author){alert("자기 글만 삭제 가능");return;}
   let posts=JSON.parse(localStorage.getItem("posts"))||[];
   posts.splice(i,1);
   localStorage.setItem("posts",JSON.stringify(posts));
   displayPosts();
 }
 
+function deleteAllPosts(){
+  const user=getUser();
+  if(!user.isAdmin)return;
+  if(confirm("모든 글 삭제?")){
+    localStorage.removeItem("posts");
+    displayPosts();
+  }
+}
+
 function openDetail(i){
   const posts=JSON.parse(localStorage.getItem("posts"))||[];
   const p=posts[i];
   const detail=document.getElementById("detailView");
-  detail.innerHTML=`
-    <h2>${p.title}</h2>
-    <div class="author">계정: ${p.account}</div>
-    <p>${p.content}</p>
-    <div class="time">${p.time}</div>
-    <button class="back" onclick="closeDetail()">닫기</button>`;
+  detail.innerHTML=`<h2>${p.title}</h2><div class="author">${p.author}</div><p>${p.content}</p><div class="time">${p.time}</div><button onclick="closeDetail()">닫기</button>`;
   detail.style.display="block";
   document.getElementById("feed").style.display="none";
   document.getElementById("writeBox").style.display="none";
@@ -134,6 +139,7 @@ function closeDetail(){
   document.getElementById("writeBox").style.display="block";
 }
 
+showUser();
 displayPosts();
 </script>
 
