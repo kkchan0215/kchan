@@ -9,7 +9,6 @@ body{
   background:linear-gradient(135deg,#f3e8ff,#e0ccff);
   margin:0
 }
-
 header{
   background:#b388ff;
   color:white;
@@ -17,7 +16,6 @@ header{
   text-align:center;
   font-size:24px
 }
-
 .write-box{
   background:#f8f2ff;
   margin:15px auto;
@@ -27,7 +25,6 @@ header{
   border-radius:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.08)
 }
-
 input, textarea{
   width:100%;
   padding:10px;
@@ -35,7 +32,6 @@ input, textarea{
   border-radius:10px;
   border:1px solid #d6b3ff
 }
-
 button{
   width:100%;
   padding:10px;
@@ -45,22 +41,18 @@ button{
   border-radius:10px;
   font-size:16px
 }
-
 .feed{
   width:90%;
   max-width:500px;
   margin:10px auto
 }
-
 .card{
   background:#e6d6ff;
   padding:15px;
   margin-bottom:15px;
   border-radius:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  cursor:pointer
 }
-
 .detail{
   background:#f8f2ff;
   padding:20px;
@@ -70,12 +62,14 @@ button{
   border-radius:15px;
   display:none
 }
-
 .back{
   margin-top:10px;
   background:#9575cd
 }
-
+.delete-btn{
+  background:#ff6b6b;
+  margin-top:8px
+}
 .time{
   font-size:12px;
   color:#555;
@@ -119,12 +113,20 @@ function displayPosts(){
   feed.innerHTML="";
   posts.forEach((p,i)=>{
     feed.innerHTML+=`
-      <div class="card" onclick="openDetail(${i})">
-        <h3>${p.title}</h3>
-        <p>${p.content.substring(0,40)}...</p>
+      <div class="card">
+        <h3 onclick="openDetail(${i})">${p.title}</h3>
+        <p onclick="openDetail(${i})">${p.content.substring(0,40)}...</p>
         <div class="time">${p.time}</div>
+        <button class="delete-btn" onclick="deletePost(${i})">삭제</button>
       </div>`;
   });
+}
+
+function deletePost(i){
+  let posts=JSON.parse(localStorage.getItem("posts"))||[];
+  posts.splice(i,1);
+  localStorage.setItem("posts",JSON.stringify(posts));
+  displayPosts();
 }
 
 function openDetail(i){
