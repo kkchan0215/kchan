@@ -28,9 +28,9 @@ header button { margin-right:5px; }
 
 <header>
 <h1>나만의 일기장</h1>
-<button onclick="showLoginBox()">로그인</button>
-<button onclick="showSignUpBox()">회원가입</button>
-<button onclick="logout()">로그아웃</button>
+<button id="loginBtn">로그인</button>
+<button id="signupBtn">회원가입</button>
+<button id="logoutBtn">로그아웃</button>
 <span id="currentUser"></span>
 </header>
 
@@ -41,7 +41,7 @@ header button { margin-right:5px; }
 <h2>회원가입</h2>
 <input type="text" id="signupUsername" placeholder="닉네임">
 <input type="password" id="signupPassword" placeholder="비밀번호">
-<button onclick="signUp()">회원가입</button>
+<button id="signupSubmit">회원가입</button>
 </section>
 
 <!-- 로그인 -->
@@ -49,16 +49,16 @@ header button { margin-right:5px; }
 <h2>로그인</h2>
 <input type="text" id="loginUsername" placeholder="닉네임">
 <input type="password" id="loginPassword" placeholder="비밀번호">
-<button onclick="login()">로그인</button>
+<button id="loginSubmit">로그인</button>
 </section>
 
 <!-- 그룹 -->
 <section class="section-box">
 <h2>그룹(앨범) 만들기</h2>
 <input type="text" id="groupName" placeholder="그룹 이름 입력">
-<button onclick="createGroup()">그룹 생성</button>
+<button id="createGroupBtn">그룹 생성</button>
 <div class="group-list" id="groups"></div>
-<button onclick="showAllPosts()">전체 보기</button>
+<button id="allPostsBtn">전체 보기</button>
 </section>
 
 <!-- 글쓰기 -->
@@ -68,7 +68,7 @@ header button { margin-right:5px; }
 <input type="text" id="postTitle" placeholder="제목 입력">
 <textarea id="postContent" rows="3" placeholder="내용 입력"></textarea>
 <input type="file" id="postImage">
-<button onclick="submitPost()">글 작성</button>
+<button id="submitPostBtn">글 작성</button>
 </section>
 
 <!-- 피드 -->
@@ -83,7 +83,7 @@ let users = JSON.parse(localStorage.getItem('users')||'[]');
 let posts = JSON.parse(localStorage.getItem('posts')||'[]');
 let groups = JSON.parse(localStorage.getItem('groups')||'[]');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
-let currentGroupFilter = null; // 현재 선택된 그룹
+let currentGroupFilter = null;
 
 // ------------------- 저장 -------------------
 function saveUsers(){ localStorage.setItem('users', JSON.stringify(users)); }
@@ -134,9 +134,7 @@ function renderFeed(){
     const div = document.createElement('div');
     div.className='post';
     div.id = p.id;
-
     const commentsHtml = p.comments.map(c=>`<div class="comment">${c.username}: ${c.text}</div>`).join('');
-
     div.innerHTML = `
       ${currentUser?.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
       <strong>${p.title}</strong> <span>by ${p.username}</span> <span>(${groups.find(g=>g.id===p.groupId)?.name||'무소속'})</span>
@@ -162,11 +160,18 @@ function showMessage(msg){
   setTimeout(()=>{ el.textContent=''; }, 3000);
 }
 
-// ------------------- 회원가입 -------------------
-function showSignUpBox(){
-  document.getElementById('signupBox').style.display='block';
-  document.getElementById('loginBox').style.display='none';
-}
+// ------------------- 이벤트 -------------------
+document.getElementById('signupBtn').onclick = ()=>{ document.getElementById('signupBox').style.display='block'; document.getElementById('loginBox').style.display='none'; };
+document.getElementById('loginBtn').onclick = ()=>{ document.getElementById('loginBox').style.display='block'; document.getElementById('signupBox').style.display='none'; };
+document.getElementById('logoutBtn').onclick = logout;
+
+document.getElementById('signupSubmit').onclick = signUp;
+document.getElementById('loginSubmit').onclick = login;
+document.getElementById('createGroupBtn').onclick = createGroup;
+document.getElementById('allPostsBtn').onclick = showAllPosts;
+document.getElementById('submitPostBtn').onclick = submitPost;
+
+// ------------------- 회원가입/로그인 -------------------
 function signUp(){
   const username = document.getElementById('signupUsername').value.trim();
   const pw = document.getElementById('signupPassword').value.trim();
@@ -179,11 +184,6 @@ function signUp(){
   showMessage('회원가입 완료되었습니다 ✅');
 }
 
-// ------------------- 로그인 -------------------
-function showLoginBox(){
-  document.getElementById('loginBox').style.display='block';
-  document.getElementById('signupBox').style.display='none';
-}
 function login(){
   const username = document.getElementById('loginUsername').value.trim();
   const pw = document.getElementById('loginPassword').value.trim();
@@ -200,7 +200,6 @@ function login(){
   showMessage('로그인 완료되었습니다 ✅');
 }
 
-// ------------------- 로그아웃 -------------------
 function logout(){
   currentUser=null;
   saveCurrentUser();
@@ -287,7 +286,7 @@ updateHeader();
 updateGroupSelect();
 renderGroups();
 renderFeed();
-</script>
 
+</script>
 </body>
 </html>
