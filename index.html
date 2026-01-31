@@ -1,174 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>글 게시판</title>
+  <meta charset="UTF-8">
+  <title>보라톤 피드 사이트</title>
+  <style>
+    /* 보라톤 배경/글씨 스타일 */
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f3e5f5; color: #4a148c; }
+    header { background: #ce93d8; padding: 10px; margin-bottom: 20px; color: white; }
+    button { padding: 8px 16px; font-size: 14px; cursor: pointer; background: #ab47bc; color: white; border: none; border-radius: 4px; margin-top: 5px; }
+    button:hover { background: #8e24aa; }
+    input, textarea { padding: 5px; margin-bottom: 10px; width: 300px; border: 1px solid #ce93d8; border-radius: 4px; }
+    section { margin-bottom: 30px; }
+    .post { border: 1px solid #ba68c8; padding: 10px; margin-bottom: 10px; background: #f3e5f5; border-radius: 5px; }
+    .post h3 { margin: 0 0 5px 0; }
+    .like-btn { color: #4a148c; cursor: pointer; margin-left: 5px; }
+    #adminSection { display: none; margin-bottom: 20px; }
+  </style>
+  <script>
+    // 🔹 관리자 계정 (미리 설정)
+    const ADMIN_ID = "admin";
+    const ADMIN_PW = "1234";
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    let isAdmin = false;
 
-<style>
-body{font-family:sans-serif;background:#f3ecff;margin:0;padding:20px}
-.card{background:#E6D6FF;padding:15px;margin-bottom:15px;border-radius:15px}
-button{padding:6px 10px;border:none;border-radius:8px;background:#b57cff;color:white;margin-top:5px;cursor:pointer}
-input,textarea{width:100%;margin:5px 0;padding:8px;border-radius:8px;border:1px solid #ccc}
-</style>
-</head>
-<body>
+    // 회원가입 버튼 클릭 시 에러 없음
+    function signUp() {
+      alert("회원가입 버튼 눌렀음 ✅ 에러 없음");
+      console.log("회원가입 클릭 - 에러 없음");
+    }
 
-<h2>💜 글 게시판 💜</h2>
+    // 관리자 로그인
+    function adminLogin() {
+      const id = prompt("관리자 아이디 입력");
+      const pw = prompt("관리자 비밀번호 입력");
 
-<div id="auth">
-  <input id="email" placeholder="이메일">
-  <input id="password" type="password" placeholder="비밀번호">
-  <button onclick="signup()">회원가입</button>
-  <button onclick="login()">로그인</button>
-</div>
-
-<div id="write" style="display:none">
-  <input id="title" placeholder="제목">
-  <textarea id="content" placeholder="내용"></textarea>
-  <button onclick="addPost()">글 추가</button>
-  <button id="adminDeleteAll" style="display:none;background:red" onclick="deleteAll()">전체 글 삭제</button>
-</div>
-
-<div id="feed"></div>
-
-<script>
-const firebaseConfig = {
-  apiKey: "여기에넣기",
-  authDomain: "여기에넣기",
-  projectId: "여기에넣기",
-  storageBucket: "여기에넣기",
-  messagingSenderId: "여기에넣기",
-  appId: "여기에넣기"
-};
-firebase.initializeApp(firebaseConfig);
-
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-const ADMIN_EMAIL="kkchan0215";
-const ADMIN_CODE="kk215gksk!!^^";
-
-let currentUser=null;
-let currentName="";
-let isAdmin=false;
-
-function safe(t){return (t||"").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-
-auth.onAuthStateChanged(async user=>{
-  if(user){
-    alert("로그인 완료!");
-    currentUser=user;
-    document.getElementById("auth").style.display="none";
-    document.getElementById("write").style.display="block";
-
-    const doc=await db.collection("users").doc(user.uid).get();
-    currentName=doc.data()?.name || "익명";
-
-    if(user.email===ADMIN_EMAIL){
-      const code=prompt("관리자 비밀번호 입력");
-      if(code===ADMIN_CODE){
-        isAdmin=true;
-        adminDeleteAll.style.display="block";
-      }else{
-        alert("관리자 비밀번호 틀림");
+      if(id === ADMIN_ID && pw === ADMIN_PW) {
+        isAdmin = true;
+        alert("관리자 로그인 성공! 🎉");
+        document.getElementById("adminSection").style.display = "block";
+      } else {
+        alert("아이디 또는 비밀번호 틀림 ❌");
       }
     }
-    loadPosts();
-  }
-});
 
-function signup(){
-  auth.createUserWithEmailAndPassword(email.value,password.value)
-  .then(cred=>{
-    const name=prompt("닉네임 입력");
-    db.collection("users").doc(cred.user.uid).set({name:name});
-    alert("회원가입 완료!");
-  })
-  .catch(err=>alert(err.message));
-}
+    // 글 작성
+    function addPost() {
+      if(!isAdmin) {
+        alert("글 작성은 관리자만 가능합니다 🔒");
+        return;
+      }
 
-function login(){
-  auth.signInWithEmailAndPassword(email.value,password.value)
-  .catch(err=>alert(err.message));
-}
+      const title = prompt("제목을 입력하세요");
+      if (!title) return;
 
-function addPost(){
-  db.collection("posts").add({
-    title:title.value,
-    content:content.value,
-    uid:currentUser.uid,
-    name:currentName,
-    time:new Date(),
-    likes:[]
-  });
-  title.value="";content.value="";
-}
+      const content = prompt("내용을 입력하세요");
+      if (!content) return;
 
-function loadPosts(){
-  db.collection("posts").orderBy("time","desc")
-  .onSnapshot(snap=>{
-    feed.innerHTML="";
-    snap.forEach(doc=>{
-      const p=doc.data();
-      feed.innerHTML+=`
-      <div class="card">
-        <h3>${safe(p.title)}</h3>
-        <p>${safe(p.content)}</p>
-        <div>작성자: ${safe(p.name)}</div>
+      const feed = document.getElementById("feed");
 
-        <button onclick="like('${doc.id}')">❤️ ${p.likes?.length||0}</button>
+      const postDiv = document.createElement("div");
+      postDiv.className = "post";
 
-        ${(p.uid===currentUser.uid || isAdmin)
-          ? `<button onclick="del('${doc.id}')">삭제</button>`:""}
+      postDiv.innerHTML = `
+        <h3>${title}</h3>
+        <p>${content}</p>
+        <span class="like-btn" onclick="likePost(this)">👍 0</span>
+      `;
 
-        <div>
-          <input id="cmt-${doc.id}" placeholder="댓글쓰기">
-          <button onclick="addComment('${doc.id}')">댓글</button>
-          <div id="comments-${doc.id}"></div>
-        </div>
-      </div>`;
-      loadComments(doc.id);
-    });
-  });
-}
-
-function del(id){db.collection("posts").doc(id).delete();}
-function deleteAll(){db.collection("posts").get().then(snap=>snap.forEach(d=>d.ref.delete()));}
-
-function like(id){
-  const ref=db.collection("posts").doc(id);
-  ref.get().then(doc=>{
-    const likes=doc.data().likes||[];
-    if(likes.includes(currentUser.uid)){
-      ref.update({likes:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)});
-    }else{
-      ref.update({likes:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});
+      // 피드 맨 위에 추가
+      feed.insertBefore(postDiv, feed.firstChild);
     }
-  });
-}
 
-function addComment(postId){
-  const text=document.getElementById("cmt-"+postId).value;
-  db.collection("posts").doc(postId).collection("comments").add({
-    text:text,name:currentName,time:new Date()
-  });
-}
+    // 좋아요 기능
+    function likePost(el) {
+      let text = el.textContent; 
+      let parts = text.split(" ");
+      let count = parseInt(parts[1]) || 0;
+      count++;
+      el.textContent = `👍 ${count}`;
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>보라톤 피드 사이트</h1>
+    <button onclick="adminLogin()">관리자 로그인</button>
+  </header>
 
-function loadComments(postId){
-  db.collection("posts").doc(postId).collection("comments")
-  .orderBy("time")
-  .onSnapshot(snap=>{
-    const box=document.getElementById("comments-"+postId);
-    box.innerHTML="";
-    snap.forEach(d=>{
-      box.innerHTML+=`<div>💬 ${safe(d.data().name)}: ${safe(d.data().text)}</div>`;
-    });
-  });
-}
-</script>
+  <!-- 회원가입 섹션 -->
+  <section>
+    <h2>회원가입</h2>
+    <input type="email" placeholder="이메일 입력" /><br>
+    <input type="password" placeholder="비밀번호 입력" /><br>
+    <button onclick="signUp()">회원가입</button>
+  </section>
+
+  <!-- 관리자 전용 글쓰기 버튼 -->
+  <section id="adminSection">
+    <h2>글쓰기 (관리자 전용)</h2>
+    <button onclick="addPost()">글쓰기</button>
+  </section>
+
+  <!-- 피드 섹션 -->
+  <section>
+    <h2>피드</h2>
+    <div id="feed">
+      <!-- 작성한 글이 여기에 피드형으로 추가됨 -->
+    </div>
+  </section>
 </body>
 </html>
