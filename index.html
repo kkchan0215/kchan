@@ -34,6 +34,7 @@ input,textarea,select{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93
 
   <input id="newGroup" placeholder="그룹 이름">
   <button id="addGroupBtn">그룹 생성</button>
+  <button id="deleteGroupBtn">현재 그룹 삭제</button>
   <select id="groupSelect"></select>
 
   <input id="title" placeholder="제목">
@@ -61,18 +62,14 @@ const loginBtn = document.getElementById("loginBtn");
 const joinBtn = document.getElementById("joinBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const addGroupBtn = document.getElementById("addGroupBtn");
+const deleteGroupBtn = document.getElementById("deleteGroupBtn");
 const savePostBtn = document.getElementById("savePostBtn");
 const groupSelect = document.getElementById("groupSelect");
 const postsDiv = document.getElementById("posts");
 
-const modalBg = document.getElementById("modalBg");
-const modalTitle = document.getElementById("modalTitle");
-const modalContent = document.getElementById("modalContent");
-const deleteMenu = document.getElementById("deleteMenu");
-
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
-let groups = JSON.parse(localStorage.getItem("groups") || '["기본그룹"]');
+let groups = JSON.parse(localStorage.getItem("groups") || "{}"); // 🔥 계정별 그룹
 let currentUser = localStorage.getItem("currentUser");
 let currentPostIndex = null;
 
@@ -84,7 +81,8 @@ function saveAll(){
 
 function updateGroups(){
   groupSelect.innerHTML="";
-  groups.forEach(g=>{
+  if(!groups[currentUser]) groups[currentUser]=["기본그룹"];
+  groups[currentUser].forEach(g=>{
     const opt=document.createElement("option");
     opt.value=g; opt.textContent=g;
     groupSelect.appendChild(opt);
@@ -119,21 +117,18 @@ function closeModal(){
   deleteMenu.style.display="none";
 }
 
-document.getElementById("menuBtn").onclick=()=>{
-  deleteMenu.style.display = deleteMenu.style.display==="block" ? "none":"block";
-};
-document.getElementById("deleteBtn").onclick=()=>{
+menuBtn.onclick=()=> deleteMenu.style.display = deleteMenu.style.display==="block"?"none":"block";
+deleteBtn.onclick=()=>{
   posts.splice(currentPostIndex,1);
   saveAll(); closeModal(); renderPosts();
 };
-document.getElementById("closeBtn").onclick=closeModal;
+closeBtn.onclick=closeModal;
 
 joinBtn.onclick=()=>{
-  const id=joinId.value, pw=joinPw.value;
-  if(!id||!pw) return alert("입력하세요");
-  if(users[id]) return alert("이미 존재");
-  users[id]=pw; saveAll();
-  alert("회원가입 완료!");
+  if(!joinId.value||!joinPw.value) return alert("입력하세요");
+  if(users[joinId.value]) return alert("이미 존재");
+  users[joinId.value]=joinPw.value;
+  saveAll(); alert("회원가입 완료!");
 };
 
 loginBtn.onclick=()=>{
@@ -147,17 +142,22 @@ loginBtn.onclick=()=>{
 
 logoutBtn.onclick=()=>{
   localStorage.removeItem("currentUser");
-  currentUser=null;
-  postsDiv.innerHTML="";
-  authBox.classList.remove("hidden");
-  diaryBox.classList.add("hidden");
+  location.reload();
 };
 
 addGroupBtn.onclick=()=>{
-  if(newGroup.value&&!groups.includes(newGroup.value)){
-    groups.push(newGroup.value);
+  if(newGroup.value && !groups[currentUser].includes(newGroup.value)){
+    groups[currentUser].push(newGroup.value);
     saveAll(); updateGroups();
   }
+};
+
+deleteGroupBtn.onclick=()=>{
+  const g=groupSelect.value;
+  if(g==="기본그룹") return alert("기본그룹은 삭제 불가");
+  groups[currentUser]=groups[currentUser].filter(x=>x!==g);
+  posts=posts.filter(p=>!(p.user===currentUser && p.group===g)); // 그룹 글도 삭제
+  saveAll(); updateGroups(); renderPosts();
 };
 
 savePostBtn.onclick=()=>{
