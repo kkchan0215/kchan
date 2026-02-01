@@ -7,7 +7,7 @@
 body { font-family: Arial; background:#f3e5f5; color:#4a148c; padding:20px;}
 h1 {text-align:center;}
 button {background:#8e24aa;color:white;border:none;padding:8px 14px;border-radius:5px;margin-top:5px;cursor:pointer;}
-input, textarea {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;}
+input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;}
 .card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;}
 .hidden {display:none;}
 </style>
@@ -31,6 +31,13 @@ input, textarea {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;bo
 <div id="diaryBox" class="hidden">
   <button onclick="logout()">로그아웃</button>
 
+  <h3>그룹 만들기</h3>
+  <input id="newGroup" placeholder="그룹 이름">
+  <button onclick="addGroup()">그룹 생성</button>
+
+  <h3>그룹 선택</h3>
+  <select id="groupSelect" onchange="renderPosts()"></select>
+
   <h3>일기 쓰기</h3>
   <input id="title" placeholder="제목">
   <textarea id="content" rows="4" placeholder="내용"></textarea>
@@ -43,11 +50,13 @@ input, textarea {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;bo
 <script>
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
+let groups = JSON.parse(localStorage.getItem("groups") || "[]");
 let currentUser = localStorage.getItem("currentUser");
 
 function saveData(){
   localStorage.setItem("users", JSON.stringify(users));
   localStorage.setItem("posts", JSON.stringify(posts));
+  localStorage.setItem("groups", JSON.stringify(groups));
 }
 
 function register(){
@@ -72,7 +81,6 @@ function login(){
 }
 
 function logout(){
-  currentUser = null;
   localStorage.removeItem("currentUser");
   location.reload();
 }
@@ -80,28 +88,46 @@ function logout(){
 function showDiary(){
   authBox.classList.add("hidden");
   diaryBox.classList.remove("hidden");
+  updateGroupSelect();
   renderPosts();
+}
+
+function addGroup(){
+  const g = newGroup.value.trim();
+  if(!g) return;
+  if(!groups.includes(g)) groups.push(g);
+  saveData();
+  updateGroupSelect();
+  newGroup.value="";
+}
+
+function updateGroupSelect(){
+  const sel = groupSelect;
+  sel.innerHTML="";
+  groups.forEach(g=>{
+    sel.innerHTML += `<option value="${g}">${g}</option>`;
+  });
 }
 
 function addPost(){
   const title = document.getElementById("title").value.trim();
   const content = document.getElementById("content").value.trim();
-  if(!title || !content) return alert("제목/내용 입력");
-  posts.push({title, content, user: currentUser});
+  const group = groupSelect.value;
+  if(!title || !content || !group) return alert("입력하세요");
+  posts.push({title, content, user: currentUser, group});
   saveData();
   renderPosts();
-  title.value = "";
-  content.value = "";
 }
 
 function renderPosts(){
-  postsDiv = document.getElementById("posts");
-  postsDiv.innerHTML = "";
+  const group = groupSelect.value;
+  postsDiv.innerHTML="";
   posts.forEach((p,i)=>{
-    if(p.user === currentUser){
+    if(p.user===currentUser && p.group===group){
       postsDiv.innerHTML += `
         <div class="card">
-          <b>${p.title}</b><br>${p.content}
+          <b>${p.title}</b><br>${p.content}<br>
+          <small>그룹: ${p.group}</small><br>
           <button onclick="deletePost(${i})">삭제</button>
         </div>`;
     }
