@@ -68,25 +68,77 @@ let currentUser=null,currentGroup=null;
 
 function showLogin(){authTitle.textContent="로그인";authActionBtn.textContent="로그인";authModal.classList.add("show");authActionBtn.onclick=login;}
 function showSignup(){authTitle.textContent="회원가입";authActionBtn.textContent="회원가입";authModal.classList.add("show");authActionBtn.onclick=signup;}
-function login(){if(users[id.value]===pw.value){currentUser=id.value;alert("로그인 완료!");closeModal();startApp();}else alert("로그인 실패");}
-function signup(){if(users[id.value])return alert("이미 존재");users[id.value]=pw.value;localStorage.setItem("users",JSON.stringify(users));alert("회원가입 완료!");closeModal();}
-function logout(){currentUser=null;app.classList.add("hidden");home.classList.remove("hidden");}
-function startApp(){home.classList.add("hidden");app.classList.remove("hidden");if(!groups[currentUser])groups[currentUser]=[];saveAll();renderGroups();}
 
-function addGroup(){if(!newGroup.value)return;groups[currentUser].push(newGroup.value);saveAll();renderGroups();newGroup.value="";}
-function deleteGroup(g){if(!confirm("그룹 삭제?"))return;groups[currentUser]=groups[currentUser].filter(x=>x!==g);delete posts[currentUser][g];saveAll();renderGroups();groupArea.classList.add("hidden");}
+function login(){
+ if(users[id.value]===pw.value){
+  currentUser=id.value;
+  alert("로그인 완료!");
+  closeModal();
+  startApp();
+ } else alert("로그인 실패");
+}
 
-function renderGroups(){groupGrid.innerHTML="";groups[currentUser].forEach(g=>{const div=document.createElement("div");div.className="group-card";div.innerHTML=g+"<span class='group-del' onclick=\"deleteGroup('"+g+"')\">✖</span>";div.onclick=()=>openGroup(g);groupGrid.appendChild(div);});}
+function signup(){
+ if(users[id.value]) return alert("이미 존재");
+ users[id.value]=pw.value;
+ localStorage.setItem("users",JSON.stringify(users));
+ alert("회원가입 완료!");
+ closeModal();
+}
 
-function openGroup(g){currentGroup=g;groupTitle.textContent="📂 "+g;groupArea.classList.remove("hidden");renderPosts();}
+function logout(){
+ currentUser=null; // 데이터 삭제 없음 ❗
+ app.classList.add("hidden");
+ home.classList.remove("hidden");
+}
+
+function startApp(){
+ home.classList.add("hidden");
+ app.classList.remove("hidden");
+ if(!groups[currentUser]) groups[currentUser]=[];
+ saveAll();
+ renderGroups();
+}
+
+function addGroup(){
+ if(!newGroup.value) return;
+ groups[currentUser].push(newGroup.value);
+ saveAll(); renderGroups();
+ newGroup.value="";
+}
+
+function deleteGroup(g){
+ if(!confirm("그룹 삭제?")) return;
+ groups[currentUser]=groups[currentUser].filter(x=>x!==g);
+ if(posts[currentUser]) delete posts[currentUser][g];
+ saveAll(); renderGroups(); groupArea.classList.add("hidden");
+}
+
+function renderGroups(){
+ groupGrid.innerHTML="";
+ groups[currentUser].forEach(g=>{
+  const div=document.createElement("div");
+  div.className="group-card";
+  div.innerHTML=g+"<span class='group-del' onclick=\"deleteGroup('"+g+"')\">✖</span>";
+  div.onclick=()=>openGroup(g);
+  groupGrid.appendChild(div);
+ });
+}
+
+function openGroup(g){
+ currentGroup=g;
+ groupTitle.textContent="📂 "+g;
+ groupArea.classList.remove("hidden");
+ renderPosts();
+}
 
 function addPost(){
- if(!postTitle.value||!postText.value)return;
- if(!posts[currentUser])posts[currentUser]={};
- if(!posts[currentUser][currentGroup])posts[currentUser][currentGroup]=[];
+ if(!postTitle.value||!postText.value) return;
+ if(!posts[currentUser]) posts[currentUser]={};
+ if(!posts[currentUser][currentGroup]) posts[currentUser][currentGroup]=[];
  posts[currentUser][currentGroup].push({title:postTitle.value,content:postText.value});
- postTitle.value="";postText.value="";
- saveAll();renderPosts();
+ postTitle.value=""; postText.value="";
+ saveAll(); renderPosts();
 }
 
 function renderPosts(){
@@ -101,8 +153,12 @@ function renderPosts(){
  });
 }
 
-function openPost(p){modal.classList.add("show");modalBody.innerHTML="<h3>"+p.title+"</h3><p>"+p.content+"</p>";}
-function toggleMenu(e,btn,i){e.stopPropagation();const d=btn.nextElementSibling;d.style.display=d.style.display==="block"?"none":"block";}
+function openPost(p){
+ modal.classList.add("show");
+ modalBody.innerHTML="<h3>"+p.title+"</h3><p>"+p.content+"</p>";
+}
+
+function toggleMenu(e,btn){e.stopPropagation();const d=btn.nextElementSibling;d.style.display=d.style.display==="block"?"none":"block";}
 function deletePost(i){posts[currentUser][currentGroup].splice(i,1);saveAll();closeModal();renderPosts();}
 function closeModal(e){if(!e||e.target.classList.contains("modal"))document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
 function saveAll(){localStorage.setItem("groups",JSON.stringify(groups));localStorage.setItem("posts",JSON.stringify(posts));}
