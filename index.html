@@ -4,139 +4,118 @@
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
 <style>
-body{font-family:Arial;background:#2d0b3a;color:#fff;margin:0;padding:10px}
-button{background:#9c27b0;color:#fff;border:none;padding:6px 12px;margin:3px;border-radius:6px;cursor:pointer}
-button:hover{background:#ba68c8}
-.box{background:#4a148c;padding:10px;margin:10px 0;border-radius:10px}
-input,textarea,select{width:100%;margin:5px 0;padding:6px;border-radius:6px;border:none}
-.feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
-.post{background:#6a1b9a;padding:8px;border-radius:8px}
-img{max-width:100%;border-radius:8px;margin-top:5px}
-
-/* 모달창 */
-.modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.6)}
-.modal-content{background:#4a148c;width:300px;margin:10% auto;padding:20px;border-radius:10px}
-.close{float:right;cursor:pointer;color:#ff8a80}
+body { font-family: Arial; background:#f3e5f5; color:#4a148c; padding:20px;}
+h1 {text-align:center;}
+button {background:#8e24aa;color:white;border:none;padding:8px 14px;border-radius:5px;margin-top:5px;cursor:pointer;}
+input, textarea {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;}
+.card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;}
+.hidden {display:none;}
 </style>
 </head>
 <body>
 
-<h1>나만의 일기장</h1>
-<button onclick="openModal('loginModal')">로그인</button>
-<button onclick="openModal('signupModal')">회원가입</button>
-<button onclick="logout()">로그아웃</button>
-<span id="who"></span>
+<h1>💜 나만의 일기장 💜</h1>
 
-<!-- 회원가입 모달 -->
-<div id="signupModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('signupModal')">X</span>
-    <h3>회원가입</h3>
-    <input id="suN" placeholder="닉네임">
-    <input id="suP" type="password" placeholder="비밀번호">
-    <button onclick="signup()">가입하기</button>
-  </div>
+<div id="authBox">
+  <h3>로그인</h3>
+  <input id="loginId" placeholder="아이디">
+  <input id="loginPw" type="password" placeholder="비밀번호">
+  <button onclick="login()">로그인</button>
+
+  <h3>회원가입</h3>
+  <input id="joinId" placeholder="아이디">
+  <input id="joinPw" type="password" placeholder="비밀번호">
+  <button onclick="register()">회원가입</button>
 </div>
 
-<!-- 로그인 모달 -->
-<div id="loginModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('loginModal')">X</span>
-    <h3>로그인</h3>
-    <input id="liN" placeholder="닉네임">
-    <input id="liP" type="password" placeholder="비밀번호">
-    <button onclick="login()">로그인하기</button>
-  </div>
-</div>
+<div id="diaryBox" class="hidden">
+  <button onclick="logout()">로그아웃</button>
 
-<div class="box">
-그룹<input id="gN">
-<button onclick="addGroup()">생성</button>
-<div id="gBtns"></div>
-</div>
+  <h3>일기 쓰기</h3>
+  <input id="title" placeholder="제목">
+  <textarea id="content" rows="4" placeholder="내용"></textarea>
+  <button onclick="addPost()">저장</button>
 
-<div class="box">
-<select id="gSel"></select>
-제목<input id="t">
-내용<textarea id="c"></textarea>
-사진<input type="file" id="img">
-<button onclick="addPost()">작성</button>
-</div>
-
-<div class="box">
-<div id="feed" class="feed"></div>
+  <h3>내 일기 목록</h3>
+  <div id="posts"></div>
 </div>
 
 <script>
-let U=JSON.parse(localStorage.U||"[]")
-let P=JSON.parse(localStorage.P||"[]")
-let G=JSON.parse(localStorage.G||"[]")
-let me=JSON.parse(localStorage.me||"null")
-let f=null
+let users = JSON.parse(localStorage.getItem("users") || "{}");
+let posts = JSON.parse(localStorage.getItem("posts") || "[]");
+let currentUser = localStorage.getItem("currentUser");
 
-function save(){localStorage.U=JSON.stringify(U);localStorage.P=JSON.stringify(P);localStorage.G=JSON.stringify(G);localStorage.me=JSON.stringify(me)}
+function saveData(){
+  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("posts", JSON.stringify(posts));
+}
 
-function openModal(id){document.getElementById(id).style.display="block"}
-function closeModal(id){document.getElementById(id).style.display="none"}
-
-function signup(){
-if(!suN.value||!suP.value)return alert("입력")
-if(U.find(x=>x.n==suN.value))return alert("이미 있음")
-U.push({n:suN.value,p:suP.value});save()
-alert("회원가입 완료!")
-closeModal('signupModal')
+function register(){
+  const id = joinId.value.trim();
+  const pw = joinPw.value.trim();
+  if(!id || !pw) return alert("입력하세요");
+  if(users[id]) return alert("이미 존재하는 아이디");
+  users[id] = pw;
+  saveData();
+  alert("회원가입 완료!");
 }
 
 function login(){
-let u=U.find(x=>x.n==liN.value&&x.p==liP.value)
-if(!u)return alert("정보 틀림")
-me=u;save();update()
-alert("로그인 완료!")
-closeModal('loginModal')
+  const id = loginId.value.trim();
+  const pw = loginPw.value.trim();
+  if(users[id] && users[id] === pw){
+    currentUser = id;
+    localStorage.setItem("currentUser", id);
+    alert("로그인 완료!");
+    showDiary();
+  } else alert("로그인 실패");
 }
 
-function logout(){me=null;save();update();alert("로그아웃")}
+function logout(){
+  currentUser = null;
+  localStorage.removeItem("currentUser");
+  location.reload();
+}
 
-function addGroup(){if(!me)return alert("로그인 필요");G.push({id:Date.now()+"",n:gN.value,o:me.n});save();update()}
+function showDiary(){
+  authBox.classList.add("hidden");
+  diaryBox.classList.remove("hidden");
+  renderPosts();
+}
 
 function addPost(){
-if(!me)return alert("로그인 필요")
-let file=img.files[0]
-if(file){let r=new FileReader();r.onload=e=>post(e.target.result);r.readAsDataURL(file)}
-else post("")
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
+  if(!title || !content) return alert("제목/내용 입력");
+  posts.push({title, content, user: currentUser});
+  saveData();
+  renderPosts();
+  title.value = "";
+  content.value = "";
 }
 
-function post(i){P.unshift({id:Date.now()+"",u:me.n,t:t.value,c:c.value,i,g:gSel.value,l:0,cm:[]});save();update()}
-
-function del(id){P=P.filter(x=>x.id!=id);save();update()}
-function like(id){P.find(x=>x.id==id).l++;save();update()}
-function com(id){let tx=document.getElementById("ci"+id).value;P.find(x=>x.id==id).cm.push({u:me.n,t:tx});save();update()}
-
-function update(){
-who.textContent=me?" 로그인:"+me.n:""
-gSel.innerHTML='<option value="">무소속</option>'
-gBtns.innerHTML=''
-if(me){
-G.filter(x=>x.o==me.n).forEach(x=>{
-gSel.innerHTML+=`<option value="${x.id}">${x.n}</option>`
-gBtns.innerHTML+=`<button onclick="f='${x.id}';update()">${x.n}</button>`
-})
+function renderPosts(){
+  postsDiv = document.getElementById("posts");
+  postsDiv.innerHTML = "";
+  posts.forEach((p,i)=>{
+    if(p.user === currentUser){
+      postsDiv.innerHTML += `
+        <div class="card">
+          <b>${p.title}</b><br>${p.content}
+          <button onclick="deletePost(${i})">삭제</button>
+        </div>`;
+    }
+  });
 }
-feed.innerHTML=''
-let list=f?P.filter(x=>x.g==f):P
-list.forEach(x=>{
-feed.innerHTML+=`
-<div class="post">
-${me?.n==x.u?`<button onclick="del('${x.id}')">삭제</button>`:''}
-<b>${x.t}</b>(${x.u})<br>${x.c}
-${x.i?`<img src="${x.i}">`:''}
-<div><button onclick="like('${x.id}')">👍${x.l}</button></div>
-<input id="ci${x.id}" placeholder="댓글"><button onclick="com('${x.id}')">댓글</button>
-${x.cm.map(a=>a.u+":"+a.t).join("<br>")}
-</div>`
-})
+
+function deletePost(i){
+  posts.splice(i,1);
+  saveData();
+  renderPosts();
 }
-update()
+
+if(currentUser) showDiary();
 </script>
+
 </body>
 </html>
