@@ -25,7 +25,6 @@ input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;bord
   <input id="loginId" placeholder="아이디">
   <input id="loginPw" type="password" placeholder="비밀번호">
   <button id="loginBtn">로그인</button>
-
   <input id="joinId" placeholder="아이디">
   <input id="joinPw" type="password" placeholder="비밀번호">
   <button id="joinBtn">회원가입</button>
@@ -33,11 +32,9 @@ input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;bord
 
 <div id="diaryBox" class="hidden">
   <button id="logoutBtn">로그아웃</button>
-
   <input id="newGroup" placeholder="새 그룹 이름">
   <button id="addGroupBtn">그룹 생성</button>
   <button id="deleteGroupBtn">현재 그룹 삭제</button>
-
   <div id="groupArea"></div>
 
   <input id="title" placeholder="제목">
@@ -61,6 +58,22 @@ input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;bord
 </div>
 
 <script>
+const loginBtn=document.getElementById("loginBtn");
+const joinBtn=document.getElementById("joinBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+const addGroupBtn=document.getElementById("addGroupBtn");
+const deleteGroupBtn=document.getElementById("deleteGroupBtn");
+const savePostBtn=document.getElementById("savePostBtn");
+const postsDiv=document.getElementById("posts");
+const groupArea=document.getElementById("groupArea");
+const modalBg=document.getElementById("modalBg");
+const modalTitle=document.getElementById("modalTitle");
+const modalContent=document.getElementById("modalContent");
+const deleteMenu=document.getElementById("deleteMenu");
+const menuBtn=document.getElementById("menuBtn");
+const deleteBtn=document.getElementById("deleteBtn");
+const closeBtn=document.getElementById("closeBtn");
+
 let users=JSON.parse(localStorage.getItem("users")||"{}");
 let posts=JSON.parse(localStorage.getItem("posts")||"[]");
 let groups=JSON.parse(localStorage.getItem("groups")||"{}");
@@ -81,7 +94,7 @@ groups[currentUser].forEach(g=>{
 const box=document.createElement("div");
 box.className="groupBox"+(g===currentGroup?" active":"");
 box.textContent=g;
-box.onclick=()=>{currentGroup=g; renderGroups(); renderPosts();};
+box.onclick=()=>{currentGroup=g;renderGroups();renderPosts();};
 groupArea.appendChild(box);
 });
 if(!currentGroup) currentGroup=groups[currentUser][0];
@@ -108,10 +121,10 @@ modalContent.textContent=p.content;
 modalBg.style.display="flex";
 }
 
+function closeModal(){modalBg.style.display="none";deleteMenu.style.display="none";}
 menuBtn.onclick=()=>deleteMenu.style.display=deleteMenu.style.display==="block"?"none":"block";
 deleteBtn.onclick=()=>{posts.splice(currentPostIndex,1);saveAll();closeModal();renderPosts();}
 closeBtn.onclick=closeModal;
-function closeModal(){modalBg.style.display="none";deleteMenu.style.display="none";}
 
 joinBtn.onclick=()=>{
 if(!joinId.value||!joinPw.value) return alert("입력하세요");
@@ -137,7 +150,7 @@ groups[currentUser].push(newGroup.value);saveAll();renderGroups();
 deleteGroupBtn.onclick=()=>{
 if(currentGroup==="기본그룹") return alert("기본그룹은 삭제 불가");
 groups[currentUser]=groups[currentUser].filter(g=>g!==currentGroup);
-posts=posts.filter(p=>!(p.user===currentUser && p.group===currentGroup));
+posts=posts.filter(p=>!(p.user===currentUser&&p.group===currentGroup));
 currentGroup=groups[currentUser][0];
 saveAll();renderGroups();renderPosts();
 };
