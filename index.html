@@ -4,42 +4,15 @@
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
 <style>
-@font-face {
-  font-family: 'Nalgae';
-  src: url('HakgyoAnsimNalae.ttf') format('truetype');
-}
-
-body { 
-  font-family: 'Nalgae', sans-serif;
-  background:#f3e5f5; 
-  color:#4a148c; 
-  padding:20px;
-}
-h1 {text-align:center;}
-button {background:#8e24aa;color:white;border:none;padding:6px 12px;border-radius:5px;margin-top:5px;cursor:pointer;}
-input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;font-family:'Nalgae';}
-.card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer;}
-.hidden {display:none;}
-
-/* 🔥 팝업 스타일 */
-.modalBg {
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.4);
-  justify-content:center;
-  align-items:center;
-}
-.modalBox {
-  background:#f8eafc;
-  padding:20px;
-  width:300px;
-  border-radius:10px;
-  position:relative;
-}
-.menu {position:absolute; right:10px; top:10px; cursor:pointer; font-weight:bold;}
-.deleteMenu {display:none; margin-top:10px;}
+body{font-family:sans-serif;background:#f3e5f5;color:#4a148c;padding:20px}
+button{background:#8e24aa;color:white;border:none;padding:6px 12px;border-radius:5px;margin-top:5px;cursor:pointer}
+input,textarea,select{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px}
+.card{background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer}
+.hidden{display:none}
+.modalBg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center}
+.modalBox{background:#f8eafc;padding:20px;width:300px;border-radius:10px;position:relative}
+.menu{position:absolute;right:10px;top:10px;cursor:pointer;font-weight:bold}
+.deleteMenu{display:none;margin-top:10px}
 </style>
 </head>
 <body>
@@ -71,20 +44,32 @@ input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #c
   <div id="posts"></div>
 </div>
 
-<!-- 💥 팝업창 -->
 <div id="modalBg" class="modalBg">
   <div class="modalBox">
-    <span class="menu" onclick="toggleMenu()">⋮</span>
+    <span class="menu" id="menuBtn">⋮</span>
     <h2 id="modalTitle"></h2>
     <p id="modalContent"></p>
     <div id="deleteMenu" class="deleteMenu">
-      <button onclick="deletePost()">삭제</button>
+      <button id="deleteBtn">삭제</button>
     </div>
-    <button onclick="closeModal()">닫기</button>
+    <button id="closeBtn">닫기</button>
   </div>
 </div>
 
 <script>
+const loginBtn = document.getElementById("loginBtn");
+const joinBtn = document.getElementById("joinBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const addGroupBtn = document.getElementById("addGroupBtn");
+const savePostBtn = document.getElementById("savePostBtn");
+const groupSelect = document.getElementById("groupSelect");
+const postsDiv = document.getElementById("posts");
+
+const modalBg = document.getElementById("modalBg");
+const modalTitle = document.getElementById("modalTitle");
+const modalContent = document.getElementById("modalContent");
+const deleteMenu = document.getElementById("deleteMenu");
+
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
 let groups = JSON.parse(localStorage.getItem("groups") || '["기본그룹"]');
@@ -133,22 +118,20 @@ function closeModal(){
   deleteMenu.style.display="none";
 }
 
-function toggleMenu(){
-  deleteMenu.style.display = deleteMenu.style.display==="block" ? "none" : "block";
-}
-
-function deletePost(){
+document.getElementById("menuBtn").onclick=()=>{
+  deleteMenu.style.display = deleteMenu.style.display==="block" ? "none":"block";
+};
+document.getElementById("deleteBtn").onclick=()=>{
   posts.splice(currentPostIndex,1);
-  saveAll();
-  closeModal();
-  renderPosts();
-}
+  saveAll(); closeModal(); renderPosts();
+};
+document.getElementById("closeBtn").onclick=closeModal;
 
 joinBtn.onclick=()=>{
-  if(!joinId.value||!joinPw.value) return alert("입력하세요");
-  if(users[joinId.value]) return alert("이미 존재");
-  users[joinId.value]=joinPw.value;
-  saveAll();
+  const id=joinId.value, pw=joinPw.value;
+  if(!id||!pw) return alert("입력하세요");
+  if(users[id]) return alert("이미 존재");
+  users[id]=pw; saveAll();
   alert("회원가입 완료!");
 };
 
@@ -161,10 +144,7 @@ loginBtn.onclick=()=>{
   } else alert("로그인 실패");
 };
 
-logoutBtn.onclick=()=>{
-  localStorage.removeItem("currentUser");
-  location.reload();
-};
+logoutBtn.onclick=()=>{localStorage.removeItem("currentUser"); location.reload();};
 
 addGroupBtn.onclick=()=>{
   if(newGroup.value&&!groups.includes(newGroup.value)){
