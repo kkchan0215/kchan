@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
-
 <style>
 @font-face {
   font-family: 'Nalgae';
@@ -17,10 +16,13 @@ body {
   padding:20px;
 }
 h1 {text-align:center;}
-button {background:#8e24aa;color:white;border:none;padding:8px 14px;border-radius:5px;margin-top:5px;cursor:pointer;}
+button {background:#8e24aa;color:white;border:none;padding:6px 12px;border-radius:5px;margin-top:5px;cursor:pointer;}
 input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;font-family:'Nalgae';}
-.card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;}
+.card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer;}
 .hidden {display:none;}
+.menu {float:right;cursor:pointer;font-weight:bold;}
+.deleteMenu {display:none;margin-top:5px;}
+.detailBox {background:#f8eafc;padding:15px;border-radius:8px;border:1px solid #ce93d8;}
 </style>
 </head>
 <body>
@@ -28,12 +30,10 @@ input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #c
 <h1>💜 나만의 일기장 💜</h1>
 
 <div id="authBox">
-  <h3>로그인</h3>
   <input id="loginId" placeholder="아이디">
   <input id="loginPw" type="password" placeholder="비밀번호">
   <button id="loginBtn">로그인</button>
 
-  <h3>회원가입</h3>
   <input id="joinId" placeholder="아이디">
   <input id="joinPw" type="password" placeholder="비밀번호">
   <button id="joinBtn">회원가입</button>
@@ -42,20 +42,18 @@ input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #c
 <div id="diaryBox" class="hidden">
   <button id="logoutBtn">로그아웃</button>
 
-  <h3>그룹 만들기</h3>
   <input id="newGroup" placeholder="그룹 이름">
   <button id="addGroupBtn">그룹 생성</button>
-
-  <h3>현재 그룹</h3>
   <select id="groupSelect"></select>
 
-  <h3>일기 쓰기</h3>
   <input id="title" placeholder="제목">
   <textarea id="content" rows="4" placeholder="내용"></textarea>
   <button id="savePostBtn">저장</button>
 
-  <h3>내 일기 목록</h3>
+  <h3>내 글 목록</h3>
   <div id="posts"></div>
+
+  <div id="detailView" class="hidden"></div>
 </div>
 
 <script>
@@ -63,6 +61,7 @@ const authBox = document.getElementById("authBox");
 const diaryBox = document.getElementById("diaryBox");
 const postsDiv = document.getElementById("posts");
 const groupSelect = document.getElementById("groupSelect");
+const detailView = document.getElementById("detailView");
 
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
@@ -91,20 +90,42 @@ function renderPosts(){
     if(p.user===currentUser && p.group===g){
       const div=document.createElement("div");
       div.className="card";
-      div.innerHTML=`<b>${p.title}</b><br>${p.content}<br>`;
-      const btn=document.createElement("button");
-      btn.textContent="삭제";
-      btn.onclick=()=>{ posts.splice(i,1); saveAll(); renderPosts(); };
-      div.appendChild(btn);
+      div.textContent=p.title;
+      div.onclick=()=>openDetail(i);
       postsDiv.appendChild(div);
     }
   });
 }
 
-function showDiary(){
-  authBox.classList.add("hidden");
-  diaryBox.classList.remove("hidden");
-  updateGroups();
+function openDetail(i){
+  const p=posts[i];
+  detailView.classList.remove("hidden");
+  detailView.innerHTML=`
+    <div class="detailBox">
+      <span class="menu" onclick="toggleMenu()">⋮</span>
+      <h2>${p.title}</h2>
+      <p>${p.content}</p>
+      <div id="deleteMenu" class="deleteMenu">
+        <button onclick="deletePost(${i})">삭제</button>
+      </div>
+      <button onclick="closeDetail()">닫기</button>
+    </div>
+  `;
+}
+
+function toggleMenu(){
+  const m=document.getElementById("deleteMenu");
+  m.style.display = m.style.display==="block" ? "none" : "block";
+}
+
+function closeDetail(){
+  detailView.classList.add("hidden");
+}
+
+function deletePost(i){
+  posts.splice(i,1);
+  saveAll();
+  closeDetail();
   renderPosts();
 }
 
@@ -147,6 +168,13 @@ savePostBtn.onclick=()=>{
   posts.push({title,content,user:currentUser,group:groupSelect.value});
   saveAll(); renderPosts();
 };
+
+function showDiary(){
+  authBox.classList.add("hidden");
+  diaryBox.classList.remove("hidden");
+  updateGroups();
+  renderPosts();
+}
 
 if(currentUser) showDiary();
 </script>
