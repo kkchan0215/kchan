@@ -1,166 +1,172 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>나만의 일기장</title>
-
 <style>
-@font-face {
-  font-family: 'SchoolSafetyWing';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/SchoolSafetyWing.woff') format('woff');
-}
-
-body{margin:0;font-family:'SchoolSafetyWing';background:#2e1065;color:white}
-header{background:#4c1d95;padding:15px;text-align:center;font-size:24px}
-.container{padding:15px}
-input,button,textarea{font-family:'SchoolSafetyWing';padding:8px;margin:5px 0;border:none;border-radius:8px}
-button{background:#7c3aed;color:white;cursor:pointer}
-.group{background:#5b21b6;padding:15px;border-radius:12px;display:inline-block;margin:8px;cursor:pointer}
-.post{background:#6d28d9;padding:12px;border-radius:10px;margin:8px 0;cursor:pointer}
+body {font-family:'Malgun Gothic',sans-serif;background:#f3e5f5;margin:0;padding:20px;color:#4a148c}
 .hidden{display:none}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000aa;display:flex;justify-content:center;align-items:center}
-.modal-content{background:#4c1d95;padding:20px;border-radius:15px;width:300px}
-.menu{float:right;cursor:pointer}
+button{background:#8e24aa;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ce93d8}
+.group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:15px 0}
+.group-card{background:#ce93d8;padding:20px;text-align:center;border-radius:10px;cursor:pointer;font-weight:bold}
+.post{background:white;padding:10px;margin:10px 0;border-radius:8px;cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
+.modal-content{background:#f3e5f5;padding:20px;border-radius:10px;width:300px}
+.menu{position:absolute;right:10px;top:10px;cursor:pointer}
+.dropdown{position:absolute;right:10px;top:30px;background:white;border:1px solid #ccc;border-radius:6px;display:none}
+.dropdown div{padding:5px 10px;cursor:pointer}
 </style>
 </head>
 <body>
 
-<header>💜 나만의 일기장 💜</header>
-
-<div class="container" id="auth">
-<h3>로그인 / 회원가입</h3>
-<input id="idInput" placeholder="아이디">
-<input id="pwInput" type="password" placeholder="비밀번호">
-<button id="signupBtn">회원가입</button>
+<div id="authBox">
+<h2>로그인 / 회원가입</h2>
+<input id="id" placeholder="아이디">
+<input id="pw" type="password" placeholder="비밀번호">
 <button id="loginBtn">로그인</button>
-<p id="msg"></p>
+<button id="signupBtn">회원가입</button>
 </div>
 
-<div class="container hidden" id="app">
+<div id="app" class="hidden">
+<h2>📔 나만의 일기장</h2>
 <button id="logoutBtn">로그아웃</button>
 
-<h3>📁 그룹 만들기</h3>
-<input id="groupName" placeholder="그룹 이름">
-<button id="addGroupBtn">추가</button>
-<div id="groups"></div>
+<h3>📁 내 그룹</h3>
+<input id="newGroup" placeholder="새 그룹 이름">
+<button id="addGroupBtn">그룹 추가</button>
+<div id="groupGrid" class="group-grid"></div>
 
-<div id="groupSection" class="hidden">
-<h3>✏ 글 작성</h3>
-<textarea id="content" placeholder="내용"></textarea>
-<input type="file" id="img">
-<button id="addPostBtn">작성</button>
-<div id="posts"></div>
+<div id="groupArea" class="hidden">
+<h3 id="groupTitle"></h3>
+<textarea id="postText" placeholder="일기 쓰기"></textarea>
+<button id="addPostBtn">글 추가</button>
+<div id="postList"></div>
 </div>
 </div>
 
-<div id="modal" class="modal hidden">
-<div class="modal-content">
-<div id="modalBody"></div>
-<button onclick="closeModal()">닫기</button>
-</div>
+<div id="modal" class="modal hidden" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div id="modalBody"></div>
+  </div>
 </div>
 
 <script>
-const idInput = document.getElementById('idInput');
-const pwInput = document.getElementById('pwInput');
-const msg = document.getElementById('msg');
-const auth = document.getElementById('auth');
-const app = document.getElementById('app');
-const groupsDiv = document.getElementById('groups');
-const postsDiv = document.getElementById('posts');
-const groupSection = document.getElementById('groupSection');
-
+let users=JSON.parse(localStorage.getItem("users")||"{}");
+let groups=JSON.parse(localStorage.getItem("groups")||"{}");
+let posts=JSON.parse(localStorage.getItem("posts")||"{}");
 let currentUser=null,currentGroup=null;
 
-function getData(){return JSON.parse(localStorage.getItem('diary')||'{}')}
-function saveData(d){localStorage.setItem('diary',JSON.stringify(d))}
+const authBox=document.getElementById("authBox");
+const app=document.getElementById("app");
+const groupGrid=document.getElementById("groupGrid");
+const postList=document.getElementById("postList");
 
-document.getElementById('signupBtn').onclick=function(){
-let d=getData();
-if(d[idInput.value]) return msg.innerText="이미 있음";
-d[idInput.value]={pw:pwInput.value,groups:{}};
-saveData(d);
-msg.innerText="회원가입 완료!";
+loginBtn.onclick=()=>{
+ if(users[id.value]===pw.value){
+  currentUser=id.value;
+  alert("로그인 완료!");
+  startApp();
+ }else alert("로그인 실패");
+};
+
+signupBtn.onclick=()=>{
+ if(users[id.value]) return alert("이미 존재");
+ users[id.value]=pw.value;
+ localStorage.setItem("users",JSON.stringify(users));
+ alert("회원가입 완료!");
+};
+
+logoutBtn.onclick=()=>{
+ currentUser=null;
+ app.classList.add("hidden");
+ authBox.classList.remove("hidden");
+};
+
+function startApp(){
+ authBox.classList.add("hidden");
+ app.classList.remove("hidden");
+ if(!groups[currentUser]) groups[currentUser]=[];
+ saveAll();
+ renderGroups();
 }
 
-document.getElementById('loginBtn').onclick=function(){
-let d=getData();
-if(d[idInput.value]&&d[idInput.value].pw===pwInput.value){
-currentUser=idInput.value;
-auth.classList.add('hidden');
-app.classList.remove('hidden');
-msg.innerText="로그인 성공!";
-renderGroups();
-}else msg.innerText="로그인 실패";
-}
-
-document.getElementById('logoutBtn').onclick=function(){
-currentUser=null;
-app.classList.add('hidden');
-auth.classList.remove('hidden');
-groupSection.classList.add('hidden');
-}
-
-document.getElementById('addGroupBtn').onclick=function(){
-let d=getData();
-d[currentUser].groups[groupName.value]={posts:[]};
-saveData(d);
-renderGroups();
-}
+addGroupBtn.onclick=()=>{
+ if(!newGroup.value) return;
+ groups[currentUser].push(newGroup.value);
+ saveAll(); renderGroups();
+ newGroup.value="";
+};
 
 function renderGroups(){
-groupsDiv.innerHTML="";
-let g=getData()[currentUser].groups;
-for(let name in g){
-let div=document.createElement('div');
-div.className='group';
-div.innerText=name;
-div.onclick=()=>{currentGroup=name;groupSection.classList.remove('hidden');renderPosts();}
-groupsDiv.appendChild(div);
-}
+ groupGrid.innerHTML="";
+ groups[currentUser].forEach(g=>{
+  const div=document.createElement("div");
+  div.className="group-card";
+  div.textContent=g;
+  div.onclick=()=>openGroup(g);
+  groupGrid.appendChild(div);
+ });
 }
 
-document.getElementById('addPostBtn').onclick=function(){
-let reader=new FileReader();
-reader.onload=function(){
-let d=getData();
-d[currentUser].groups[currentGroup].posts.push({text:content.value,img:reader.result});
-saveData(d);
-renderPosts();
+function openGroup(g){
+ currentGroup=g;
+ groupTitle.textContent="📂 "+g;
+ groupArea.classList.remove("hidden");
+ renderPosts();
 }
-if(img.files[0]) reader.readAsDataURL(img.files[0]);
-else reader.onload();
-}
+
+addPostBtn.onclick=()=>{
+ if(!postText.value) return;
+ if(!posts[currentUser]) posts[currentUser]={};
+ if(!posts[currentUser][currentGroup]) posts[currentUser][currentGroup]=[];
+ posts[currentUser][currentGroup].push(postText.value);
+ postText.value="";
+ saveAll(); renderPosts();
+};
 
 function renderPosts(){
-postsDiv.innerHTML="";
-let p=getData()[currentUser].groups[currentGroup].posts;
-p.forEach((post,i)=>{
-let div=document.createElement('div');
-div.className='post';
-div.innerText=post.text.substring(0,20);
-div.onclick=()=>openPost(post,i);
-postsDiv.appendChild(div);
-})
+ postList.innerHTML="";
+ const list=(posts[currentUser]&&posts[currentUser][currentGroup])||[];
+ list.forEach((p,i)=>{
+  const div=document.createElement("div");
+  div.className="post";
+  div.textContent=p.slice(0,20)+"...";
+  div.onclick=()=>openPost(p,i);
+  postList.appendChild(div);
+ });
 }
 
-function openPost(post,i){
-modal.classList.remove('hidden');
-modalBody.innerHTML=`<span class="menu" onclick="deletePost(${i})">삭제</span>
-<p>${post.text}</p>
-${post.img?`<img src="${post.img}" width="100%">`:''}`;
+function openPost(text,index){
+ modal.classList.remove("hidden");
+ modalBody.innerHTML=`
+ <div style="position:relative">
+  <div class="menu" onclick="toggleMenu()">⋮</div>
+  <div id="dropdown" class="dropdown">
+    <div onclick="deletePost(${index})">삭제</div>
+  </div>
+  <p>${text}</p>
+ </div>`;
+}
+
+function toggleMenu(){
+ const d=document.getElementById("dropdown");
+ d.style.display=d.style.display==="block"?"none":"block";
 }
 
 function deletePost(i){
-let d=getData();
-d[currentUser].groups[currentGroup].posts.splice(i,1);
-saveData(d);
-closeModal();
-renderPosts();
+ posts[currentUser][currentGroup].splice(i,1);
+ saveAll(); closeModal(); renderPosts();
 }
 
-function closeModal(){modal.classList.add('hidden')}
-</script>
+function closeModal(e){
+ if(!e || e.target.id==="modal") modal.classList.add("hidden");
+}
 
+function saveAll(){
+ localStorage.setItem("groups",JSON.stringify(groups));
+ localStorage.setItem("posts",JSON.stringify(posts));
+}
+</script>
 </body>
 </html>
