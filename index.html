@@ -3,11 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
+
 <style>
-body { font-family: Arial; background:#f3e5f5; color:#4a148c; padding:20px;}
+@font-face {
+  font-family: 'Nalgae';
+  src: url('HakgyoAnsimNalae.ttf') format('truetype');
+}
+
+body { 
+  font-family: 'Nalgae', sans-serif;
+  background:#f3e5f5; 
+  color:#4a148c; 
+  padding:20px;
+}
 h1 {text-align:center;}
 button {background:#8e24aa;color:white;border:none;padding:8px 14px;border-radius:5px;margin-top:5px;cursor:pointer;}
-input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;}
+input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;font-family:'Nalgae';}
 .card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;}
 .hidden {display:none;}
 </style>
@@ -20,130 +31,122 @@ input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #c
   <h3>로그인</h3>
   <input id="loginId" placeholder="아이디">
   <input id="loginPw" type="password" placeholder="비밀번호">
-  <button onclick="login()">로그인</button>
+  <button id="loginBtn">로그인</button>
 
   <h3>회원가입</h3>
   <input id="joinId" placeholder="아이디">
   <input id="joinPw" type="password" placeholder="비밀번호">
-  <button onclick="register()">회원가입</button>
+  <button id="joinBtn">회원가입</button>
 </div>
 
 <div id="diaryBox" class="hidden">
-  <button onclick="logout()">로그아웃</button>
+  <button id="logoutBtn">로그아웃</button>
 
   <h3>그룹 만들기</h3>
   <input id="newGroup" placeholder="그룹 이름">
-  <button onclick="addGroup()">그룹 생성</button>
+  <button id="addGroupBtn">그룹 생성</button>
 
-  <h3>그룹 선택</h3>
-  <select id="groupSelect" onchange="renderPosts()"></select>
+  <h3>현재 그룹</h3>
+  <select id="groupSelect"></select>
 
   <h3>일기 쓰기</h3>
   <input id="title" placeholder="제목">
   <textarea id="content" rows="4" placeholder="내용"></textarea>
-  <button onclick="addPost()">저장</button>
+  <button id="savePostBtn">저장</button>
 
   <h3>내 일기 목록</h3>
   <div id="posts"></div>
 </div>
 
 <script>
+const authBox = document.getElementById("authBox");
+const diaryBox = document.getElementById("diaryBox");
+const postsDiv = document.getElementById("posts");
+const groupSelect = document.getElementById("groupSelect");
+
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
-let groups = JSON.parse(localStorage.getItem("groups") || "[]");
+let groups = JSON.parse(localStorage.getItem("groups") || '["기본그룹"]');
 let currentUser = localStorage.getItem("currentUser");
 
-function saveData(){
+function saveAll(){
   localStorage.setItem("users", JSON.stringify(users));
   localStorage.setItem("posts", JSON.stringify(posts));
   localStorage.setItem("groups", JSON.stringify(groups));
 }
 
-function register(){
-  const id = joinId.value.trim();
-  const pw = joinPw.value.trim();
-  if(!id || !pw) return alert("입력하세요");
-  if(users[id]) return alert("이미 존재하는 아이디");
-  users[id] = pw;
-  saveData();
-  alert("회원가입 완료!");
+function updateGroups(){
+  groupSelect.innerHTML="";
+  groups.forEach(g=>{
+    const opt=document.createElement("option");
+    opt.value=g; opt.textContent=g;
+    groupSelect.appendChild(opt);
+  });
 }
 
-function login(){
-  const id = loginId.value.trim();
-  const pw = loginPw.value.trim();
-  if(users[id] && users[id] === pw){
-    currentUser = id;
-    localStorage.setItem("currentUser", id);
-    alert("로그인 완료!");
-    showDiary();
-  } else alert("로그인 실패");
-}
-
-function logout(){
-  localStorage.removeItem("currentUser");
-  location.reload();
+function renderPosts(){
+  postsDiv.innerHTML="";
+  const g = groupSelect.value;
+  posts.forEach((p,i)=>{
+    if(p.user===currentUser && p.group===g){
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`<b>${p.title}</b><br>${p.content}<br>`;
+      const btn=document.createElement("button");
+      btn.textContent="삭제";
+      btn.onclick=()=>{ posts.splice(i,1); saveAll(); renderPosts(); };
+      div.appendChild(btn);
+      postsDiv.appendChild(div);
+    }
+  });
 }
 
 function showDiary(){
   authBox.classList.add("hidden");
   diaryBox.classList.remove("hidden");
-  if(groups.length===0){
-    groups.push("기본그룹");
-    saveData();
+  updateGroups();
+  renderPosts();
+}
+
+joinBtn.onclick=()=>{
+  const id=joinId.value.trim(), pw=joinPw.value.trim();
+  if(!id||!pw) return alert("입력하세요");
+  if(users[id]) return alert("이미 존재");
+  users[id]=pw; saveAll();
+  alert("회원가입 완료!");
+};
+
+loginBtn.onclick=()=>{
+  const id=loginId.value.trim(), pw=loginPw.value.trim();
+  if(users[id]===pw){
+    currentUser=id;
+    localStorage.setItem("currentUser",id);
+    alert("로그인 완료!");
+    showDiary();
+  } else alert("로그인 실패");
+};
+
+logoutBtn.onclick=()=>{
+  localStorage.removeItem("currentUser");
+  location.reload();
+};
+
+addGroupBtn.onclick=()=>{
+  const g=newGroup.value.trim();
+  if(g&&!groups.includes(g)){
+    groups.push(g); saveAll(); updateGroups();
+    groupSelect.value=g;
   }
-  updateGroupSelect();
-  renderPosts();
-}
-
-function addGroup(){
-  const g = newGroup.value.trim();
-  if(!g) return;
-  if(!groups.includes(g)) groups.push(g);
-  saveData();
-  updateGroupSelect();
-  groupSelect.value = g;
   newGroup.value="";
-  renderPosts();
-}
+};
 
-function updateGroupSelect(){
-  const sel = groupSelect;
-  sel.innerHTML="";
-  groups.forEach(g=>{
-    sel.innerHTML += `<option value="${g}">${g}</option>`;
-  });
-}
-
-function addPost(){
-  const title = document.getElementById("title").value.trim();
-  const content = document.getElementById("content").value.trim();
-  const group = groupSelect.value;
-  if(!title || !content) return alert("입력하세요");
-  posts.push({title, content, user: currentUser, group});
-  saveData();
-  renderPosts();
-}
-
-function renderPosts(){
-  const group = groupSelect.value;
-  postsDiv.innerHTML="";
-  posts.forEach((p,i)=>{
-    if(p.user===currentUser && p.group===group){
-      postsDiv.innerHTML += `
-        <div class="card">
-          <b>${p.title}</b><br>${p.content}<br>
-          <button onclick="deletePost(${i})">삭제</button>
-        </div>`;
-    }
-  });
-}
-
-function deletePost(i){
-  posts.splice(i,1);
-  saveData();
-  renderPosts();
-}
+savePostBtn.onclick=()=>{
+  const title=document.getElementById("title").value.trim();
+  const content=document.getElementById("content").value.trim();
+  if(!title||!content) return alert("입력하세요");
+  posts.push({title,content,user:currentUser,group:groupSelect.value});
+  saveAll(); renderPosts();
+};
 
 if(currentUser) showDiary();
 </script>
