@@ -4,177 +4,146 @@
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
 <style>
-body { font-family: Arial; padding:20px; background:#2d0b3a; color:#f3e5f5; }
-input, textarea, select { width:100%; margin-bottom:10px; padding:6px; border-radius:6px; border:none; }
-button { padding:6px 12px; cursor:pointer; margin:3px; border:none; border-radius:6px; background:#9c27b0; color:white; }
-button:hover { background:#ba68c8; }
-
-header { margin-bottom:15px; }
-.section-box { background:#4a148c; padding:12px; border-radius:10px; margin-bottom:12px; }
-#message { color:#ffeb3b; font-weight:bold; }
-
-.group-list button { background:#7b1fa2; }
-.feed { display:grid; grid-template-columns: repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
-
-.post { background:#6a1b9a; padding:10px; border-radius:10px; position:relative; }
-.post img { max-width:100%; border-radius:8px; margin-top:6px; }
-.delete-btn { position:absolute; top:6px; right:8px; color:#ff8a80; cursor:pointer; }
-.like-btn { cursor:pointer; color:#ffd54f; }
-.comment { margin-left:10px; font-size:14px; }
-.comment-box { display:flex; margin-top:6px; }
-.comment-box input { flex:1; margin-right:5px; }
+body{margin:0;font-family:Arial;background:#2d0b3a;color:#f3e5f5}
+header{background:#4a148c;padding:15px}
+h1{margin:0}
+button{background:#9c27b0;color:white;border:none;padding:6px 12px;margin:3px;border-radius:6px;cursor:pointer}
+button:hover{background:#ba68c8}
+.box{background:#4a148c;margin:10px;padding:10px;border-radius:10px}
+input,textarea,select{width:100%;margin:5px 0;padding:6px;border-radius:6px;border:none}
+.feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.post{background:#6a1b9a;padding:10px;border-radius:10px;position:relative}
+.post img{max-width:100%;border-radius:8px;margin-top:5px}
+.del{position:absolute;top:5px;right:8px;color:#ff8a80;cursor:pointer}
+.like{color:#ffd54f;cursor:pointer}
+.comment{font-size:14px;margin-left:8px}
 </style>
 </head>
 <body>
 
 <header>
 <h1>나만의 일기장</h1>
-<button id="loginBtn">로그인</button>
-<button id="signupBtn">회원가입</button>
-<button id="logoutBtn">로그아웃</button>
-<span id="currentUser"></span>
+<button onclick="showLogin()">로그인</button>
+<button onclick="showSignup()">회원가입</button>
+<button onclick="logout()">로그아웃</button>
+<span id="userInfo"></span>
 </header>
 
-<div id="message"></div>
+<div class="box" id="signupBox" style="display:none">
+<h3>회원가입</h3>
+<input id="suName" placeholder="닉네임">
+<input id="suPw" type="password" placeholder="비밀번호">
+<button onclick="signup()">완료</button>
+</div>
 
-<section class="section-box" id="signupBox" style="display:none;">
-<h2>회원가입</h2>
-<input type="text" id="signupUsername" placeholder="닉네임">
-<input type="password" id="signupPassword" placeholder="비밀번호">
-<button id="signupSubmit">회원가입 완료</button>
-</section>
+<div class="box" id="loginBox" style="display:none">
+<h3>로그인</h3>
+<input id="liName" placeholder="닉네임">
+<input id="liPw" type="password" placeholder="비밀번호">
+<button onclick="login()">완료</button>
+</div>
 
-<section class="section-box" id="loginBox" style="display:none;">
-<h2>로그인</h2>
-<input type="text" id="loginUsername" placeholder="닉네임">
-<input type="password" id="loginPassword" placeholder="비밀번호">
-<button id="loginSubmit">로그인 완료</button>
-</section>
+<div class="box">
+<h3>그룹 만들기</h3>
+<input id="gName" placeholder="그룹 이름">
+<button onclick="makeGroup()">생성</button>
+<div id="groupBtns"></div>
+<button onclick="showAll()">전체 보기</button>
+</div>
 
-<section class="section-box">
-<h2>그룹 만들기</h2>
-<input type="text" id="groupName" placeholder="그룹 이름">
-<button id="createGroupBtn">그룹 생성</button>
-<div id="groups" class="group-list"></div>
-<button id="allPostsBtn">전체 보기</button>
-</section>
+<div class="box">
+<h3>글쓰기</h3>
+<select id="groupSel"></select>
+<input id="title" placeholder="제목">
+<textarea id="content" placeholder="내용"></textarea>
+<input type="file" id="imgInput">
+<button onclick="writePost()">작성</button>
+</div>
 
-<section class="section-box">
-<h2>글쓰기</h2>
-<select id="groupSelect"></select>
-<input type="text" id="postTitle" placeholder="제목">
-<textarea id="postContent" rows="3" placeholder="내용"></textarea>
-<input type="file" id="postImage">
-<img id="previewImage" style="display:none;">
-<button id="submitPostBtn">글 작성</button>
-</section>
-
-<section class="section-box">
-<h2>피드</h2>
+<div class="box">
+<h3>피드</h3>
 <div id="feed" class="feed"></div>
-</section>
+</div>
 
 <script>
-let users = JSON.parse(localStorage.getItem('users')||'[]');
-let posts = JSON.parse(localStorage.getItem('posts')||'[]');
-let groups = JSON.parse(localStorage.getItem('groups')||'[]');
-let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
-let currentGroupFilter=null;
+let users=JSON.parse(localStorage.users||"[]")
+let posts=JSON.parse(localStorage.posts||"[]")
+let groups=JSON.parse(localStorage.groups||"[]")
+let currentUser=JSON.parse(localStorage.currentUser||"null")
+let filter=null
 
-const save=()=>{localStorage.setItem('users',JSON.stringify(users));
-localStorage.setItem('posts',JSON.stringify(posts));
-localStorage.setItem('groups',JSON.stringify(groups));
-localStorage.setItem('currentUser',JSON.stringify(currentUser));}
+function save(){localStorage.users=JSON.stringify(users);localStorage.posts=JSON.stringify(posts);localStorage.groups=JSON.stringify(groups);localStorage.currentUser=JSON.stringify(currentUser)}
 
-const msg=t=>{message.textContent=t;setTimeout(()=>message.textContent='',2500);}
+function showSignup(){signupBox.style.display='block';loginBox.style.display='none'}
+function showLogin(){loginBox.style.display='block';signupBox.style.display='none'}
 
-function updateHeader(){currentUserSpan.textContent=currentUser?` 로그인: ${currentUser.username}`:'';}
-function updateGroupSelect(){
-groupSelect.innerHTML='<option value="">무소속</option>';
-if(!currentUser) return;
-groups.filter(g=>g.owner===currentUser.username).forEach(g=>{
-let o=document.createElement('option');o.value=g.id;o.textContent=g.name;groupSelect.appendChild(o);});
-}
-function renderGroups(){
-groupsDiv.innerHTML='';
-if(!currentUser) return;
-groups.filter(g=>g.owner===currentUser.username).forEach(g=>{
-let b=document.createElement('button');b.textContent=g.name;
-b.onclick=()=>{currentGroupFilter=g.id;renderFeed();};groupsDiv.appendChild(b);});
-}
-function renderFeed(){
-feed.innerHTML='';
-let list=currentGroupFilter?posts.filter(p=>p.groupId===currentGroupFilter):posts;
-list.forEach(p=>{
-let d=document.createElement('div');d.className='post';
-d.innerHTML=`
-${currentUser?.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
-<b>${p.title}</b> (${p.username})<br>${p.content}
-${p.imageUrl?`<img src="${p.imageUrl}">`:''}
-<div><span class="like-btn" onclick="likePost('${p.id}')">👍 ${p.likes}</span></div>
-<div class="comment-box"><input id="c_${p.id}" placeholder="댓글"><button onclick="addComment('${p.id}')">쓰기</button></div>
-${p.comments.map(c=>`<div class="comment">${c.username}: ${c.text}</div>`).join('')}
-`;
-feed.appendChild(d);
-});
-}
-
-function signUp(){
-let u=signupUsername.value.trim(),p=signupPassword.value.trim();
-if(!u||!p) return alert("입력!");
-if(users.find(x=>x.username===u)) return alert("존재함");
-users.push({username:u,password:p});save();msg("회원가입 완료 ✅");
-}
+function signup(){
+let n=suName.value.trim(),p=suPw.value.trim()
+if(!n||!p)return alert("입력")
+if(users.find(u=>u.n==n))return alert("이미 있음")
+users.push({n,p});save();alert("회원가입 완료")}
 function login(){
-let u=loginUsername.value.trim(),p=loginPassword.value.trim();
-let user=users.find(x=>x.username===u&&x.password===p);
-if(!user) return alert("오류");
-currentUser=user;save();updateHeader();updateGroupSelect();renderGroups();renderFeed();msg("로그인 완료 ✅");
-}
-function logout(){currentUser=null;save();updateHeader();renderFeed();msg("로그아웃");}
-function createGroup(){
-if(!currentUser) return alert("로그인");
-let name=groupName.value.trim();if(!name) return;
-groups.push({id:Date.now()+'',name,owner:currentUser.username});save();updateGroupSelect();renderGroups();
-}
-function submitPost(){
-if(!currentUser) return alert("로그인");
-let title=postTitle.value.trim(),content=postContent.value.trim(),gid=groupSelect.value;
-if(!title||!content) return;
-let file=postImage.files[0];
-if(file){let r=new FileReader();r.onload=e=>addPost(title,content,e.target.result,gid);r.readAsDataURL(file);}
-else addPost(title,content,'',gid);
-postTitle.value='';postContent.value='';previewImage.style.display='none';
-}
-function addPost(title,content,img,gid){
-posts.unshift({id:Date.now()+'',username:currentUser.username,title,content,imageUrl:img,groupId:gid,likes:0,comments:[]});
-save();renderFeed();
-}
-function deletePost(id){posts=posts.filter(p=>p.id!==id);save();renderFeed();}
-function likePost(id){let p=posts.find(p=>p.id===id);p.likes++;save();renderFeed();}
-function addComment(id){let input=document.getElementById('c_'+id);let t=input.value.trim();if(!t)return;
-posts.find(p=>p.id===id).comments.push({username:currentUser.username,text:t});save();renderFeed();}
+let n=liName.value.trim(),p=liPw.value.trim()
+let u=users.find(u=>u.n==n&&u.p==p)
+if(!u)return alert("오류")
+currentUser=u;save();update();alert("로그인 완료")}
+function logout(){currentUser=null;save();update()}
 
-postImage.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=ev=>{previewImage.src=ev.target.result;previewImage.style.display='block';};r.readAsDataURL(f);};
+function makeGroup(){
+if(!currentUser)return alert("로그인")
+let name=gName.value.trim();if(!name)return
+groups.push({id:Date.now()+"",name,owner:currentUser.n});save();update()
+}
 
-signupBtn.onclick=()=>{signupBox.style.display='block';loginBox.style.display='none';}
-loginBtn.onclick=()=>{loginBox.style.display='block';signupBox.style.display='none';}
-logoutBtn.onclick=logout;
-signupSubmit.onclick=signUp;
-loginSubmit.onclick=login;
-createGroupBtn.onclick=createGroup;
-submitPostBtn.onclick=submitPost;
-allPostsBtn.onclick=()=>{currentGroupFilter=null;renderFeed();}
+function writePost(){
+if(!currentUser)return alert("로그인")
+let t=title.value.trim(),c=content.value.trim(),g=groupSel.value
+if(!t||!c)return
+let file=imgInput.files[0]
+if(file){let r=new FileReader();r.onload=e=>addPost(t,c,e.target.result,g);r.readAsDataURL(file)}
+else addPost(t,c,'',g)
+title.value='';content.value='';imgInput.value=''
+}
+function addPost(t,c,img,g){posts.unshift({id:Date.now()+"",u:currentUser.n,t,c,img,g,l:0,cm:[]});save();render()}
 
-const message=document.getElementById('message'),
-currentUserSpan=document.getElementById('currentUser'),
-groupsDiv=document.getElementById('groups'),
-groupSelect=document.getElementById('groupSelect'),
-feed=document.getElementById('feed'),
-previewImage=document.getElementById('previewImage');
+function del(id){posts=posts.filter(p=>p.id!=id);save();render()}
+function like(id){posts.find(p=>p.id==id).l++;save();render()}
+function addC(id){
+let txt=document.getElementById('c'+id).value.trim();if(!txt)return
+posts.find(p=>p.id==id).cm.push({u:currentUser.n,t:txt});save();render()
+}
 
-updateHeader();updateGroupSelect();renderGroups();renderFeed();
+function showAll(){filter=null;render()}
+
+function update(){
+userInfo.textContent=currentUser?" 로그인: "+currentUser.n:""
+groupSel.innerHTML='<option value="">무소속</option>'
+groupBtns.innerHTML=''
+if(currentUser){
+groups.filter(g=>g.owner==currentUser.n).forEach(g=>{
+groupSel.innerHTML+=`<option value="${g.id}">${g.name}</option>`
+groupBtns.innerHTML+=`<button onclick="filter='${g.id}';render()">${g.name}</button>`
+})
+}
+render()
+}
+
+function render(){
+feed.innerHTML=''
+let list=filter?posts.filter(p=>p.g==filter):posts
+list.forEach(p=>{
+feed.innerHTML+=`
+<div class="post">
+${currentUser?.n==p.u?`<div class="del" onclick="del('${p.id}')">삭제</div>`:''}
+<b>${p.t}</b> (${p.u})<br>${p.c}
+${p.img?`<img src="${p.img}">`:''}
+<div><span class="like" onclick="like('${p.id}')">👍 ${p.l}</span></div>
+<input id="c${p.id}" placeholder="댓글"><button onclick="addC('${p.id}')">쓰기</button>
+${p.cm.map(x=>`<div class="comment">${x.u}: ${x.t}</div>`).join('')}
+</div>`})
+}
+
+update()
 </script>
-
 </body>
 </html>
