@@ -9,7 +9,8 @@ button{background:#8e24aa;color:white;border:none;padding:8px 12px;border-radius
 input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ce93d8}
 .hidden{display:none}
 .group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:15px 0}
-.group-card{background:#ce93d8;padding:20px;text-align:center;border-radius:10px;cursor:pointer;font-weight:bold}
+.group-card{background:#ce93d8;padding:20px;text-align:center;border-radius:10px;cursor:pointer;font-weight:bold;position:relative}
+.group-del{position:absolute;top:5px;right:8px;color:red;cursor:pointer}
 .post{background:white;padding:10px;margin:10px 0;border-radius:8px;cursor:pointer;position:relative}
 .menu{position:absolute;right:10px;top:10px;cursor:pointer}
 .dropdown{position:absolute;right:10px;top:30px;background:white;border:1px solid #ccc;border-radius:6px;display:none}
@@ -20,14 +21,12 @@ input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px 
 </head>
 <body>
 
-<!-- 첫 화면 -->
 <div id="home">
   <h1>📔 나만의 일기장</h1>
   <button onclick="showLogin()">로그인</button>
   <button onclick="showSignup()">회원가입</button>
 </div>
 
-<!-- 로그인/회원가입 모달 -->
 <div id="authModal" class="modal" onclick="closeModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3 id="authTitle"></h3>
@@ -37,7 +36,6 @@ input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px 
   </div>
 </div>
 
-<!-- 앱 화면 -->
 <div id="app" class="hidden">
 <h2>📔 나만의 일기장</h2>
 <button onclick="logout()">로그아웃</button>
@@ -49,13 +47,13 @@ input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px 
 
 <div id="groupArea" class="hidden">
 <h3 id="groupTitle"></h3>
-<textarea id="postText" placeholder="일기 쓰기"></textarea>
+<input id="postTitle" placeholder="제목">
+<textarea id="postText" placeholder="내용"></textarea>
 <button onclick="addPost()">글 추가</button>
 <div id="postList"></div>
 </div>
 </div>
 
-<!-- 글 상세 모달 -->
 <div id="modal" class="modal" onclick="closeModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div id="modalBody"></div>
@@ -68,80 +66,27 @@ let groups=JSON.parse(localStorage.getItem("groups")||"{}");
 let posts=JSON.parse(localStorage.getItem("posts")||"{}");
 let currentUser=null,currentGroup=null;
 
-function showLogin(){
- authTitle.textContent="로그인";
- authActionBtn.textContent="로그인";
- authModal.classList.add("show");
- authActionBtn.onclick=login;
-}
-function showSignup(){
- authTitle.textContent="회원가입";
- authActionBtn.textContent="회원가입";
- authModal.classList.add("show");
- authActionBtn.onclick=signup;
-}
-function login(){
- if(users[id.value]===pw.value){
-  currentUser=id.value;
-  alert("로그인 완료!");
-  closeModal();
-  startApp();
- } else alert("로그인 실패");
-}
-function signup(){
- if(users[id.value]) return alert("이미 존재");
- users[id.value]=pw.value;
- localStorage.setItem("users",JSON.stringify(users));
- alert("회원가입 완료!");
- closeModal();
-}
+function showLogin(){authTitle.textContent="로그인";authActionBtn.textContent="로그인";authModal.classList.add("show");authActionBtn.onclick=login;}
+function showSignup(){authTitle.textContent="회원가입";authActionBtn.textContent="회원가입";authModal.classList.add("show");authActionBtn.onclick=signup;}
+function login(){if(users[id.value]===pw.value){currentUser=id.value;alert("로그인 완료!");closeModal();startApp();}else alert("로그인 실패");}
+function signup(){if(users[id.value])return alert("이미 존재");users[id.value]=pw.value;localStorage.setItem("users",JSON.stringify(users));alert("회원가입 완료!");closeModal();}
+function logout(){currentUser=null;app.classList.add("hidden");home.classList.remove("hidden");}
+function startApp(){home.classList.add("hidden");app.classList.remove("hidden");if(!groups[currentUser])groups[currentUser]=[];saveAll();renderGroups();}
 
-function logout(){
- currentUser=null;
- app.classList.add("hidden");
- home.classList.remove("hidden");
-}
+function addGroup(){if(!newGroup.value)return;groups[currentUser].push(newGroup.value);saveAll();renderGroups();newGroup.value="";}
+function deleteGroup(g){if(!confirm("그룹 삭제?"))return;groups[currentUser]=groups[currentUser].filter(x=>x!==g);delete posts[currentUser][g];saveAll();renderGroups();groupArea.classList.add("hidden");}
 
-function startApp(){
- home.classList.add("hidden");
- app.classList.remove("hidden");
- if(!groups[currentUser]) groups[currentUser]=[];
- saveAll();
- renderGroups();
-}
+function renderGroups(){groupGrid.innerHTML="";groups[currentUser].forEach(g=>{const div=document.createElement("div");div.className="group-card";div.innerHTML=g+"<span class='group-del' onclick=\"deleteGroup('"+g+"')\">✖</span>";div.onclick=()=>openGroup(g);groupGrid.appendChild(div);});}
 
-function addGroup(){
- if(!newGroup.value) return;
- groups[currentUser].push(newGroup.value);
- saveAll(); renderGroups();
- newGroup.value="";
-}
-
-function renderGroups(){
- groupGrid.innerHTML="";
- groups[currentUser].forEach(g=>{
-  const div=document.createElement("div");
-  div.className="group-card";
-  div.textContent=g;
-  div.onclick=()=>openGroup(g);
-  groupGrid.appendChild(div);
- });
-}
-
-function openGroup(g){
- currentGroup=g;
- groupTitle.textContent="📂 "+g;
- groupArea.classList.remove("hidden");
- renderPosts();
-}
+function openGroup(g){currentGroup=g;groupTitle.textContent="📂 "+g;groupArea.classList.remove("hidden");renderPosts();}
 
 function addPost(){
- if(!postText.value) return;
- if(!posts[currentUser]) posts[currentUser]={};
- if(!posts[currentUser][currentGroup]) posts[currentUser][currentGroup]=[];
- posts[currentUser][currentGroup].push(postText.value);
- postText.value="";
- saveAll(); renderPosts();
+ if(!postTitle.value||!postText.value)return;
+ if(!posts[currentUser])posts[currentUser]={};
+ if(!posts[currentUser][currentGroup])posts[currentUser][currentGroup]=[];
+ posts[currentUser][currentGroup].push({title:postTitle.value,content:postText.value});
+ postTitle.value="";postText.value="";
+ saveAll();renderPosts();
 }
 
 function renderPosts(){
@@ -150,38 +95,17 @@ function renderPosts(){
  list.forEach((p,i)=>{
   const div=document.createElement("div");
   div.className="post";
-  div.innerHTML=p.slice(0,20)+"...<div class='menu' onclick='toggleMenu(event,this,"+i+")'>⋮</div><div class='dropdown'><div onclick='deletePost("+i+")'>삭제</div></div>";
+  div.innerHTML="<b>"+p.title+"</b><div class='menu' onclick='toggleMenu(event,this,"+i+")'>⋮</div><div class='dropdown'><div onclick='deletePost("+i+")'>삭제</div></div>";
   div.onclick=()=>openPost(p);
   postList.appendChild(div);
  });
 }
 
-function openPost(text){
- modal.classList.add("show");
- modalBody.innerHTML="<p>"+text+"</p>";
-}
-
-function toggleMenu(e,btn,i){
- e.stopPropagation();
- const d=btn.nextElementSibling;
- d.style.display=d.style.display==="block"?"none":"block";
-}
-
-function deletePost(i){
- posts[currentUser][currentGroup].splice(i,1);
- saveAll(); closeModal(); renderPosts();
-}
-
-function closeModal(e){
- if(!e || e.target.classList.contains("modal")){
-  document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));
- }
-}
-
-function saveAll(){
- localStorage.setItem("groups",JSON.stringify(groups));
- localStorage.setItem("posts",JSON.stringify(posts));
-}
+function openPost(p){modal.classList.add("show");modalBody.innerHTML="<h3>"+p.title+"</h3><p>"+p.content+"</p>";}
+function toggleMenu(e,btn,i){e.stopPropagation();const d=btn.nextElementSibling;d.style.display=d.style.display==="block"?"none":"block";}
+function deletePost(i){posts[currentUser][currentGroup].splice(i,1);saveAll();closeModal();renderPosts();}
+function closeModal(e){if(!e||e.target.classList.contains("modal"))document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
+function saveAll(){localStorage.setItem("groups",JSON.stringify(groups));localStorage.setItem("posts",JSON.stringify(posts));}
 </script>
 </body>
 </html>
