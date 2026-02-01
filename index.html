@@ -6,9 +6,11 @@
 <style>
 body{font-family:sans-serif;background:#f3e5f5;color:#4a148c;padding:20px}
 button{background:#8e24aa;color:white;border:none;padding:6px 12px;border-radius:5px;margin-top:5px;cursor:pointer}
-input,textarea,select{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px}
-.card{background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer}
+input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px}
 .hidden{display:none}
+.groupBox{display:inline-block;background:#ce93d8;color:white;padding:10px 15px;border-radius:8px;margin:5px;cursor:pointer}
+.groupBox.active{background:#6a1b9a}
+.card{background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer}
 .modalBg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center}
 .modalBox{background:#f8eafc;padding:20px;width:300px;border-radius:10px;position:relative}
 .menu{position:absolute;right:10px;top:10px;cursor:pointer;font-weight:bold}
@@ -32,10 +34,11 @@ input,textarea,select{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93
 <div id="diaryBox" class="hidden">
   <button id="logoutBtn">로그아웃</button>
 
-  <input id="newGroup" placeholder="그룹 이름">
+  <input id="newGroup" placeholder="새 그룹 이름">
   <button id="addGroupBtn">그룹 생성</button>
   <button id="deleteGroupBtn">현재 그룹 삭제</button>
-  <select id="groupSelect"></select>
+
+  <div id="groupArea"></div>
 
   <input id="title" placeholder="제목">
   <textarea id="content" rows="4" placeholder="내용"></textarea>
@@ -58,119 +61,97 @@ input,textarea,select{width:100%;padding:6px;margin:5px 0;border:1px solid #ce93
 </div>
 
 <script>
-const loginBtn = document.getElementById("loginBtn");
-const joinBtn = document.getElementById("joinBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const addGroupBtn = document.getElementById("addGroupBtn");
-const deleteGroupBtn = document.getElementById("deleteGroupBtn");
-const savePostBtn = document.getElementById("savePostBtn");
-const groupSelect = document.getElementById("groupSelect");
-const postsDiv = document.getElementById("posts");
-
-let users = JSON.parse(localStorage.getItem("users") || "{}");
-let posts = JSON.parse(localStorage.getItem("posts") || "[]");
-let groups = JSON.parse(localStorage.getItem("groups") || "{}"); // 🔥 계정별 그룹
-let currentUser = localStorage.getItem("currentUser");
-let currentPostIndex = null;
+let users=JSON.parse(localStorage.getItem("users")||"{}");
+let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+let groups=JSON.parse(localStorage.getItem("groups")||"{}");
+let currentUser=localStorage.getItem("currentUser");
+let currentGroup=null;
+let currentPostIndex=null;
 
 function saveAll(){
-  localStorage.setItem("users", JSON.stringify(users));
-  localStorage.setItem("posts", JSON.stringify(posts));
-  localStorage.setItem("groups", JSON.stringify(groups));
+localStorage.setItem("users",JSON.stringify(users));
+localStorage.setItem("posts",JSON.stringify(posts));
+localStorage.setItem("groups",JSON.stringify(groups));
 }
 
-function updateGroups(){
-  groupSelect.innerHTML="";
-  if(!groups[currentUser]) groups[currentUser]=["기본그룹"];
-  groups[currentUser].forEach(g=>{
-    const opt=document.createElement("option");
-    opt.value=g; opt.textContent=g;
-    groupSelect.appendChild(opt);
-  });
+function renderGroups(){
+groupArea.innerHTML="";
+if(!groups[currentUser]) groups[currentUser]=["기본그룹"];
+groups[currentUser].forEach(g=>{
+const box=document.createElement("div");
+box.className="groupBox"+(g===currentGroup?" active":"");
+box.textContent=g;
+box.onclick=()=>{currentGroup=g; renderGroups(); renderPosts();};
+groupArea.appendChild(box);
+});
+if(!currentGroup) currentGroup=groups[currentUser][0];
 }
 
 function renderPosts(){
-  if(!currentUser){ postsDiv.innerHTML=""; return; }
-  postsDiv.innerHTML="";
-  const g = groupSelect.value;
-  posts.forEach((p,i)=>{
-    if(p.user===currentUser && p.group===g){
-      const div=document.createElement("div");
-      div.className="card";
-      div.textContent=p.title;
-      div.onclick=()=>openModal(i);
-      postsDiv.appendChild(div);
-    }
-  });
+postsDiv.innerHTML="";
+posts.forEach((p,i)=>{
+if(p.user===currentUser && p.group===currentGroup){
+const div=document.createElement("div");
+div.className="card";
+div.textContent=p.title;
+div.onclick=()=>openModal(i);
+postsDiv.appendChild(div);
+}
+});
 }
 
 function openModal(i){
-  const p=posts[i];
-  currentPostIndex=i;
-  modalTitle.textContent=p.title;
-  modalContent.textContent=p.content;
-  modalBg.style.display="flex";
+const p=posts[i];
+currentPostIndex=i;
+modalTitle.textContent=p.title;
+modalContent.textContent=p.content;
+modalBg.style.display="flex";
 }
 
-function closeModal(){
-  modalBg.style.display="none";
-  deleteMenu.style.display="none";
-}
-
-menuBtn.onclick=()=> deleteMenu.style.display = deleteMenu.style.display==="block"?"none":"block";
-deleteBtn.onclick=()=>{
-  posts.splice(currentPostIndex,1);
-  saveAll(); closeModal(); renderPosts();
-};
+menuBtn.onclick=()=>deleteMenu.style.display=deleteMenu.style.display==="block"?"none":"block";
+deleteBtn.onclick=()=>{posts.splice(currentPostIndex,1);saveAll();closeModal();renderPosts();}
 closeBtn.onclick=closeModal;
+function closeModal(){modalBg.style.display="none";deleteMenu.style.display="none";}
 
 joinBtn.onclick=()=>{
-  if(!joinId.value||!joinPw.value) return alert("입력하세요");
-  if(users[joinId.value]) return alert("이미 존재");
-  users[joinId.value]=joinPw.value;
-  saveAll(); alert("회원가입 완료!");
+if(!joinId.value||!joinPw.value) return alert("입력하세요");
+if(users[joinId.value]) return alert("이미 존재");
+users[joinId.value]=joinPw.value;saveAll();alert("회원가입 완료!");
 };
 
 loginBtn.onclick=()=>{
-  if(users[loginId.value]===loginPw.value){
-    currentUser=loginId.value;
-    localStorage.setItem("currentUser",currentUser);
-    alert("로그인 완료!");
-    showDiary();
-  } else alert("로그인 실패");
+if(users[loginId.value]===loginPw.value){
+currentUser=loginId.value;localStorage.setItem("currentUser",currentUser);
+alert("로그인 완료!");showDiary();
+}else alert("로그인 실패");
 };
 
-logoutBtn.onclick=()=>{
-  localStorage.removeItem("currentUser");
-  location.reload();
-};
+logoutBtn.onclick=()=>{localStorage.removeItem("currentUser");location.reload();};
 
 addGroupBtn.onclick=()=>{
-  if(newGroup.value && !groups[currentUser].includes(newGroup.value)){
-    groups[currentUser].push(newGroup.value);
-    saveAll(); updateGroups();
-  }
+if(newGroup.value&&!groups[currentUser].includes(newGroup.value)){
+groups[currentUser].push(newGroup.value);saveAll();renderGroups();
+}
 };
 
 deleteGroupBtn.onclick=()=>{
-  const g=groupSelect.value;
-  if(g==="기본그룹") return alert("기본그룹은 삭제 불가");
-  groups[currentUser]=groups[currentUser].filter(x=>x!==g);
-  posts=posts.filter(p=>!(p.user===currentUser && p.group===g)); // 그룹 글도 삭제
-  saveAll(); updateGroups(); renderPosts();
+if(currentGroup==="기본그룹") return alert("기본그룹은 삭제 불가");
+groups[currentUser]=groups[currentUser].filter(g=>g!==currentGroup);
+posts=posts.filter(p=>!(p.user===currentUser && p.group===currentGroup));
+currentGroup=groups[currentUser][0];
+saveAll();renderGroups();renderPosts();
 };
 
 savePostBtn.onclick=()=>{
-  if(!title.value||!content.value) return alert("입력하세요");
-  posts.push({title:title.value,content:content.value,user:currentUser,group:groupSelect.value});
-  saveAll(); renderPosts();
+if(!title.value||!content.value) return alert("입력하세요");
+posts.push({title:title.value,content:content.value,user:currentUser,group:currentGroup});
+saveAll();renderPosts();
 };
 
 function showDiary(){
-  authBox.classList.add("hidden");
-  diaryBox.classList.remove("hidden");
-  updateGroups();
-  renderPosts();
+authBox.classList.add("hidden");
+diaryBox.classList.remove("hidden");
+renderGroups();renderPosts();
 }
 
 if(currentUser) showDiary();
