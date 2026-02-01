@@ -88,6 +88,10 @@ function logout(){
 function showDiary(){
   authBox.classList.add("hidden");
   diaryBox.classList.remove("hidden");
+  if(groups.length===0){
+    groups.push("기본그룹");
+    saveData();
+  }
   updateGroupSelect();
   renderPosts();
 }
@@ -98,7 +102,9 @@ function addGroup(){
   if(!groups.includes(g)) groups.push(g);
   saveData();
   updateGroupSelect();
+  groupSelect.value = g;
   newGroup.value="";
+  renderPosts();
 }
 
 function updateGroupSelect(){
@@ -113,7 +119,7 @@ function addPost(){
   const title = document.getElementById("title").value.trim();
   const content = document.getElementById("content").value.trim();
   const group = groupSelect.value;
-  if(!title || !content || !group) return alert("입력하세요");
+  if(!title || !content) return alert("입력하세요");
   posts.push({title, content, user: currentUser, group});
   saveData();
   renderPosts();
@@ -127,7 +133,6 @@ function renderPosts(){
       postsDiv.innerHTML += `
         <div class="card">
           <b>${p.title}</b><br>${p.content}<br>
-          <small>그룹: ${p.group}</small><br>
           <button onclick="deletePost(${i})">삭제</button>
         </div>`;
     }
