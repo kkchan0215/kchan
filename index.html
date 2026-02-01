@@ -20,9 +20,26 @@ button {background:#8e24aa;color:white;border:none;padding:6px 12px;border-radiu
 input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #ce93d8;border-radius:4px;font-family:'Nalgae';}
 .card {background:#f8eafc;border:1px solid #ce93d8;padding:10px;margin:10px 0;border-radius:6px;cursor:pointer;}
 .hidden {display:none;}
-.menu {float:right;cursor:pointer;font-weight:bold;}
-.deleteMenu {display:none;margin-top:5px;}
-.detailBox {background:#f8eafc;padding:15px;border-radius:8px;border:1px solid #ce93d8;}
+
+/* 🔥 팝업 스타일 */
+.modalBg {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.4);
+  justify-content:center;
+  align-items:center;
+}
+.modalBox {
+  background:#f8eafc;
+  padding:20px;
+  width:300px;
+  border-radius:10px;
+  position:relative;
+}
+.menu {position:absolute; right:10px; top:10px; cursor:pointer; font-weight:bold;}
+.deleteMenu {display:none; margin-top:10px;}
 </style>
 </head>
 <body>
@@ -52,21 +69,27 @@ input, textarea, select {width:100%;padding:6px;margin:5px 0;border:1px solid #c
 
   <h3>내 글 목록</h3>
   <div id="posts"></div>
+</div>
 
-  <div id="detailView" class="hidden"></div>
+<!-- 💥 팝업창 -->
+<div id="modalBg" class="modalBg">
+  <div class="modalBox">
+    <span class="menu" onclick="toggleMenu()">⋮</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalContent"></p>
+    <div id="deleteMenu" class="deleteMenu">
+      <button onclick="deletePost()">삭제</button>
+    </div>
+    <button onclick="closeModal()">닫기</button>
+  </div>
 </div>
 
 <script>
-const authBox = document.getElementById("authBox");
-const diaryBox = document.getElementById("diaryBox");
-const postsDiv = document.getElementById("posts");
-const groupSelect = document.getElementById("groupSelect");
-const detailView = document.getElementById("detailView");
-
 let users = JSON.parse(localStorage.getItem("users") || "{}");
 let posts = JSON.parse(localStorage.getItem("posts") || "[]");
 let groups = JSON.parse(localStorage.getItem("groups") || '["기본그룹"]');
 let currentUser = localStorage.getItem("currentUser");
+let currentPostIndex = null;
 
 function saveAll(){
   localStorage.setItem("users", JSON.stringify(users));
@@ -91,57 +114,48 @@ function renderPosts(){
       const div=document.createElement("div");
       div.className="card";
       div.textContent=p.title;
-      div.onclick=()=>openDetail(i);
+      div.onclick=()=>openModal(i);
       postsDiv.appendChild(div);
     }
   });
 }
 
-function openDetail(i){
+function openModal(i){
   const p=posts[i];
-  detailView.classList.remove("hidden");
-  detailView.innerHTML=`
-    <div class="detailBox">
-      <span class="menu" onclick="toggleMenu()">⋮</span>
-      <h2>${p.title}</h2>
-      <p>${p.content}</p>
-      <div id="deleteMenu" class="deleteMenu">
-        <button onclick="deletePost(${i})">삭제</button>
-      </div>
-      <button onclick="closeDetail()">닫기</button>
-    </div>
-  `;
+  currentPostIndex=i;
+  modalTitle.textContent=p.title;
+  modalContent.textContent=p.content;
+  modalBg.style.display="flex";
+}
+
+function closeModal(){
+  modalBg.style.display="none";
+  deleteMenu.style.display="none";
 }
 
 function toggleMenu(){
-  const m=document.getElementById("deleteMenu");
-  m.style.display = m.style.display==="block" ? "none" : "block";
+  deleteMenu.style.display = deleteMenu.style.display==="block" ? "none" : "block";
 }
 
-function closeDetail(){
-  detailView.classList.add("hidden");
-}
-
-function deletePost(i){
-  posts.splice(i,1);
+function deletePost(){
+  posts.splice(currentPostIndex,1);
   saveAll();
-  closeDetail();
+  closeModal();
   renderPosts();
 }
 
 joinBtn.onclick=()=>{
-  const id=joinId.value.trim(), pw=joinPw.value.trim();
-  if(!id||!pw) return alert("입력하세요");
-  if(users[id]) return alert("이미 존재");
-  users[id]=pw; saveAll();
+  if(!joinId.value||!joinPw.value) return alert("입력하세요");
+  if(users[joinId.value]) return alert("이미 존재");
+  users[joinId.value]=joinPw.value;
+  saveAll();
   alert("회원가입 완료!");
 };
 
 loginBtn.onclick=()=>{
-  const id=loginId.value.trim(), pw=loginPw.value.trim();
-  if(users[id]===pw){
-    currentUser=id;
-    localStorage.setItem("currentUser",id);
+  if(users[loginId.value]===loginPw.value){
+    currentUser=loginId.value;
+    localStorage.setItem("currentUser",currentUser);
     alert("로그인 완료!");
     showDiary();
   } else alert("로그인 실패");
@@ -153,19 +167,15 @@ logoutBtn.onclick=()=>{
 };
 
 addGroupBtn.onclick=()=>{
-  const g=newGroup.value.trim();
-  if(g&&!groups.includes(g)){
-    groups.push(g); saveAll(); updateGroups();
-    groupSelect.value=g;
+  if(newGroup.value&&!groups.includes(newGroup.value)){
+    groups.push(newGroup.value);
+    saveAll(); updateGroups();
   }
-  newGroup.value="";
 };
 
 savePostBtn.onclick=()=>{
-  const title=document.getElementById("title").value.trim();
-  const content=document.getElementById("content").value.trim();
-  if(!title||!content) return alert("입력하세요");
-  posts.push({title,content,user:currentUser,group:groupSelect.value});
+  if(!title.value||!content.value) return alert("입력하세요");
+  posts.push({title:title.value,content:content.value,user:currentUser,group:groupSelect.value});
   saveAll(); renderPosts();
 };
 
@@ -178,6 +188,5 @@ function showDiary(){
 
 if(currentUser) showDiary();
 </script>
-
 </body>
 </html>
