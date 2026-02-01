@@ -92,6 +92,7 @@ function updateGroups(){
 }
 
 function renderPosts(){
+  if(!currentUser){ postsDiv.innerHTML=""; return; }
   postsDiv.innerHTML="";
   const g = groupSelect.value;
   posts.forEach((p,i)=>{
@@ -144,7 +145,13 @@ loginBtn.onclick=()=>{
   } else alert("로그인 실패");
 };
 
-logoutBtn.onclick=()=>{localStorage.removeItem("currentUser"); location.reload();};
+logoutBtn.onclick=()=>{
+  localStorage.removeItem("currentUser");
+  currentUser=null;
+  postsDiv.innerHTML="";
+  authBox.classList.remove("hidden");
+  diaryBox.classList.add("hidden");
+};
 
 addGroupBtn.onclick=()=>{
   if(newGroup.value&&!groups.includes(newGroup.value)){
