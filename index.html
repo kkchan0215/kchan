@@ -4,47 +4,57 @@
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
 <style>
-body {font-family:'Malgun Gothic',sans-serif;background:#f3e5f5;margin:0;padding:20px;color:#4a148c}
-.hidden{display:none}
+body{font-family:'Malgun Gothic',sans-serif;background:#f3e5f5;margin:0;padding:20px;color:#4a148c}
 button{background:#8e24aa;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
 input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ce93d8}
+.hidden{display:none}
 .group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:15px 0}
 .group-card{background:#ce93d8;padding:20px;text-align:center;border-radius:10px;cursor:pointer;font-weight:bold}
-.post{background:white;padding:10px;margin:10px 0;border-radius:8px;cursor:pointer}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
-.modal-content{background:#f3e5f5;padding:20px;border-radius:10px;width:300px}
+.post{background:white;padding:10px;margin:10px 0;border-radius:8px;cursor:pointer;position:relative}
 .menu{position:absolute;right:10px;top:10px;cursor:pointer}
 .dropdown{position:absolute;right:10px;top:30px;background:white;border:1px solid #ccc;border-radius:6px;display:none}
-.dropdown div{padding:5px 10px;cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
+.modal-content{background:#f3e5f5;padding:20px;border-radius:10px;width:300px}
 </style>
 </head>
 <body>
 
-<div id="authBox">
-<h2>로그인 / 회원가입</h2>
-<input id="id" placeholder="아이디">
-<input id="pw" type="password" placeholder="비밀번호">
-<button id="loginBtn">로그인</button>
-<button id="signupBtn">회원가입</button>
+<!-- 첫 화면 -->
+<div id="home">
+  <h1>📔 나만의 일기장</h1>
+  <button onclick="showLogin()">로그인</button>
+  <button onclick="showSignup()">회원가입</button>
 </div>
 
+<!-- 로그인/회원가입 모달 -->
+<div id="authModal" class="modal hidden" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3 id="authTitle"></h3>
+    <input id="id" placeholder="아이디">
+    <input id="pw" type="password" placeholder="비밀번호">
+    <button id="authActionBtn"></button>
+  </div>
+</div>
+
+<!-- 앱 화면 -->
 <div id="app" class="hidden">
 <h2>📔 나만의 일기장</h2>
-<button id="logoutBtn">로그아웃</button>
+<button onclick="logout()">로그아웃</button>
 
 <h3>📁 내 그룹</h3>
 <input id="newGroup" placeholder="새 그룹 이름">
-<button id="addGroupBtn">그룹 추가</button>
+<button onclick="addGroup()">그룹 추가</button>
 <div id="groupGrid" class="group-grid"></div>
 
 <div id="groupArea" class="hidden">
 <h3 id="groupTitle"></h3>
 <textarea id="postText" placeholder="일기 쓰기"></textarea>
-<button id="addPostBtn">글 추가</button>
+<button onclick="addPost()">글 추가</button>
 <div id="postList"></div>
 </div>
 </div>
 
+<!-- 글 상세 모달 -->
 <div id="modal" class="modal hidden" onclick="closeModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div id="modalBody"></div>
@@ -57,46 +67,54 @@ let groups=JSON.parse(localStorage.getItem("groups")||"{}");
 let posts=JSON.parse(localStorage.getItem("posts")||"{}");
 let currentUser=null,currentGroup=null;
 
-const authBox=document.getElementById("authBox");
-const app=document.getElementById("app");
-const groupGrid=document.getElementById("groupGrid");
-const postList=document.getElementById("postList");
-
-loginBtn.onclick=()=>{
+function showLogin(){
+ authTitle.textContent="로그인";
+ authActionBtn.textContent="로그인";
+ authModal.classList.remove("hidden");
+ authActionBtn.onclick=login;
+}
+function showSignup(){
+ authTitle.textContent="회원가입";
+ authActionBtn.textContent="회원가입";
+ authModal.classList.remove("hidden");
+ authActionBtn.onclick=signup;
+}
+function login(){
  if(users[id.value]===pw.value){
   currentUser=id.value;
   alert("로그인 완료!");
+  closeModal();
   startApp();
- }else alert("로그인 실패");
-};
-
-signupBtn.onclick=()=>{
+ } else alert("로그인 실패");
+}
+function signup(){
  if(users[id.value]) return alert("이미 존재");
  users[id.value]=pw.value;
  localStorage.setItem("users",JSON.stringify(users));
  alert("회원가입 완료!");
-};
+ closeModal();
+}
 
-logoutBtn.onclick=()=>{
+function logout(){
  currentUser=null;
  app.classList.add("hidden");
- authBox.classList.remove("hidden");
-};
+ home.classList.remove("hidden");
+}
 
 function startApp(){
- authBox.classList.add("hidden");
+ home.classList.add("hidden");
  app.classList.remove("hidden");
  if(!groups[currentUser]) groups[currentUser]=[];
  saveAll();
  renderGroups();
 }
 
-addGroupBtn.onclick=()=>{
+function addGroup(){
  if(!newGroup.value) return;
  groups[currentUser].push(newGroup.value);
  saveAll(); renderGroups();
  newGroup.value="";
-};
+}
 
 function renderGroups(){
  groupGrid.innerHTML="";
@@ -116,14 +134,14 @@ function openGroup(g){
  renderPosts();
 }
 
-addPostBtn.onclick=()=>{
+function addPost(){
  if(!postText.value) return;
  if(!posts[currentUser]) posts[currentUser]={};
  if(!posts[currentUser][currentGroup]) posts[currentUser][currentGroup]=[];
  posts[currentUser][currentGroup].push(postText.value);
  postText.value="";
  saveAll(); renderPosts();
-};
+}
 
 function renderPosts(){
  postList.innerHTML="";
@@ -131,26 +149,20 @@ function renderPosts(){
  list.forEach((p,i)=>{
   const div=document.createElement("div");
   div.className="post";
-  div.textContent=p.slice(0,20)+"...";
-  div.onclick=()=>openPost(p,i);
+  div.innerHTML=p.slice(0,20)+"...<div class='menu' onclick='toggleMenu(event,this,"+i+")'>⋮</div><div class='dropdown'><div onclick='deletePost("+i+")'>삭제</div></div>";
+  div.onclick=()=>openPost(p);
   postList.appendChild(div);
  });
 }
 
-function openPost(text,index){
+function openPost(text){
  modal.classList.remove("hidden");
- modalBody.innerHTML=`
- <div style="position:relative">
-  <div class="menu" onclick="toggleMenu()">⋮</div>
-  <div id="dropdown" class="dropdown">
-    <div onclick="deletePost(${index})">삭제</div>
-  </div>
-  <p>${text}</p>
- </div>`;
+ modalBody.innerHTML="<p>"+text+"</p>";
 }
 
-function toggleMenu(){
- const d=document.getElementById("dropdown");
+function toggleMenu(e,btn,i){
+ e.stopPropagation();
+ const d=btn.nextElementSibling;
  d.style.display=d.style.display==="block"?"none":"block";
 }
 
@@ -160,7 +172,9 @@ function deletePost(i){
 }
 
 function closeModal(e){
- if(!e || e.target.id==="modal") modal.classList.add("hidden");
+ if(!e || e.target.id==="modal" || e.target.id==="authModal"){
+  document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"));
+ }
 }
 
 function saveAll(){
