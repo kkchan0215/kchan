@@ -4,23 +4,24 @@
 <meta charset="UTF-8">
 <title>나만의 일기장</title>
 <style>
-body { font-family: Arial; padding:20px; background:#f3e5f5; color:#4a148c; }
-input, textarea, select { width:100%; margin-bottom:10px; padding:5px; }
-button { padding:5px 10px; cursor:pointer; margin:2px; border:none; border-radius:4px; }
-header button { margin-right:5px; }
-.section-box { border:1px solid #ba68c8; padding:10px; border-radius:5px; margin-bottom:10px; background:#f8bbd0; }
-#message { color:green; font-weight:bold; margin-bottom:10px; }
+body { font-family: Arial; padding:20px; background:#2d0b3a; color:#f3e5f5; }
+input, textarea, select { width:100%; margin-bottom:10px; padding:6px; border-radius:6px; border:none; }
+button { padding:6px 12px; cursor:pointer; margin:3px; border:none; border-radius:6px; background:#9c27b0; color:white; }
+button:hover { background:#ba68c8; }
 
-.group-list button { margin:2px; padding:5px 10px; border-radius:5px; background:#ab47bc; color:white; }
-.group-list button:hover { background:#8e24aa; }
+header { margin-bottom:15px; }
+.section-box { background:#4a148c; padding:12px; border-radius:10px; margin-bottom:12px; }
+#message { color:#ffeb3b; font-weight:bold; }
 
-.feed { display:grid; grid-template-columns: repeat(auto-fill,minmax(250px,1fr)); gap:10px; }
-.post { border:1px solid #ba68c8; padding:10px; border-radius:8px; background:#fce4ec; position:relative; display:flex; flex-direction:column; }
-.post img { max-width:100%; margin-top:5px; border-radius:5px; }
-.delete-btn { position:absolute; top:5px; right:5px; color:red; cursor:pointer; font-size:14px; }
-.like-btn { color:purple; cursor:pointer; margin-left:5px; cursor:pointer; }
-.comment { margin-left:10px; font-size:14px; margin-top:3px; }
-.comment-box { display:flex; margin-top:5px; }
+.group-list button { background:#7b1fa2; }
+.feed { display:grid; grid-template-columns: repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
+
+.post { background:#6a1b9a; padding:10px; border-radius:10px; position:relative; }
+.post img { max-width:100%; border-radius:8px; margin-top:6px; }
+.delete-btn { position:absolute; top:6px; right:8px; color:#ff8a80; cursor:pointer; }
+.like-btn { cursor:pointer; color:#ffd54f; }
+.comment { margin-left:10px; font-size:14px; }
+.comment-box { display:flex; margin-top:6px; }
 .comment-box input { flex:1; margin-right:5px; }
 </style>
 </head>
@@ -40,31 +41,31 @@ header button { margin-right:5px; }
 <h2>회원가입</h2>
 <input type="text" id="signupUsername" placeholder="닉네임">
 <input type="password" id="signupPassword" placeholder="비밀번호">
-<button id="signupSubmit">회원가입</button>
+<button id="signupSubmit">회원가입 완료</button>
 </section>
 
 <section class="section-box" id="loginBox" style="display:none;">
 <h2>로그인</h2>
 <input type="text" id="loginUsername" placeholder="닉네임">
 <input type="password" id="loginPassword" placeholder="비밀번호">
-<button id="loginSubmit">로그인</button>
+<button id="loginSubmit">로그인 완료</button>
 </section>
 
 <section class="section-box">
-<h2>그룹(앨범) 만들기</h2>
-<input type="text" id="groupName" placeholder="그룹 이름 입력">
+<h2>그룹 만들기</h2>
+<input type="text" id="groupName" placeholder="그룹 이름">
 <button id="createGroupBtn">그룹 생성</button>
-<div class="group-list" id="groups"></div>
+<div id="groups" class="group-list"></div>
 <button id="allPostsBtn">전체 보기</button>
 </section>
 
 <section class="section-box">
 <h2>글쓰기</h2>
 <select id="groupSelect"></select>
-<input type="text" id="postTitle" placeholder="제목 입력">
-<textarea id="postContent" rows="3" placeholder="내용 입력"></textarea>
+<input type="text" id="postTitle" placeholder="제목">
+<textarea id="postContent" rows="3" placeholder="내용"></textarea>
 <input type="file" id="postImage">
-<img id="previewImage" style="max-width:100%; display:none; margin-bottom:10px; border-radius:5px;">
+<img id="previewImage" style="display:none;">
 <button id="submitPostBtn">글 작성</button>
 </section>
 
@@ -74,248 +75,105 @@ header button { margin-right:5px; }
 </section>
 
 <script>
-(() => {
-
-// ------------------- 데이터 -------------------
 let users = JSON.parse(localStorage.getItem('users')||'[]');
 let posts = JSON.parse(localStorage.getItem('posts')||'[]');
 let groups = JSON.parse(localStorage.getItem('groups')||'[]');
 let currentUser = JSON.parse(localStorage.getItem('currentUser')||'null');
-let currentGroupFilter = null;
+let currentGroupFilter=null;
 
-// ------------------- 저장 -------------------
-const saveUsers = ()=>localStorage.setItem('users', JSON.stringify(users));
-const savePosts = ()=>localStorage.setItem('posts', JSON.stringify(posts));
-const saveGroups = ()=>localStorage.setItem('groups', JSON.stringify(groups));
-const saveCurrentUser = ()=>localStorage.setItem('currentUser', JSON.stringify(currentUser));
+const save=()=>{localStorage.setItem('users',JSON.stringify(users));
+localStorage.setItem('posts',JSON.stringify(posts));
+localStorage.setItem('groups',JSON.stringify(groups));
+localStorage.setItem('currentUser',JSON.stringify(currentUser));}
 
-// ------------------- 메시지 -------------------
-function showMessage(msg){
-  const el = document.getElementById('message');
-  el.textContent = msg;
-  setTimeout(()=>{ el.textContent=''; }, 3000);
-}
+const msg=t=>{message.textContent=t;setTimeout(()=>message.textContent='',2500);}
 
-// ------------------- UI -------------------
-function updateHeader(){ 
-  document.getElementById('currentUser').textContent = currentUser ? `로그인: ${currentUser.username}` : '';
-}
+function updateHeader(){currentUserSpan.textContent=currentUser?` 로그인: ${currentUser.username}`:'';}
 function updateGroupSelect(){
-  const select = document.getElementById('groupSelect');
-  select.innerHTML = '<option value="">무소속</option>';
-  if(!currentUser) return;
-  groups.forEach(g=>{
-    if(g.owner===currentUser.username){
-      const option = document.createElement('option');
-      option.value = g.id;
-      option.textContent = g.name;
-      select.appendChild(option);
-    }
-  });
+groupSelect.innerHTML='<option value="">무소속</option>';
+if(!currentUser) return;
+groups.filter(g=>g.owner===currentUser.username).forEach(g=>{
+let o=document.createElement('option');o.value=g.id;o.textContent=g.name;groupSelect.appendChild(o);});
 }
 function renderGroups(){
-  const div = document.getElementById('groups');
-  div.innerHTML='';
-  if(!currentUser) return;
-  groups.forEach(g=>{
-    if(g.owner===currentUser.username){
-      const btn = document.createElement('button');
-      btn.textContent = g.name;
-      btn.addEventListener('click', () => { currentGroupFilter = g.id; renderFeed(); });
-      div.appendChild(btn);
-    }
-  });
+groupsDiv.innerHTML='';
+if(!currentUser) return;
+groups.filter(g=>g.owner===currentUser.username).forEach(g=>{
+let b=document.createElement('button');b.textContent=g.name;
+b.onclick=()=>{currentGroupFilter=g.id;renderFeed();};groupsDiv.appendChild(b);});
 }
-function showAllPosts(){ currentGroupFilter=null; renderFeed(); }
-
 function renderFeed(){
-  const feed = document.getElementById('feed');
-  feed.innerHTML='';
-  let filteredPosts = posts;
-  if(currentGroupFilter){
-    filteredPosts = posts.filter(p => p.groupId === currentGroupFilter);
-  }
-  filteredPosts.forEach(p=>{
-    const div = document.createElement('div');
-    div.className='post';
-    div.id = p.id;
-    const commentsHtml = p.comments.map(c=>`<div class="comment">${c.username}: ${c.text}</div>`).join('');
-    div.innerHTML = `
-      ${currentUser?.username===p.username?`<div class="delete-btn" data-id="${p.id}">삭제</div>`:''}
-      <strong>${p.title}</strong> <span>by ${p.username}</span> <span>(${groups.find(g=>g.id===p.groupId)?.name||'무소속'})</span>
-      <p>${p.content}</p>
-      ${p.imageUrl?`<img src="${p.imageUrl}">`:''}
-      <div>
-        <span class="like-btn" data-id="${p.id}">👍 ${p.likes}</span>
-      </div>
-      <div class="comment-box">
-        <input type="text" placeholder="댓글 입력" data-id="${p.id}">
-        <button data-id="${p.id}">댓글쓰기</button>
-      </div>
-      <div class="comments-container">${commentsHtml}</div>
-    `;
-    feed.appendChild(div);
-  });
-
-  // 이벤트 바인딩 (삭제/좋아요/댓글/Enter)
-  document.querySelectorAll('.delete-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>deletePost(btn.dataset.id));
-  });
-  document.querySelectorAll('.like-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>likePost(btn.dataset.id, btn));
-  });
-  document.querySelectorAll('.comment-box button').forEach(btn=>{
-    btn.addEventListener('click',()=>addComment(btn.dataset.id));
-  });
-  document.querySelectorAll('.comment-box input').forEach(input=>{
-    input.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter') addComment(input.dataset.id);
-    });
-  });
-}
-
-// ------------------- 회원가입/로그인 -------------------
-function signUp(){
-  const username = document.getElementById('signupUsername').value.trim();
-  const pw = document.getElementById('signupPassword').value.trim();
-  if(!username||!pw) return alert("닉네임과 비밀번호 입력!");
-  if(users.find(u=>u.username===username)) return alert("이미 존재하는 닉네임!");
-  users.push({username,password:pw});
-  saveUsers();
-  document.getElementById('signupUsername').value='';
-  document.getElementById('signupPassword').value='';
-  showMessage('회원가입 완료 ✅');
-}
-
-function login(){
-  const username = document.getElementById('loginUsername').value.trim();
-  const pw = document.getElementById('loginPassword').value.trim();
-  const user = users.find(u=>u.username===username && u.password===pw);
-  if(!user) return alert("닉네임/비밀번호 오류");
-  currentUser = user;
-  saveCurrentUser();
-  document.getElementById('loginUsername').value='';
-  document.getElementById('loginPassword').value='';
-  updateHeader();
-  updateGroupSelect();
-  renderGroups();
-  renderFeed();
-  showMessage('로그인 완료 ✅');
-}
-
-function logout(){
-  currentUser=null;
-  saveCurrentUser();
-  updateHeader();
-  updateGroupSelect();
-  renderGroups();
-  renderFeed();
-  showMessage('로그아웃 ✅');
-}
-
-// ------------------- 그룹 -------------------
-function createGroup(){
-  if(!currentUser) return alert("로그인 필요!");
-  const name = document.getElementById('groupName').value.trim();
-  if(!name) return alert("그룹 이름 입력!");
-  const id = Date.now()+'_'+Math.floor(Math.random()*1000);
-  groups.push({id, name, owner: currentUser.username});
-  saveGroups();
-  document.getElementById('groupName').value='';
-  updateGroupSelect();
-  renderGroups();
-}
-
-// ------------------- 글쓰기 -------------------
-function submitPost(){
-  if(!currentUser) return alert("로그인 필요!");
-  const title = document.getElementById('postTitle').value.trim();
-  const content = document.getElementById('postContent').value.trim();
-  const groupId = document.getElementById('groupSelect').value;
-  const file = document.getElementById('postImage').files[0];
-  if(!title||!content) return alert("제목과 내용 입력!");
-  
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      addPost(title, content, e.target.result, groupId);
-    };
-    reader.readAsDataURL(file);
-  } else {
-    addPost(title, content, '', groupId);
-  }
-
-  document.getElementById('postTitle').value='';
-  document.getElementById('postContent').value='';
-  document.getElementById('postImage').value='';
-  document.getElementById('previewImage').style.display='none';
-}
-
-function addPost(title, content, imageUrl, groupId){
-  const id = Date.now()+'_'+Math.floor(Math.random()*1000);
-  const post = {id, username:currentUser.username, title, content, imageUrl, groupId, likes:0, comments:[]};
-  posts.unshift(post);
-  savePosts();
-  renderFeed();
-}
-
-// ------------------- 기능 -------------------
-function deletePost(id){
-  const post = posts.find(p=>p.id===id);
-  if(post.username !== currentUser.username) return alert("본인 글만 삭제 가능!");
-  posts = posts.filter(p=>p.id!==id);
-  savePosts();
-  renderFeed();
-}
-
-function likePost(id, el){
-  const post = posts.find(p=>p.id===id);
-  post.likes++;
-  savePosts();
-  el.textContent=`👍 ${post.likes}`;
-}
-
-function addComment(id){
-  const input = document.querySelector(`.comment-box input[data-id='${id}']`);
-  const text = input.value.trim();
-  if(!text) return;
-  const post = posts.find(p=>p.id===id);
-  post.comments.push({username:currentUser.username,text});
-  savePosts();
-  renderFeed();
-}
-
-// ------------------- 사진 미리보기 -------------------
-document.getElementById('postImage').addEventListener('change', function(e){
-  const file = e.target.files[0];
-  const preview = document.getElementById('previewImage');
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      preview.src = ev.target.result;
-      preview.style.display = 'block';
-    }
-    reader.readAsDataURL(file);
-  } else { preview.style.display='none'; }
+feed.innerHTML='';
+let list=currentGroupFilter?posts.filter(p=>p.groupId===currentGroupFilter):posts;
+list.forEach(p=>{
+let d=document.createElement('div');d.className='post';
+d.innerHTML=`
+${currentUser?.username===p.username?`<div class="delete-btn" onclick="deletePost('${p.id}')">삭제</div>`:''}
+<b>${p.title}</b> (${p.username})<br>${p.content}
+${p.imageUrl?`<img src="${p.imageUrl}">`:''}
+<div><span class="like-btn" onclick="likePost('${p.id}')">👍 ${p.likes}</span></div>
+<div class="comment-box"><input id="c_${p.id}" placeholder="댓글"><button onclick="addComment('${p.id}')">쓰기</button></div>
+${p.comments.map(c=>`<div class="comment">${c.username}: ${c.text}</div>`).join('')}
+`;
+feed.appendChild(d);
 });
+}
 
-// ------------------- 버튼 이벤트 -------------------
-document.getElementById('signupBtn').addEventListener('click', ()=>{ document.getElementById('signupBox').style.display='block'; document.getElementById('loginBox').style.display='none'; });
-document.getElementById('loginBtn').addEventListener('click', ()=>{ document.getElementById('loginBox').style.display='block'; document.getElementById('signupBox').style.display='none'; });
-document.getElementById('logoutBtn').addEventListener('click', logout);
-document.getElementById('signupSubmit').addEventListener('click', signUp);
-document.getElementById('loginSubmit').addEventListener('click', login);
-document.getElementById('createGroupBtn').addEventListener('click', createGroup);
-document.getElementById('allPostsBtn').addEventListener('click', showAllPosts);
-document.getElementById('submitPostBtn').addEventListener('click', submitPost);
+function signUp(){
+let u=signupUsername.value.trim(),p=signupPassword.value.trim();
+if(!u||!p) return alert("입력!");
+if(users.find(x=>x.username===u)) return alert("존재함");
+users.push({username:u,password:p});save();msg("회원가입 완료 ✅");
+}
+function login(){
+let u=loginUsername.value.trim(),p=loginPassword.value.trim();
+let user=users.find(x=>x.username===u&&x.password===p);
+if(!user) return alert("오류");
+currentUser=user;save();updateHeader();updateGroupSelect();renderGroups();renderFeed();msg("로그인 완료 ✅");
+}
+function logout(){currentUser=null;save();updateHeader();renderFeed();msg("로그아웃");}
+function createGroup(){
+if(!currentUser) return alert("로그인");
+let name=groupName.value.trim();if(!name) return;
+groups.push({id:Date.now()+'',name,owner:currentUser.username});save();updateGroupSelect();renderGroups();
+}
+function submitPost(){
+if(!currentUser) return alert("로그인");
+let title=postTitle.value.trim(),content=postContent.value.trim(),gid=groupSelect.value;
+if(!title||!content) return;
+let file=postImage.files[0];
+if(file){let r=new FileReader();r.onload=e=>addPost(title,content,e.target.result,gid);r.readAsDataURL(file);}
+else addPost(title,content,'',gid);
+postTitle.value='';postContent.value='';previewImage.style.display='none';
+}
+function addPost(title,content,img,gid){
+posts.unshift({id:Date.now()+'',username:currentUser.username,title,content,imageUrl:img,groupId:gid,likes:0,comments:[]});
+save();renderFeed();
+}
+function deletePost(id){posts=posts.filter(p=>p.id!==id);save();renderFeed();}
+function likePost(id){let p=posts.find(p=>p.id===id);p.likes++;save();renderFeed();}
+function addComment(id){let input=document.getElementById('c_'+id);let t=input.value.trim();if(!t)return;
+posts.find(p=>p.id===id).comments.push({username:currentUser.username,text:t});save();renderFeed();}
 
-// ------------------- 초기 렌더 -------------------
-updateHeader();
-updateGroupSelect();
-renderGroups();
-renderFeed();
+postImage.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=ev=>{previewImage.src=ev.target.result;previewImage.style.display='block';};r.readAsDataURL(f);};
 
-})();
+signupBtn.onclick=()=>{signupBox.style.display='block';loginBox.style.display='none';}
+loginBtn.onclick=()=>{loginBox.style.display='block';signupBox.style.display='none';}
+logoutBtn.onclick=logout;
+signupSubmit.onclick=signUp;
+loginSubmit.onclick=login;
+createGroupBtn.onclick=createGroup;
+submitPostBtn.onclick=submitPost;
+allPostsBtn.onclick=()=>{currentGroupFilter=null;renderFeed();}
+
+const message=document.getElementById('message'),
+currentUserSpan=document.getElementById('currentUser'),
+groupsDiv=document.getElementById('groups'),
+groupSelect=document.getElementById('groupSelect'),
+feed=document.getElementById('feed'),
+previewImage=document.getElementById('previewImage');
+
+updateHeader();updateGroupSelect();renderGroups();renderFeed();
 </script>
 
 </body>
