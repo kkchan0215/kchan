@@ -1,152 +1,135 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>나만의 일기장</title>
-<style>
-body{font-family:'Malgun Gothic';background:#f3e5f5;margin:0;padding:20px;color:#4a148c}
-button{background:#8e24aa;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
-input,textarea{width:100%;padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ce93d8}
-.hidden{display:none}
-.group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:15px 0}
-.group-card{background:#ce93d8;padding:20px;text-align:center;border-radius:10px;cursor:pointer;font-weight:bold;position:relative}
-.group-del{position:absolute;top:5px;right:8px;color:red;cursor:pointer}
-.post{background:white;padding:10px;margin:10px 0;border-radius:8px;cursor:pointer;position:relative}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center}
-.modal.show{display:flex;}
-.modal-content{background:#f3e5f5;padding:20px;border-radius:10px;width:300px}
-</style>
+  <meta charset="UTF-8">
+  <title>Score Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: white;
+    }
+
+    h1 {
+      margin-top: 30px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 80px;
+    }
+
+    .team {
+      border: 2px solid white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 220px;
+      transition: transform 0.1s;
+    }
+
+    .score {
+      font-size: 70px;
+      margin-top: 20px;
+    }
+
+    .boys { color: skyblue; }
+    .girls { color: pink; }
+
+    .flash {
+      transform: scale(1.2);
+    }
+
+    .buttons {
+      margin-top: 50px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<div id="home">
-  <h1>📔 나만의 일기장</h1>
-  <button onclick="showLogin()">로그인</button>
-  <button onclick="showSignup()">회원가입</button>
-</div>
+<h1>Score Board</h1>
 
-<div id="authModal" class="modal" onclick="closeModal(event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h3 id="authTitle"></h3>
-    <input id="id" placeholder="아이디">
-    <input id="pw" type="password" placeholder="비밀번호">
-    <button id="authBtn"></button>
+<div class="container">
+  <div id="boysBox" class="team boys">
+    <h2>BOYS</h2>
+    <div id="boysScore" class="score">0</div>
+  </div>
+
+  <div id="girlsBox" class="team girls">
+    <h2>GIRLS</h2>
+    <div id="girlsScore" class="score">0</div>
   </div>
 </div>
 
-<div id="app" class="hidden">
-<h2>📔 나만의 일기장</h2>
-<button onclick="logout()">로그아웃</button>
-
-<h3>📁 내 그룹</h3>
-<input id="newGroup" placeholder="새 그룹 이름">
-<button onclick="addGroup()">그룹 추가</button>
-<div id="groupGrid" class="group-grid"></div>
-
-<div id="groupArea" class="hidden">
-<h3 id="groupTitle"></h3>
-<input id="postTitle" placeholder="제목">
-<textarea id="postText" placeholder="내용"></textarea>
-<button onclick="addPost()">글 추가</button>
-<div id="postList"></div>
-</div>
+<div class="buttons">
+  <p>버튼 (터치용)</p>
+  <button onclick="addBoys(5)">BOYS +5</button>
+  <button onclick="addBoys(50)">BOYS +50</button>
+  <button onclick="addGirls(5)">GIRLS +5</button>
+  <button onclick="addGirls(50)">GIRLS +50</button>
+  <button onclick="addBoys(-5)">BOYS -5</button>
+  <button onclick="addGirls(-5)">GIRLS -5</button>
 </div>
 
-<div id="modal" class="modal" onclick="closeModal(event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div id="modalBody"></div>
-  </div>
-</div>
+<p style="margin-top:40px;">
+  키보드: 1(+5), 2(+50), 3(+5), 4(+50), 5(-5), 6(-5)
+</p>
 
 <script>
-let users=JSON.parse(localStorage.getItem("users")||"{}");
-let groups=JSON.parse(localStorage.getItem("groups")||"{}");
-let posts=JSON.parse(localStorage.getItem("posts")||"{}");
-let currentUser=localStorage.getItem("currentUser"); // ⭐ 자동복구
-let currentGroup=null;
+  let boys = 0;
+  let girls = 0;
 
-if(currentUser){ startApp(); }
+  const boysEl = document.getElementById("boysScore");
+  const girlsEl = document.getElementById("girlsScore");
+  const boysBox = document.getElementById("boysBox");
+  const girlsBox = document.getElementById("girlsBox");
 
-function showLogin(){authTitle.textContent="로그인";authBtn.textContent="로그인";authModal.classList.add("show");authBtn.onclick=login;}
-function showSignup(){authTitle.textContent="회원가입";authBtn.textContent="회원가입";authModal.classList.add("show");authBtn.onclick=signup;}
+  function update() {
+    boysEl.textContent = boys;
+    girlsEl.textContent = girls;
+  }
 
-function login(){
- if(users[id.value]===pw.value){
-  currentUser=id.value;
-  localStorage.setItem("currentUser",currentUser); // ⭐ 로그인 기억
-  alert("로그인 완료!");
-  closeModal(); startApp();
- } else alert("실패");
-}
+  function flash(el) {
+    el.classList.add("flash");
+    setTimeout(() => el.classList.remove("flash"), 100);
+  }
 
-function signup(){
- if(users[id.value]) return alert("이미 존재");
- users[id.value]=pw.value;
- localStorage.setItem("users",JSON.stringify(users));
- alert("회원가입 완료!");
- closeModal();
-}
+  function addBoys(value) {
+    boys += value;
+    if (boys < 0) boys = 0; // 0 밑으로 안 내려가게
+    update();
+    flash(boysBox);
+  }
 
-function logout(){
- localStorage.removeItem("currentUser"); // 로그인만 해제
- location.reload();
-}
+  function addGirls(value) {
+    girls += value;
+    if (girls < 0) girls = 0;
+    update();
+    flash(girlsBox);
+  }
 
-function startApp(){
- home.classList.add("hidden");
- app.classList.remove("hidden");
- if(!groups[currentUser]) groups[currentUser]=[];
- saveAll(); renderGroups();
-}
-
-function addGroup(){
- if(!newGroup.value) return;
- groups[currentUser].push(newGroup.value);
- saveAll(); renderGroups(); newGroup.value="";
-}
-
-function deleteGroup(g){
- groups[currentUser]=groups[currentUser].filter(x=>x!==g);
- if(posts[currentUser]) delete posts[currentUser][g];
- saveAll(); renderGroups(); groupArea.classList.add("hidden");
-}
-
-function renderGroups(){
- groupGrid.innerHTML="";
- groups[currentUser].forEach(g=>{
-  const div=document.createElement("div");
-  div.className="group-card";
-  div.innerHTML=g+" <span class='group-del' onclick=\"deleteGroup('"+g+"')\">✖</span>";
-  div.onclick=()=>openGroup(g);
-  groupGrid.appendChild(div);
- });
-}
-
-function openGroup(g){currentGroup=g;groupTitle.textContent="📂 "+g;groupArea.classList.remove("hidden");renderPosts();}
-
-function addPost(){
- if(!postTitle.value||!postText.value) return;
- if(!posts[currentUser]) posts[currentUser]={};
- if(!posts[currentUser][currentGroup]) posts[currentUser][currentGroup]=[];
- posts[currentUser][currentGroup].push({title:postTitle.value,content:postText.value});
- postTitle.value=""; postText.value=""; saveAll(); renderPosts();
-}
-
-function renderPosts(){
- postList.innerHTML="";
- const list=(posts[currentUser]&&posts[currentUser][currentGroup])||[];
- list.forEach(p=>{
-  const div=document.createElement("div");
-  div.className="post";
-  div.innerHTML="<b>"+p.title+"</b>";
-  div.onclick=()=>openPost(p);
-  postList.appendChild(div);
- });
-}
-
-function openPost(p){modal.classList.add("show");modalBody.innerHTML="<h3>"+p.title+"</h3><p>"+p.content+"</p>";}
-function closeModal(e){if(!e||e.target.classList.contains("modal"))document.querySelectorAll(".modal").forEach(m=>m.classList.remove("show"));}
-function saveAll(){localStorage.setItem("groups",JSON.stringify(groups));localStorage.setItem("posts",JSON.stringify(posts));}
+  document.addEventListener("keydown", function(e) {
+    switch(e.key) {
+      case "1": addBoys(5); break;
+      case "2": addBoys(50); break;
+      case "3": addGirls(5); break;
+      case "4": addGirls(50); break;
+      case "5": addBoys(-5); break;
+      case "6": addGirls(-5); break;
+    }
+  });
 </script>
+
 </body>
 </html>
