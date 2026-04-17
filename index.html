@@ -1,135 +1,16 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <title>Score Counter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #111;
-      color: white;
-    }
+const scoreBoard = {
+  "1": ["Korea", 5],   "2": ["Korea", 50],
+  "3": ["Thailand", 5],"4": ["Thailand", 50],
+  "5": ["Japan", 5],   "6": ["Japan", 50],
+  "7": ["USA", 5],     "8": ["USA", 50],
+  "9": ["Vietnam", 5], "0": ["Vietnam", 50],
+  "-": ["China", 5],   "=": ["China", 50]
+};
 
-    h1 {
-      margin-top: 30px;
-    }
+document.addEventListener("keydown", ({ key }) => {
+  const data = scoreBoard[key];
+  if (!data) return;
 
-    .container {
-      display: flex;
-      justify-content: center;
-      gap: 50px;
-      margin-top: 80px;
-    }
-
-    .team {
-      border: 2px solid white;
-      border-radius: 20px;
-      padding: 30px;
-      width: 220px;
-      transition: transform 0.1s;
-    }
-
-    .score {
-      font-size: 70px;
-      margin-top: 20px;
-    }
-
-    .boys { color: skyblue; }
-    .girls { color: pink; }
-
-    .flash {
-      transform: scale(1.2);
-    }
-
-    .buttons {
-      margin-top: 50px;
-    }
-
-    button {
-      margin: 5px;
-      padding: 10px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-<h1>Score Board</h1>
-
-<div class="container">
-  <div id="boysBox" class="team boys">
-    <h2>BOYS</h2>
-    <div id="boysScore" class="score">0</div>
-  </div>
-
-  <div id="girlsBox" class="team girls">
-    <h2>GIRLS</h2>
-    <div id="girlsScore" class="score">0</div>
-  </div>
-</div>
-
-<div class="buttons">
-  <p>버튼 (터치용)</p>
-  <button onclick="addBoys(5)">BOYS +5</button>
-  <button onclick="addBoys(50)">BOYS +50</button>
-  <button onclick="addGirls(5)">GIRLS +5</button>
-  <button onclick="addGirls(50)">GIRLS +50</button>
-  <button onclick="addBoys(-5)">BOYS -5</button>
-  <button onclick="addGirls(-5)">GIRLS -5</button>
-</div>
-
-<p style="margin-top:40px;">
-  키보드: 1(+5), 2(+50), 3(+5), 4(+50), 5(-5), 6(-5)
-</p>
-
-<script>
-  let boys = 0;
-  let girls = 0;
-
-  const boysEl = document.getElementById("boysScore");
-  const girlsEl = document.getElementById("girlsScore");
-  const boysBox = document.getElementById("boysBox");
-  const girlsBox = document.getElementById("girlsBox");
-
-  function update() {
-    boysEl.textContent = boys;
-    girlsEl.textContent = girls;
-  }
-
-  function flash(el) {
-    el.classList.add("flash");
-    setTimeout(() => el.classList.remove("flash"), 100);
-  }
-
-  function addBoys(value) {
-    boys += value;
-    if (boys < 0) boys = 0; // 0 밑으로 안 내려가게
-    update();
-    flash(boysBox);
-  }
-
-  function addGirls(value) {
-    girls += value;
-    if (girls < 0) girls = 0;
-    update();
-    flash(girlsBox);
-  }
-
-  document.addEventListener("keydown", function(e) {
-    switch(e.key) {
-      case "1": addBoys(5); break;
-      case "2": addBoys(50); break;
-      case "3": addGirls(5); break;
-      case "4": addGirls(50); break;
-      case "5": addBoys(-5); break;
-      case "6": addGirls(-5); break;
-    }
-  });
-</script>
-
-</body>
-</html>
+  const [country, score] = data;
+  console.log(`${country} +${score}`);
+});
