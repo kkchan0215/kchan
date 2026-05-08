@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>❤️ 좋아요 순위 ❤️</title>
 
@@ -18,158 +18,137 @@
 }
 
 body{
-  background:linear-gradient(180deg,#ffd7ea,#fff1f7);
-  min-height:100vh;
-  padding:20px;
+  background:linear-gradient(180deg,#ffd9eb,#fff3f8);
+  padding:12px;
 }
 
 .container{
-  max-width:750px;
+  max-width:500px;
   margin:auto;
 }
 
 .title{
   text-align:center;
-  font-size:50px;
+  font-size:32px;
   color:#ff2f6d;
-  margin-bottom:10px;
-}
-
-.sub{
-  text-align:center;
-  font-size:24px;
-  color:#ff5f95;
-  margin-bottom:20px;
+  margin-bottom:12px;
 }
 
 .box{
   background:white;
-  padding:20px;
-  border-radius:25px;
-  margin-bottom:20px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  padding:12px;
+  border-radius:18px;
+  margin-bottom:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
 .add-text{
-  font-size:28px;
-  color:#ff2f6d;
-  margin-bottom:15px;
   text-align:center;
+  color:#ff4f88;
+  font-size:20px;
+  margin-bottom:10px;
 }
 
 .input-group{
   display:flex;
-  gap:10px;
-  margin-bottom:10px;
+  gap:8px;
 }
 
 input{
   flex:1;
-  padding:14px;
+  padding:10px;
   border:none;
-  border-radius:15px;
-  background:#ffe4ef;
-  font-size:18px;
+  border-radius:12px;
+  background:#ffe5ef;
+  font-size:15px;
   outline:none;
 }
 
-button{
+.add-btn{
   border:none;
-  border-radius:15px;
-  padding:14px 18px;
+  border-radius:12px;
   background:#ff4f88;
   color:white;
-  font-size:17px;
+  padding:10px 14px;
+  font-size:15px;
   cursor:pointer;
-}
-
-button:hover{
-  transform:scale(1.03);
 }
 
 .ranking{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:8px;
 }
 
 .card{
   background:white;
-  border-radius:22px;
-  padding:16px;
+  border-radius:18px;
+  padding:12px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  box-shadow:0 6px 15px rgba(0,0,0,0.08);
-  animation:pop .3s ease;
-}
-
-@keyframes pop{
-  from{
-    opacity:0;
-    transform:scale(.9);
-  }
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
+  box-shadow:0 4px 10px rgba(0,0,0,0.07);
 }
 
 .left{
   display:flex;
   align-items:center;
-  gap:15px;
+  gap:10px;
 }
 
 .rank{
-  width:55px;
-  height:55px;
+  width:36px;
+  height:36px;
   border-radius:50%;
   background:#ff4f88;
   color:white;
   display:flex;
   justify-content:center;
   align-items:center;
-  font-size:24px;
+  font-size:16px;
 }
 
 .name{
-  font-size:28px;
+  font-size:20px;
   color:#333;
+  cursor:pointer;
+  transition:0.15s;
+  user-select:none;
+}
+
+.name:active{
+  transform:scale(0.95);
 }
 
 .likes{
-  font-size:35px;
   color:#ff2f6d;
-}
-
-.actions{
-  margin-top:8px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.small-btn{
-  padding:10px 14px;
-  font-size:15px;
+  font-size:24px;
 }
 
 .gold{
-  background:linear-gradient(90deg,#ffe27a,#fff3bc);
+  background:linear-gradient(90deg,#ffe27a,#fff5c4);
 }
 
 .silver{
-  background:linear-gradient(90deg,#e1e1e1,#f8f8f8);
+  background:linear-gradient(90deg,#e3e3e3,#fafafa);
 }
 
 .bronze{
-  background:linear-gradient(90deg,#ffc08f,#ffe0c4);
+  background:linear-gradient(90deg,#ffc08f,#ffe3cc);
 }
 
-.touch-text{
-  color:#ff5f95;
-  font-size:16px;
+.delete{
+  margin-left:8px;
+  color:#999;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.tip{
+  text-align:center;
+  color:#ff5d95;
+  font-size:15px;
+  margin-bottom:10px;
 }
 
 </style>
@@ -182,8 +161,8 @@ button:hover{
     ❤️ 좋아요 순위 ❤️
   </div>
 
-  <div class="sub">
-    💖 하트 터치하면 +10 💖
+  <div class="tip">
+    💖 이름 누르면 +10 💖
   </div>
 
   <div class="box">
@@ -193,13 +172,16 @@ button:hover{
     </div>
 
     <div class="input-group">
-      <input type="text" id="name" placeholder="닉네임">
-      <input type="number" id="likes" placeholder="좋아요 수">
-    </div>
 
-    <button onclick="addUser()">
-      추가하기 ❤️
-    </button>
+      <input type="text" id="name" placeholder="닉네임">
+
+      <input type="number" id="likes" placeholder="점수">
+
+      <button class="add-btn" onclick="addUser()">
+        추가
+      </button>
+
+    </div>
 
   </div>
 
@@ -221,17 +203,17 @@ function render(){
 
   const ranking = document.getElementById("ranking");
 
-  ranking.innerHTML = "";
+  let html = "";
 
   users.forEach((user,index)=>{
 
     let bg = "";
 
     if(index===0) bg="gold";
-    if(index===1) bg="silver";
-    if(index===2) bg="bronze";
+    else if(index===1) bg="silver";
+    else if(index===2) bg="bronze";
 
-    ranking.innerHTML += `
+    html += `
 
     <div class="card ${bg}">
 
@@ -241,41 +223,24 @@ function render(){
           ${index+1}
         </div>
 
-        <div>
+        <div class="name"
+          onclick="addLike(${index})">
 
-          <div class="name">
-            ❤️ ${user.name}
-          </div>
+          ❤️ ${user.name}
 
-          <div class="actions">
+        </div>
 
-            <button class="small-btn"
-              onclick="addLike(${index})">
-              ❤️ +10
-            </button>
+        <div class="delete"
+          onclick="removeUser(${index})">
 
-            <button class="small-btn"
-              onclick="minusLike(${index})">
-              💔 -10
-            </button>
-
-            <button class="small-btn"
-              onclick="removeUser(${index})">
-              🗑️ 삭제
-            </button>
-
-          </div>
-
-          <div class="touch-text">
-            💕 터치로 점수 추가 💕
-          </div>
+          🗑️
 
         </div>
 
       </div>
 
       <div class="likes">
-        ❤️ ${user.likes.toLocaleString()}
+        ${user.likes}
       </div>
 
     </div>
@@ -283,11 +248,14 @@ function render(){
     `;
   });
 
+  ranking.innerHTML = html;
+
 }
 
 function addUser(){
 
   const name = document.getElementById("name").value;
+
   const likes = Number(document.getElementById("likes").value);
 
   if(name === "" || likes === ""){
@@ -319,22 +287,6 @@ function addLike(index){
 
 }
 
-function minusLike(index){
-
-  if(users[index].likes > 0){
-    users[index].likes -= 10;
-  }
-
-  if(users[index].likes < 0){
-    users[index].likes = 0;
-  }
-
-  saveData();
-
-  render();
-
-}
-
 function removeUser(index){
 
   users.splice(index,1);
@@ -344,10 +296,6 @@ function removeUser(index){
   render();
 
 }
-
-setInterval(()=>{
-  render();
-},1000);
 
 render();
 
