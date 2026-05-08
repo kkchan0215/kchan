@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>틱톡 좋아요 순위</title>
+<title>❤️ 좋아요 순위 ❤️</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 
@@ -30,16 +30,16 @@ body{
 
 .title{
   text-align:center;
-  font-size:48px;
+  font-size:50px;
   color:#ff2f6d;
-  margin-bottom:20px;
+  margin-bottom:10px;
 }
 
-.live{
+.sub{
   text-align:center;
-  color:#ff2f6d;
+  font-size:24px;
+  color:#ff5f95;
   margin-bottom:20px;
-  font-size:20px;
 }
 
 .box{
@@ -48,6 +48,13 @@ body{
   border-radius:25px;
   margin-bottom:20px;
   box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.add-text{
+  font-size:28px;
+  color:#ff2f6d;
+  margin-bottom:15px;
+  text-align:center;
 }
 
 .input-group{
@@ -115,24 +122,24 @@ button:hover{
 }
 
 .rank{
-  width:52px;
-  height:52px;
+  width:55px;
+  height:55px;
   border-radius:50%;
   background:#ff4f88;
   color:white;
   display:flex;
   justify-content:center;
   align-items:center;
-  font-size:22px;
+  font-size:24px;
 }
 
 .name{
-  font-size:25px;
+  font-size:28px;
   color:#333;
 }
 
 .likes{
-  font-size:33px;
+  font-size:35px;
   color:#ff2f6d;
 }
 
@@ -140,11 +147,12 @@ button:hover{
   margin-top:8px;
   display:flex;
   gap:8px;
+  flex-wrap:wrap;
 }
 
 .small-btn{
-  padding:8px 12px;
-  font-size:14px;
+  padding:10px 14px;
+  font-size:15px;
 }
 
 .gold{
@@ -159,6 +167,11 @@ button:hover{
   background:linear-gradient(90deg,#ffc08f,#ffe0c4);
 }
 
+.touch-text{
+  color:#ff5f95;
+  font-size:16px;
+}
+
 </style>
 </head>
 <body>
@@ -166,14 +179,18 @@ button:hover{
 <div class="container">
 
   <div class="title">
-    💖 틱톡 좋아요 순위 💖
+    ❤️ 좋아요 순위 ❤️
   </div>
 
-  <div class="live">
-    🔴 실시간 느낌 수동 랭킹
+  <div class="sub">
+    💖 하트 터치하면 +10 💖
   </div>
 
   <div class="box">
+
+    <div class="add-text">
+      ✨ 추가 ✨
+    </div>
 
     <div class="input-group">
       <input type="text" id="name" placeholder="닉네임">
@@ -181,7 +198,7 @@ button:hover{
     </div>
 
     <button onclick="addUser()">
-      추가하기 ✨
+      추가하기 ❤️
     </button>
 
   </div>
@@ -192,23 +209,11 @@ button:hover{
 
 <script>
 
-//////////////////////////////////////////////////
-// 저장된 데이터 불러오기
-//////////////////////////////////////////////////
-
 let users = JSON.parse(localStorage.getItem("ranking")) || [];
-
-//////////////////////////////////////////////////
-// 저장
-//////////////////////////////////////////////////
 
 function saveData(){
   localStorage.setItem("ranking", JSON.stringify(users));
 }
-
-//////////////////////////////////////////////////
-// 화면 출력
-//////////////////////////////////////////////////
 
 function render(){
 
@@ -246,19 +251,23 @@ function render(){
 
             <button class="small-btn"
               onclick="addLike(${index})">
-              +1 ❤️
+              ❤️ +10
             </button>
 
             <button class="small-btn"
               onclick="minusLike(${index})">
-              -1 💔
+              💔 -10
             </button>
 
             <button class="small-btn"
               onclick="removeUser(${index})">
-              삭제 🗑️
+              🗑️ 삭제
             </button>
 
+          </div>
+
+          <div class="touch-text">
+            💕 터치로 점수 추가 💕
           </div>
 
         </div>
@@ -266,7 +275,7 @@ function render(){
       </div>
 
       <div class="likes">
-        ${user.likes.toLocaleString()}
+        ❤️ ${user.likes.toLocaleString()}
       </div>
 
     </div>
@@ -275,10 +284,6 @@ function render(){
   });
 
 }
-
-//////////////////////////////////////////////////
-// 유저 추가
-//////////////////////////////////////////////////
 
 function addUser(){
 
@@ -304,13 +309,9 @@ function addUser(){
 
 }
 
-//////////////////////////////////////////////////
-// 좋아요 증가
-//////////////////////////////////////////////////
-
 function addLike(index){
 
-  users[index].likes++;
+  users[index].likes += 10;
 
   saveData();
 
@@ -318,14 +319,14 @@ function addLike(index){
 
 }
 
-//////////////////////////////////////////////////
-// 좋아요 감소
-//////////////////////////////////////////////////
-
 function minusLike(index){
 
   if(users[index].likes > 0){
-    users[index].likes--;
+    users[index].likes -= 10;
+  }
+
+  if(users[index].likes < 0){
+    users[index].likes = 0;
   }
 
   saveData();
@@ -333,10 +334,6 @@ function minusLike(index){
   render();
 
 }
-
-//////////////////////////////////////////////////
-// 삭제
-//////////////////////////////////////////////////
 
 function removeUser(index){
 
@@ -347,10 +344,6 @@ function removeUser(index){
   render();
 
 }
-
-//////////////////////////////////////////////////
-// 자동 새로고침 느낌
-//////////////////////////////////////////////////
 
 setInterval(()=>{
   render();
