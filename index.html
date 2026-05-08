@@ -1,262 +1,363 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>말랑 점수판</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>틱톡 좋아요 순위</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 
 <style>
-body{
+
+*{
   margin:0;
-  background:linear-gradient(135deg,#ffd6ec,#ffe8fb,#f3d9ff);
-  font-family:"Comic Sans MS", cursive;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Jua',sans-serif;
+}
+
+body{
+  background:linear-gradient(180deg,#ffd7ea,#fff1f7);
   min-height:100vh;
-  padding:30px;
+  padding:20px;
+}
+
+.container{
+  max-width:750px;
+  margin:auto;
 }
 
 .title{
   text-align:center;
-  font-size:50px;
-  color:#ff4f95;
-  font-weight:900;
+  font-size:48px;
+  color:#ff2f6d;
   margin-bottom:20px;
 }
 
-.container{
-  max-width:900px;
-  margin:auto;
+.live{
+  text-align:center;
+  color:#ff2f6d;
+  margin-bottom:20px;
+  font-size:20px;
 }
 
-.add-box{
+.box{
+  background:white;
+  padding:20px;
+  border-radius:25px;
+  margin-bottom:20px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.input-group{
   display:flex;
   gap:10px;
-  justify-content:center;
-  margin-bottom:30px;
-  flex-wrap:wrap;
+  margin-bottom:10px;
 }
 
 input{
-  padding:15px;
+  flex:1;
+  padding:14px;
   border:none;
-  border-radius:20px;
+  border-radius:15px;
+  background:#ffe4ef;
   font-size:18px;
   outline:none;
-  width:250px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 button{
   border:none;
-  border-radius:20px;
-  padding:15px 20px;
-  font-size:18px;
+  border-radius:15px;
+  padding:14px 18px;
+  background:#ff4f88;
+  color:white;
+  font-size:17px;
   cursor:pointer;
-  font-weight:bold;
-  transition:0.2s;
 }
 
 button:hover{
-  transform:scale(1.05);
+  transform:scale(1.03);
 }
 
-.add-btn{
-  background:#ff73b3;
-  color:white;
+.ranking{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
 .card{
   background:white;
-  border-radius:30px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 10px 20px rgba(0,0,0,0.1);
+  border-radius:22px;
+  padding:16px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  flex-wrap:wrap;
+  box-shadow:0 6px 15px rgba(0,0,0,0.08);
+  animation:pop .3s ease;
+}
+
+@keyframes pop{
+  from{
+    opacity:0;
+    transform:scale(.9);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+.left{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.rank{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#ff4f88;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:22px;
 }
 
 .name{
-  font-size:30px;
-  color:#ff4f95;
-  font-weight:900;
+  font-size:25px;
+  color:#333;
 }
 
-.score{
-  font-size:40px;
-  color:#b14cff;
-  font-weight:900;
+.likes{
+  font-size:33px;
+  color:#ff2f6d;
 }
 
-.controls{
+.actions{
+  margin-top:8px;
   display:flex;
-  gap:10px;
-  margin-top:10px;
+  gap:8px;
 }
 
-.plus{
-  background:#ff9ed0;
-  color:white;
+.small-btn{
+  padding:8px 12px;
+  font-size:14px;
 }
 
-.minus{
-  background:#caa6ff;
-  color:white;
+.gold{
+  background:linear-gradient(90deg,#ffe27a,#fff3bc);
 }
 
-.delete{
-  background:#ff5d5d;
-  color:white;
+.silver{
+  background:linear-gradient(90deg,#e1e1e1,#f8f8f8);
 }
 
-.stopwatch{
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:white;
-  padding:15px;
-  border-radius:25px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  text-align:center;
-  width:180px;
+.bronze{
+  background:linear-gradient(90deg,#ffc08f,#ffe0c4);
 }
 
-.stopwatch h2{
-  margin:0;
-  color:#ff4f95;
-}
-
-#time{
-  font-size:35px;
-  margin:10px 0;
-  color:#b14cff;
-  font-weight:900;
-}
-
-.stop-btns{
-  display:flex;
-  gap:5px;
-  justify-content:center;
-}
-
-.start{
-  background:#ff73b3;
-  color:white;
-}
-
-.reset{
-  background:#b14cff;
-  color:white;
-}
 </style>
 </head>
-
 <body>
-
-<div class="stopwatch">
-  <h2>⏱ 스톱워치</h2>
-  <div id="time">00:00</div>
-
-  <div class="stop-btns">
-    <button class="start" onclick="startStop()">시작</button>
-    <button class="reset" onclick="resetWatch()">초기화</button>
-  </div>
-</div>
 
 <div class="container">
 
   <div class="title">
-    💖 말랑 점수판 💖
+    💖 틱톡 좋아요 순위 💖
   </div>
 
-  <div class="add-box">
-    <input type="text" id="nameInput" placeholder="이름 입력하기 ✨">
-    <button class="add-btn" onclick="addPlayer()">추가</button>
+  <div class="live">
+    🔴 실시간 느낌 수동 랭킹
   </div>
 
-  <div id="scoreBoard"></div>
+  <div class="box">
+
+    <div class="input-group">
+      <input type="text" id="name" placeholder="닉네임">
+      <input type="number" id="likes" placeholder="좋아요 수">
+    </div>
+
+    <button onclick="addUser()">
+      추가하기 ✨
+    </button>
+
+  </div>
+
+  <div class="ranking" id="ranking"></div>
 
 </div>
 
 <script>
-const scoreBoard = document.getElementById("scoreBoard");
 
-function addPlayer(){
-  const input = document.getElementById("nameInput");
-  const name = input.value.trim();
+//////////////////////////////////////////////////
+// 저장된 데이터 불러오기
+//////////////////////////////////////////////////
 
-  if(name === "") return;
+let users = JSON.parse(localStorage.getItem("ranking")) || [];
 
-  const card = document.createElement("div");
-  card.className = "card";
+//////////////////////////////////////////////////
+// 저장
+//////////////////////////////////////////////////
 
-  card.innerHTML = `
-    <div>
-      <div class="name">💖 ${name}</div>
-      <div class="controls">
-        <button class="plus">+1</button>
-        <button class="minus">-1</button>
-        <button class="delete">삭제</button>
+function saveData(){
+  localStorage.setItem("ranking", JSON.stringify(users));
+}
+
+//////////////////////////////////////////////////
+// 화면 출력
+//////////////////////////////////////////////////
+
+function render(){
+
+  users.sort((a,b)=>b.likes-a.likes);
+
+  const ranking = document.getElementById("ranking");
+
+  ranking.innerHTML = "";
+
+  users.forEach((user,index)=>{
+
+    let bg = "";
+
+    if(index===0) bg="gold";
+    if(index===1) bg="silver";
+    if(index===2) bg="bronze";
+
+    ranking.innerHTML += `
+
+    <div class="card ${bg}">
+
+      <div class="left">
+
+        <div class="rank">
+          ${index+1}
+        </div>
+
+        <div>
+
+          <div class="name">
+            ❤️ ${user.name}
+          </div>
+
+          <div class="actions">
+
+            <button class="small-btn"
+              onclick="addLike(${index})">
+              +1 ❤️
+            </button>
+
+            <button class="small-btn"
+              onclick="minusLike(${index})">
+              -1 💔
+            </button>
+
+            <button class="small-btn"
+              onclick="removeUser(${index})">
+              삭제 🗑️
+            </button>
+
+          </div>
+
+        </div>
+
       </div>
+
+      <div class="likes">
+        ${user.likes.toLocaleString()}
+      </div>
+
     </div>
 
-    <div class="score">0</div>
-  `;
+    `;
+  });
 
-  const scoreText = card.querySelector(".score");
-
-  let score = 0;
-
-  card.querySelector(".plus").onclick = () => {
-    score++;
-    scoreText.textContent = score;
-  };
-
-  card.querySelector(".minus").onclick = () => {
-    score--;
-    scoreText.textContent = score;
-  };
-
-  card.querySelector(".delete").onclick = () => {
-    card.remove();
-  };
-
-  scoreBoard.appendChild(card);
-
-  input.value = "";
 }
 
-let seconds = 0;
-let running = false;
-let interval;
+//////////////////////////////////////////////////
+// 유저 추가
+//////////////////////////////////////////////////
 
-function updateStopwatch(){
-  const mins = String(Math.floor(seconds/60)).padStart(2,'0');
-  const secs = String(seconds%60).padStart(2,'0');
+function addUser(){
 
-  document.getElementById("time").textContent = `${mins}:${secs}`;
-}
+  const name = document.getElementById("name").value;
+  const likes = Number(document.getElementById("likes").value);
 
-function startStop(){
-  if(!running){
-    running = true;
-
-    interval = setInterval(() => {
-      seconds++;
-      updateStopwatch();
-    },1000);
-  }else{
-    running = false;
-    clearInterval(interval);
+  if(name === "" || likes === ""){
+    alert("입력해!");
+    return;
   }
+
+  users.push({
+    name,
+    likes
+  });
+
+  saveData();
+
+  render();
+
+  document.getElementById("name").value = "";
+  document.getElementById("likes").value = "";
+
 }
 
-function resetWatch(){
-  running = false;
-  clearInterval(interval);
-  seconds = 0;
-  updateStopwatch();
+//////////////////////////////////////////////////
+// 좋아요 증가
+//////////////////////////////////////////////////
+
+function addLike(index){
+
+  users[index].likes++;
+
+  saveData();
+
+  render();
+
 }
+
+//////////////////////////////////////////////////
+// 좋아요 감소
+//////////////////////////////////////////////////
+
+function minusLike(index){
+
+  if(users[index].likes > 0){
+    users[index].likes--;
+  }
+
+  saveData();
+
+  render();
+
+}
+
+//////////////////////////////////////////////////
+// 삭제
+//////////////////////////////////////////////////
+
+function removeUser(index){
+
+  users.splice(index,1);
+
+  saveData();
+
+  render();
+
+}
+
+//////////////////////////////////////////////////
+// 자동 새로고침 느낌
+//////////////////////////////////////////////////
+
+setInterval(()=>{
+  render();
+},1000);
+
+render();
+
 </script>
 
 </body>
