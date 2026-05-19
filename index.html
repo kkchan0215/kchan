@@ -1,305 +1,79 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+export default function CuteClockSite() {
+  const now = new Date();
 
-<title>❤️ 좋아요 순위 ❤️</title>
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
 
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  return (
+    <div className="min-h-screen bg-pink-100 flex items-center justify-center p-4 overflow-hidden relative">
+      <div className="absolute w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-40 top-10 left-10 animate-pulse"></div>
+      <div className="absolute w-72 h-72 bg-sky-300 rounded-full blur-3xl opacity-40 bottom-10 right-10 animate-pulse"></div>
 
-<style>
+      <div className="relative bg-white/70 backdrop-blur-xl border-4 border-white rounded-[40px] shadow-2xl px-10 py-12 text-center max-w-md w-full">
+        <div className="flex justify-center gap-2 mb-6 text-3xl">
+          <span>☁️</span>
+          <span>🩷</span>
+          <span>⭐</span>
+        </div>
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Jua',sans-serif;
-}
+        <h1 className="text-4xl font-black text-pink-500 mb-3 tracking-wide">
+          Cute Clock
+        </h1>
 
-body{
-  background:linear-gradient(180deg,#ffd9eb,#fff3f8);
-  padding:12px;
-}
+        <p className="text-gray-500 mb-8 text-sm font-semibold">
+         시계 ✨
+        </p>
 
-.container{
-  max-width:500px;
-  margin:auto;
-}
+        <ClockDisplay />
 
-.title{
-  text-align:center;
-  font-size:32px;
-  color:#ff2f6d;
-  margin-bottom:12px;
-}
-
-.box{
-  background:white;
-  padding:12px;
-  border-radius:18px;
-  margin-bottom:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
-}
-
-.add-text{
-  text-align:center;
-  color:#ff4f88;
-  font-size:20px;
-  margin-bottom:10px;
-}
-
-.input-group{
-  display:flex;
-  gap:8px;
-}
-
-input{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  background:#ffe5ef;
-  font-size:15px;
-  outline:none;
-}
-
-.add-btn{
-  border:none;
-  border-radius:12px;
-  background:#ff4f88;
-  color:white;
-  padding:10px 14px;
-  font-size:15px;
-  cursor:pointer;
-}
-
-.ranking{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.card{
-  background:white;
-  border-radius:18px;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:0 4px 10px rgba(0,0,0,0.07);
-}
-
-.left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.rank{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:#ff4f88;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:16px;
-}
-
-.name{
-  font-size:20px;
-  color:#333;
-  cursor:pointer;
-  transition:0.15s;
-  user-select:none;
-}
-
-.name:active{
-  transform:scale(0.95);
-}
-
-.likes{
-  color:#ff2f6d;
-  font-size:24px;
-}
-
-.gold{
-  background:linear-gradient(90deg,#ffe27a,#fff5c4);
-}
-
-.silver{
-  background:linear-gradient(90deg,#e3e3e3,#fafafa);
-}
-
-.bronze{
-  background:linear-gradient(90deg,#ffc08f,#ffe3cc);
-}
-
-.delete{
-  margin-left:8px;
-  color:#999;
-  cursor:pointer;
-  font-size:14px;
-}
-
-.tip{
-  text-align:center;
-  color:#ff5d95;
-  font-size:15px;
-  margin-bottom:10px;
-}
-
-</style>
-</head>
-<body>
-
-<div class="container">
-
-  <div class="title">
-    ❤️ 좋아요 순위 ❤️
-  </div>
-
-  <div class="tip">
-    💖 이름 누르면 +10 💖
-  </div>
-
-  <div class="box">
-
-    <div class="add-text">
-      ✨ 추가 ✨
+        <div className="mt-8 flex justify-center gap-3 text-2xl">
+          <span className="animate-bounce">🐰</span>
+          <span className="animate-bounce delay-100">🧸</span>
+          <span className="animate-bounce delay-200">🌸</span>
+        </div>
+      </div>
     </div>
-
-    <div class="input-group">
-
-      <input type="text" id="name" placeholder="닉네임">
-
-      <input type="number" id="likes" placeholder="점수">
-
-      <button class="add-btn" onclick="addUser()">
-        추가
-      </button>
-
-    </div>
-
-  </div>
-
-  <div class="ranking" id="ranking"></div>
-
-</div>
-
-<script>
-
-let users = JSON.parse(localStorage.getItem("ranking")) || [];
-
-function saveData(){
-  localStorage.setItem("ranking", JSON.stringify(users));
+  );
 }
 
-function render(){
+function ClockDisplay() {
+  const [time, setTime] = React.useState(new Date());
 
-  users.sort((a,b)=>b.likes-a.likes);
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
 
-  const ranking = document.getElementById("ranking");
+    return () => clearInterval(interval);
+  }, []);
 
-  let html = "";
+  const hours = String(time.getHours()).padStart(2, "0");
+  const minutes = String(time.getMinutes()).padStart(2, "0");
+  const seconds = String(time.getSeconds()).padStart(2, "0");
 
-  users.forEach((user,index)=>{
-
-    let bg = "";
-
-    if(index===0) bg="gold";
-    else if(index===1) bg="silver";
-    else if(index===2) bg="bronze";
-
-    html += `
-
-    <div class="card ${bg}">
-
-      <div class="left">
-
-        <div class="rank">
-          ${index+1}
+  return (
+    <div>
+      <div className="bg-gradient-to-r from-pink-300 to-sky-300 rounded-3xl p-1 shadow-lg">
+        <div className="bg-white rounded-3xl py-8 px-4">
+          <div className="text-6xl font-black tracking-widest text-gray-700 drop-shadow-sm">
+            {hours}
+            <span className="text-pink-400 animate-pulse">:</span>
+            {minutes}
+            <span className="text-sky-400 animate-pulse">:</span>
+            {seconds}
+          </div>
         </div>
-
-        <div class="name"
-          onclick="addLike(${index})">
-
-          ❤️ ${user.name}
-
-        </div>
-
-        <div class="delete"
-          onclick="removeUser(${index})">
-
-          🗑️
-
-        </div>
-
       </div>
 
-      <div class="likes">
-        ${user.likes}
+      <div className="mt-6 text-gray-500 font-bold text-lg">
+        {time.toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "long",
+        })}
       </div>
-
     </div>
-
-    `;
-  });
-
-  ranking.innerHTML = html;
-
+  );
 }
-
-function addUser(){
-
-  const name = document.getElementById("name").value;
-
-  const likes = Number(document.getElementById("likes").value);
-
-  if(name === "" || likes === ""){
-    alert("입력해!");
-    return;
-  }
-
-  users.push({
-    name,
-    likes
-  });
-
-  saveData();
-
-  render();
-
-  document.getElementById("name").value = "";
-  document.getElementById("likes").value = "";
-
-}
-
-function addLike(index){
-
-  users[index].likes += 10;
-
-  saveData();
-
-  render();
-
-}
-
-function removeUser(index){
-
-  users.splice(index,1);
-
-  saveData();
-
-  render();
-
-}
-
-render();
-
-</script>
-
-</body>
-</html>
