@@ -1,83 +1,80 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>귀여운 실시간 시계</title>
 
-export default function CuteClockSite() {
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#ffd6ec;
+      font-family:'Arial Rounded MT Bold', sans-serif;
+      overflow:hidden;
+    }
 
-  return (
-    <div className="min-h-screen bg-pink-100 flex items-center justify-center p-4 overflow-hidden relative">
-      <div className="absolute w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-40 top-10 left-10 animate-pulse"></div>
-      <div className="absolute w-72 h-72 bg-sky-300 rounded-full blur-3xl opacity-40 bottom-10 right-10 animate-pulse"></div>
+    .clock-box{
+      background:white;
+      padding:40px 60px;
+      border-radius:35px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.15);
+      text-align:center;
+    }
 
-      <div className="relative bg-white/70 backdrop-blur-xl border-4 border-white rounded-[40px] shadow-2xl px-10 py-12 text-center max-w-md w-full">
-        <div className="flex justify-center gap-2 mb-6 text-3xl">
-          <span>☁️</span>
-          <span>🩷</span>
-          <span>⭐</span>
-        </div>
+    .title{
+      font-size:28px;
+      margin-bottom:20px;
+      color:#ff4f9a;
+    }
 
-        <h1 className="text-4xl font-black text-pink-500 mb-3 tracking-wide">
-          Cute Clock
-        </h1>
+    #clock{
+      font-size:65px;
+      font-weight:bold;
+      color:#444;
+      letter-spacing:4px;
+    }
 
-        <p className="text-gray-500 mb-8 text-sm font-semibold">
-          실시간 귀여운 시계 ✨
-        </p>
+    .date{
+      margin-top:15px;
+      font-size:20px;
+      color:#777;
+    }
+  </style>
+</head>
+<body>
 
-        <ClockDisplay />
+  <div class="clock-box">
+    <div class="title">⏰ 실시간 시계</div>
+    <div id="clock">00:00:00</div>
+    <div class="date" id="date"></div>
+  </div>
 
-        <div className="mt-8 flex justify-center gap-3 text-2xl">
-          <span className="animate-bounce">🐰</span>
-          <span className="animate-bounce delay-100">🧸</span>
-          <span className="animate-bounce delay-200">🌸</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+  <script>
+    function updateClock() {
+      const now = new Date();
 
-function ClockDisplay() {
-  const [time, setTime] = React.useState(new Date());
+      let hours = String(now.getHours()).padStart(2, '0');
+      let minutes = String(now.getMinutes()).padStart(2, '0');
+      let seconds = String(now.getSeconds()).padStart(2, '0');
 
-  React.useEffect(() => {
-    const updateClock = () => {
-      setTime(new Date());
-    };
+      document.getElementById("clock").textContent =
+        `${hours}:${minutes}:${seconds}`;
+
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const day = now.getDate();
+
+      document.getElementById("date").textContent =
+        `${year}년 ${month}월 ${day}일`;
+    }
 
     updateClock();
+    setInterval(updateClock, 1000);
+  </script>
 
-    const interval = setInterval(updateClock, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return () => clearInterval(interval);
-  }, []);
-
-  const hours = String(time.getHours()).padStart(2, "0");
-  const minutes = String(time.getMinutes()).padStart(2, "0");
-  const seconds = String(time.getSeconds()).padStart(2, "0");
-
-  return (
-    <div>
-      <div className="bg-gradient-to-r from-pink-300 to-sky-300 rounded-3xl p-1 shadow-lg">
-        <div className="bg-white rounded-3xl py-8 px-4">
-          <div className="text-6xl font-black tracking-widest text-gray-700 drop-shadow-sm">
-            {hours}
-            <span className="text-pink-400 animate-pulse">:</span>
-            {minutes}
-            <span className="text-sky-400 animate-pulse">:</span>
-            {seconds}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 text-gray-500 font-bold text-lg">
-        {time.toLocaleDateString("ko-KR", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          weekday: "long",
-        })}
-      </div>
-    </div>
-  );
-}
+</body>
+</html>
