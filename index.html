@@ -2,68 +2,117 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>룰렛 스핀</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍀 행운 룰렛 🍀</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 
 <style>
+*{
+    box-sizing:border-box;
+    font-family:'Jua',sans-serif;
+}
+
 body{
-    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ffd6f5,#d6f7ff,#fff3b0);
+}
+
+.container{
+    width:320px;
     text-align:center;
-    background:#f5f5ff;
-    padding-top:50px;
+    background:white;
+    border-radius:30px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+h1{
+    color:#ff69b4;
+    margin-top:0;
+}
+
+.cute{
+    font-size:55px;
+    margin-bottom:10px;
 }
 
 .viewport{
-    width:250px;
-    height:80px;
+    width:260px;
+    height:90px;
     margin:auto;
     overflow:hidden;
-    border:4px solid #333;
-    border-radius:15px;
-    background:white;
-    position:relative;
+    border:5px solid #ffb6d9;
+    border-radius:20px;
+    background:#fffafc;
 }
 
 .track{
     display:flex;
     align-items:center;
     height:100%;
-    transition:none;
 }
 
 .item{
-    min-width:250px;
-    height:80px;
+    min-width:260px;
+    height:90px;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:32px;
+    font-size:40px;
     font-weight:bold;
+}
+
+.win{
+    color:#00b050;
+}
+
+.lose{
+    color:#ff4040;
 }
 
 button{
     margin-top:20px;
+    border:none;
+    border-radius:15px;
     padding:12px 25px;
-    font-size:18px;
+    background:#ff8cc8;
+    color:white;
+    font-size:22px;
     cursor:pointer;
 }
 
+button:hover{
+    transform:scale(1.05);
+}
+
 #result{
-    margin-top:20px;
-    font-size:24px;
+    margin-top:15px;
+    font-size:30px;
 }
 </style>
 </head>
 <body>
 
-<h1>🎰 룰렛 스핀</h1>
+<div class="container">
+
+<div class="cute">🐰🍀🐻</div>
+
+<h1>행운 룰렛</h1>
 
 <div class="viewport">
     <div class="track" id="track"></div>
 </div>
 
-<button onclick="spin()">돌리기</button>
+<button onclick="spin()">🎀 돌리기 🎀</button>
 
 <div id="result"></div>
+
+</div>
 
 <script>
 
@@ -75,13 +124,24 @@ const baseItems=[
 
 const track=document.getElementById("track");
 
-for(let i=0;i<20;i++){
-    let shuffled=[...baseItems].sort(()=>Math.random()-0.5);
+for(let r=0;r<20;r++){
+
+    const shuffled=[...baseItems].sort(()=>Math.random()-0.5);
 
     shuffled.forEach(text=>{
+
         const div=document.createElement("div");
+
         div.className="item";
-        div.textContent=text;
+
+        if(text==="당첨"){
+            div.classList.add("win");
+            div.innerHTML="🍀 당첨 🍀";
+        }else{
+            div.classList.add("lose");
+            div.innerHTML="💥 꽝 💥";
+        }
+
         track.appendChild(div);
     });
 }
@@ -98,19 +158,25 @@ function spin(){
 
     const target=Math.floor(Math.random()*items.length);
 
-    const move=target*250;
+    const move=target*260;
 
-    track.style.transition="transform 4s cubic-bezier(.1,.8,.2,1)";
-    track.style.transform=`translateX(-${move}px)`;
+    track.style.transition=
+    "transform 4s cubic-bezier(.15,.8,.2,1)";
+
+    track.style.transform=
+    `translateX(-${move}px)`;
 
     setTimeout(()=>{
 
-        const result=items[target].textContent;
+        const text=items[target].textContent;
 
-        document.getElementById("result").innerHTML=
-        result==="당첨"
-        ? "🎉 당첨!"
-        : "❌ 꽝";
+        if(text.includes("당첨")){
+            document.getElementById("result").innerHTML=
+            "🎉🍀 당첨! 🍀🎉";
+        }else{
+            document.getElementById("result").innerHTML=
+            "😭💥 꽝 💥😭";
+        }
 
         spinning=false;
 
