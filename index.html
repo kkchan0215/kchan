@@ -22,43 +22,35 @@ body{
     align-items:center;
     overflow:hidden;
     background:linear-gradient(
-        -45deg,
-        #ff6ec7,
-        #8b5cf6,
-        #00c6ff,
-        #00ff95,
-        #ffd93d
+        135deg,
+        #ffb6e1,
+        #d8c2ff,
+        #bdefff,
+        #c9ffd8,
+        #fff0a8
     );
-    background-size:500% 500%;
-    animation:bg 10s ease infinite;
-}
-
-@keyframes bg{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
 }
 
 .container{
     width:380px;
     text-align:center;
-    background:rgba(255,255,255,.92);
+    background:rgba(255,255,255,.95);
     border-radius:30px;
     padding:25px;
-    backdrop-filter:blur(10px);
     box-shadow:
         0 0 20px white,
-        0 0 50px #ff69b4,
-        0 0 80px #00c6ff;
+        0 0 40px #ff69b4,
+        0 0 70px #7dd3fc;
 }
 
 .top{
     font-size:55px;
+    margin-bottom:10px;
 }
 
 h1{
     color:#ff1493;
-    margin:10px 0 20px;
+    margin-bottom:20px;
 }
 
 .viewport{
@@ -76,12 +68,12 @@ h1{
 }
 
 @keyframes rainbow{
-    0%{box-shadow:0 0 25px red;}
-    20%{box-shadow:0 0 25px orange;}
-    40%{box-shadow:0 0 25px yellow;}
-    60%{box-shadow:0 0 25px lime;}
-    80%{box-shadow:0 0 25px cyan;}
-    100%{box-shadow:0 0 25px violet;}
+    0%{box-shadow:0 0 20px red;}
+    20%{box-shadow:0 0 20px orange;}
+    40%{box-shadow:0 0 20px yellow;}
+    60%{box-shadow:0 0 20px lime;}
+    80%{box-shadow:0 0 20px cyan;}
+    100%{box-shadow:0 0 20px violet;}
 }
 
 .track{
@@ -104,21 +96,21 @@ h1{
     color:#00b050;
     text-shadow:
         0 0 10px #00ff88,
-        0 0 30px #00ff88;
+        0 0 20px #00ff88;
 }
 
 .lose{
     color:#ff3333;
     text-shadow:
         0 0 10px #ff8080,
-        0 0 30px #ff8080;
+        0 0 20px #ff8080;
 }
 
 button{
     margin-top:20px;
-    padding:15px 35px;
     border:none;
     border-radius:20px;
+    padding:15px 35px;
     font-size:24px;
     color:white;
     cursor:pointer;
@@ -216,6 +208,7 @@ for(let r=0;r<40;r++){
         }
 
         track.appendChild(d);
+
     });
 }
 
@@ -256,8 +249,7 @@ function spin(){
 
         if(result.includes("당첨")){
 
-            document.getElementById("result")
-            .innerHTML=
+            document.getElementById("result").innerHTML=
             '<div id="jackpot" class="jackpot">🏆🍀 JACKPOT 🍀🏆</div>';
 
             const jackpot=
@@ -296,8 +288,7 @@ function spin(){
 
         }else{
 
-            document.getElementById("result")
-            .innerHTML=
+            document.getElementById("result").innerHTML=
             "😭💥 꽝 💥😭";
 
         }
