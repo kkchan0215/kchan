@@ -16,39 +16,73 @@
 body{
     margin:0;
     min-height:100vh;
+    overflow:hidden;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#ffd6f5,#d6f7ff,#fff3b0);
+    background:linear-gradient(-45deg,#ffd6f5,#c9f4ff,#fff3b0,#d8ffd8);
+    background-size:400% 400%;
+    animation:bgMove 10s ease infinite;
+}
+
+@keyframes bgMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+.star{
+    position:fixed;
+    animation:float 8s linear infinite;
+    pointer-events:none;
+}
+
+@keyframes float{
+    from{
+        transform:translateY(110vh) rotate(0deg);
+        opacity:0;
+    }
+    20%{
+        opacity:1;
+    }
+    to{
+        transform:translateY(-120vh) rotate(360deg);
+        opacity:0;
+    }
 }
 
 .container{
-    width:320px;
+    width:340px;
     text-align:center;
-    background:white;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(10px);
     border-radius:30px;
     padding:25px;
-    box-shadow:0 10px 30px rgba(0,0,0,.15);
+    box-shadow:
+    0 0 20px #ff8fd9,
+    0 0 50px #9be7ff,
+    0 0 80px #ffe37d;
 }
 
 h1{
-    color:#ff69b4;
-    margin-top:0;
+    color:#ff5db1;
+    margin-bottom:10px;
 }
 
-.cute{
-    font-size:55px;
+.top{
+    font-size:50px;
     margin-bottom:10px;
 }
 
 .viewport{
-    width:260px;
+    width:280px;
     height:90px;
-    margin:auto;
     overflow:hidden;
-    border:5px solid #ffb6d9;
+    margin:auto;
     border-radius:20px;
-    background:#fffafc;
+    border:5px solid #ff9ad8;
+    background:white;
+    box-shadow:0 0 20px #ff9ad8;
 }
 
 .track{
@@ -58,41 +92,83 @@ h1{
 }
 
 .item{
-    min-width:260px;
+    min-width:280px;
     height:90px;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:40px;
-    font-weight:bold;
+    font-size:38px;
 }
 
 .win{
     color:#00b050;
+    text-shadow:
+    0 0 10px #00ff88,
+    0 0 20px #00ff88;
 }
 
 .lose{
     color:#ff4040;
+    text-shadow:
+    0 0 10px #ff8080,
+    0 0 20px #ff8080;
 }
 
 button{
     margin-top:20px;
     border:none;
-    border-radius:15px;
-    padding:12px 25px;
-    background:#ff8cc8;
+    border-radius:20px;
+    padding:14px 30px;
+    font-size:24px;
     color:white;
-    font-size:22px;
+    background:linear-gradient(45deg,#ff7ac8,#ff9e5d);
     cursor:pointer;
+    transition:.2s;
 }
 
 button:hover{
-    transform:scale(1.05);
+    transform:scale(1.08);
 }
 
 #result{
     margin-top:15px;
-    font-size:30px;
+    font-size:34px;
+    min-height:50px;
+}
+
+.jackpot{
+    animation:glow .8s infinite alternate;
+}
+
+@keyframes glow{
+    from{
+        text-shadow:
+        0 0 10px #fff,
+        0 0 20px #00ff88;
+    }
+    to{
+        text-shadow:
+        0 0 20px #fff,
+        0 0 50px #00ff88;
+    }
+}
+
+.firework{
+    position:fixed;
+    font-size:45px;
+    animation:boom 1.5s forwards;
+    pointer-events:none;
+}
+
+@keyframes boom{
+    from{
+        transform:scale(0);
+        opacity:1;
+    }
+    to{
+        transform:scale(4);
+        opacity:0;
+    }
 }
 </style>
 </head>
@@ -100,7 +176,7 @@ button:hover{
 
 <div class="container">
 
-<div class="cute">🐰🍀🐻</div>
+<div class="top">🐰🍀🐻</div>
 
 <h1>행운 룰렛</h1>
 
@@ -108,7 +184,7 @@ button:hover{
     <div class="track" id="track"></div>
 </div>
 
-<button onclick="spin()">🎀 돌리기 🎀</button>
+<button onclick="spin()">🎰 돌리기</button>
 
 <div id="result"></div>
 
@@ -116,7 +192,18 @@ button:hover{
 
 <script>
 
-const baseItems=[
+for(let i=0;i<30;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    s.innerHTML=Math.random()>0.5?"⭐":"✨";
+    s.style.left=Math.random()*100+"vw";
+    s.style.fontSize=(15+Math.random()*25)+"px";
+    s.style.animationDuration=(5+Math.random()*8)+"s";
+    s.style.animationDelay=Math.random()*5+"s";
+    document.body.appendChild(s);
+}
+
+const itemsBase=[
 "꽝","꽝","꽝","꽝","꽝",
 "꽝","꽝","꽝","꽝","꽝",
 "당첨","당첨","당첨","당첨","당첨"
@@ -124,26 +211,29 @@ const baseItems=[
 
 const track=document.getElementById("track");
 
-for(let r=0;r<20;r++){
+for(let r=0;r<40;r++){
 
-    const shuffled=[...baseItems].sort(()=>Math.random()-0.5);
+    const mix=[...itemsBase]
+    .sort(()=>Math.random()-0.5);
 
-    shuffled.forEach(text=>{
+    mix.forEach(t=>{
 
-        const div=document.createElement("div");
+        const d=document.createElement("div");
 
-        div.className="item";
+        d.className="item";
 
-        if(text==="당첨"){
-            div.classList.add("win");
-            div.innerHTML="🍀 당첨 🍀";
+        if(t==="당첨"){
+            d.classList.add("win");
+            d.innerHTML="🍀 당첨 🍀";
         }else{
-            div.classList.add("lose");
-            div.innerHTML="💥 꽝 💥";
+            d.classList.add("lose");
+            d.innerHTML="💥 꽝 💥";
         }
 
-        track.appendChild(div);
+        track.appendChild(d);
+
     });
+
 }
 
 let spinning=false;
@@ -154,33 +244,59 @@ function spin(){
 
     spinning=true;
 
+    document.getElementById("result").innerHTML="";
+
     const items=document.querySelectorAll(".item");
 
     const target=Math.floor(Math.random()*items.length);
 
-    const move=target*260;
+    const move=target*280;
 
     track.style.transition=
-    "transform 4s cubic-bezier(.15,.8,.2,1)";
+    "transform 5s cubic-bezier(.12,.85,.18,1)";
 
     track.style.transform=
     `translateX(-${move}px)`;
 
     setTimeout(()=>{
 
-        const text=items[target].textContent;
+        const result=items[target].textContent;
 
-        if(text.includes("당첨")){
+        if(result.includes("당첨")){
+
             document.getElementById("result").innerHTML=
-            "🎉🍀 당첨! 🍀🎉";
+            '<div class="jackpot">🏆🍀 JACKPOT 🍀🏆</div>';
+
+            for(let i=0;i<20;i++){
+
+                const f=document.createElement("div");
+
+                f.className="firework";
+
+                f.innerHTML=
+                ["🎉","✨","🎊","🌟"][Math.floor(Math.random()*4)];
+
+                f.style.left=Math.random()*100+"vw";
+                f.style.top=Math.random()*100+"vh";
+
+                document.body.appendChild(f);
+
+                setTimeout(()=>{
+                    f.remove();
+                },1500);
+            }
+
         }else{
+
             document.getElementById("result").innerHTML=
             "😭💥 꽝 💥😭";
+
         }
 
         spinning=false;
 
-    },4000);
+    },5000);
+
 }
 
 </script>
