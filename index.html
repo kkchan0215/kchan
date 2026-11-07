@@ -1,53 +1,81 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NEON COAST · JAVE TOWER</title>
+<title>NEON COAST — FUTURE CITY</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020817;color:#eafaff;font-family:'Noto Sans KR',sans-serif}
+body{margin:0;overflow:hidden;background:#061426;color:white;font-family:'Noto Sans KR',sans-serif}
 canvas{display:block}
-.panel{background:linear-gradient(135deg,rgba(7,24,48,.9),rgba(5,12,28,.75));border:1px solid rgba(100,220,255,.28);box-shadow:0 0 25px rgba(0,180,255,.08);backdrop-filter:blur(12px);border-radius:14px}
 #hud{position:fixed;inset:0;pointer-events:none}
-#brand{position:absolute;left:20px;top:18px;padding:13px 17px}
-.logo{font:800 20px Orbitron;letter-spacing:2px}
-.sub{font:10px Orbitron;letter-spacing:3px;color:#61dfff;margin-top:5px}
-#stats{position:absolute;right:20px;top:18px;display:flex;gap:8px}
-.stat{padding:10px 13px;min-width:90px;text-align:center}
-.stat b{display:block;font:700 17px Orbitron;color:#8ceeff}
-.stat span{display:block;font-size:10px;color:#8caec5;margin-top:4px}
-#help{position:absolute;left:20px;bottom:18px;padding:13px 16px;font-size:11px;line-height:1.9;color:#b5d4e8}
-#help strong{color:#71eaff}
-#crosshair{position:absolute;left:50%;top:50%;width:12px;height:12px;transform:translate(-50%,-50%)}
-#crosshair:before,#crosshair:after{content:"";position:absolute;background:#9af3ff;box-shadow:0 0 7px #49dfff}
-#crosshair:before{width:12px;height:1px;top:5px}
-#crosshair:after{height:12px;width:1px;left:5px}
-#prompt{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);padding:10px 16px;border-radius:30px;background:rgba(3,17,35,.9);border:1px solid #67e8ff;font-size:12px;opacity:0;transition:.2s}
-#prompt.show{opacity:1}
-#start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 42%,rgba(20,79,117,.25),rgba(1,6,18,.96) 65%);z-index:5}
-.start-card{width:min(520px,calc(100% - 34px));padding:34px;text-align:center;border-radius:22px;background:linear-gradient(145deg,rgba(8,31,57,.96),rgba(3,12,27,.96));border:1px solid rgba(103,224,255,.36);box-shadow:0 0 80px rgba(0,174,255,.15)}
-.start-card h1{font:800 clamp(25px,5vw,40px) Orbitron;letter-spacing:3px;margin:0;text-shadow:0 0 25px #4ddcff}
-.start-card h2{font-size:12px;letter-spacing:5px;color:#70e6ff;font-weight:500;margin:10px 0 22px}
-.start-card p{font-size:13px;line-height:1.8;color:#aac7dc;margin-bottom:23px}
-button{border:1px solid rgba(125,239,255,.6);border-radius:10px;padding:12px 20px;color:#eaffff;background:linear-gradient(100deg,#087da4,#1553a4);font:700 12px 'Noto Sans KR';cursor:pointer}
-button:hover{filter:brightness(1.2)}
-#elevator{display:none;position:fixed;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);width:min(360px,calc(100% - 30px));padding:20px;pointer-events:auto}
-#elevator h3{margin:0 0 5px;font:700 17px Orbitron;color:#9df2ff}
-#elevator p{margin:0 0 15px;font-size:11px;color:#9db9cf}
-#floors{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-height:300px;overflow:auto}
-#floors button{padding:10px 4px;font-size:11px}
-#closeElevator{margin-top:12px;width:100%;background:rgba(20,37,58,.9)}
-#toast{position:fixed;left:50%;top:82px;transform:translateX(-50%);padding:9px 14px;border:1px solid rgba(103,232,255,.3);border-radius:30px;background:rgba(4,18,35,.9);font-size:11px;color:#b8f6ff;opacity:0;transition:.25s;pointer-events:none;z-index:8}
-#toast.on{opacity:1}
-#quality{position:absolute;right:20px;bottom:18px;pointer-events:auto;background:rgba(6,26,47,.9);padding:9px 13px;font-size:10px}
+#top{
+ position:absolute;left:25px;top:20px;
+ padding:15px 20px;border:1px solid #5ceaff55;
+ background:linear-gradient(120deg,#071d35dd,#0c3452aa);
+ backdrop-filter:blur(12px);border-radius:14px;
+ box-shadow:0 0 25px #27cfff22
+}
+.logo{font:800 23px Orbitron;letter-spacing:3px;color:#8af3ff}
+.sub{font:10px Orbitron;letter-spacing:3px;color:#82b9d3;margin-top:5px}
+#stats{position:absolute;right:25px;top:20px;display:flex;gap:9px}
+.stat{padding:12px 15px;background:#071b30d9;border:1px solid #56dfff55;border-radius:11px;min-width:85px;text-align:center}
+.stat b{display:block;font:700 18px Orbitron;color:#8df2ff}
+.stat span{font-size:10px;color:#a8c8d9;letter-spacing:1px}
+#help{
+ position:absolute;left:25px;bottom:24px;
+ padding:13px 17px;background:#071a2cdd;border:1px solid #57dfff44;
+ border-radius:12px;color:#c5e9f4;font-size:12px;line-height:2
+}
+kbd{padding:3px 7px;background:#153b56;border:1px solid #6cdff477;border-radius:5px;color:#fff}
+#crosshair{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%)}
+#crosshair:before,#crosshair:after{content:"";position:absolute;background:#bafaff;box-shadow:0 0 8px #48eaff}
+#crosshair:before{width:2px;height:18px;left:8px}
+#crosshair:after{height:2px;width:18px;top:8px}
+#notice{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);font-size:12px;color:#b9edff;text-shadow:0 0 10px #00bfff}
+#start,#elevator{
+ position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(ellipse at center,#123c5a99,#020b18ee);
+ z-index:5
+}
+.panel{
+ width:min(520px,90vw);padding:35px;text-align:center;
+ border:1px solid #69eaff77;border-radius:22px;
+ background:linear-gradient(145deg,#0b2843f5,#061322f5);
+ box-shadow:0 0 70px #00cfff25, inset 0 0 35px #2adfff0b
+}
+.panel h1{font:800 clamp(27px,5vw,42px) Orbitron;color:#9af6ff;letter-spacing:3px;margin:0 0 8px}
+.panel p{color:#b6d8e9;font-size:13px;line-height:1.8}
+.action{
+ pointer-events:auto;border:1px solid #7cf1ff;background:linear-gradient(100deg,#087ea8,#15c6df);
+ color:white;padding:13px 27px;border-radius:10px;font-weight:900;cursor:pointer;
+ box-shadow:0 0 25px #13cfff55;font-size:14px
+}
+.action:hover{filter:brightness(1.2)}
+#elevator{display:none;background:#020b18bb}
+#floorButtons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}
+.floor{
+ pointer-events:auto;background:#123957;border:1px solid #53cde9;color:#d9faff;
+ padding:12px 5px;border-radius:8px;cursor:pointer
+}
+.floor:hover{background:#087fa5}
+#closeElevator{margin-top:18px}
+#quality{
+ pointer-events:auto;position:absolute;right:25px;bottom:24px;
+ background:#09233a;border:1px solid #4bdcff88;color:#a9efff;
+ padding:9px 13px;border-radius:8px;cursor:pointer
+}
+#mobileHint{display:none}
 @media(max-width:700px){
-#stats{top:90px;left:12px;right:12px;justify-content:space-between}
-.stat{min-width:0;flex:1;padding:8px 3px}
-#brand{left:12px;top:12px}
-#help{left:12px;bottom:12px;font-size:10px}
-#quality{right:12px;bottom:12px}
+ #top{left:10px;top:10px;padding:10px}
+ .logo{font-size:16px}
+ #stats{right:10px;top:95px;gap:4px}
+ .stat{min-width:58px;padding:7px}
+ .stat b{font-size:13px}
+ #help{left:10px;bottom:10px;font-size:10px}
+ #quality{right:10px;bottom:10px}
 }
 </style>
 <script type="importmap">
@@ -55,894 +83,575 @@ button:hover{filter:brightness(1.2)}
 </script>
 </head>
 <body>
-
 <div id="hud">
- <div id="brand" class="panel">
+ <div id="top">
   <div class="logo">NEON COAST</div>
-  <div class="sub">V9 · JAVE TOWER EDITION</div>
+  <div class="sub">THE CITY OF TOMORROW</div>
  </div>
-
  <div id="stats">
-  <div class="stat panel"><b>70</b><span>BUILDINGS</span></div>
-  <div class="stat panel"><b>10</b><span>BEAM TOWERS</span></div>
-  <div class="stat panel"><b>0</b><span>CITIZENS</span></div>
-  <div class="stat panel"><b>3,966m</b><span>JAVE TOWER</span></div>
+  <div class="stat"><b>70</b><span>BUILDINGS</span></div>
+  <div class="stat"><b>10</b><span>BEAM TOWERS</span></div>
+  <div class="stat"><b>250</b><span>CITIZENS</span></div>
+  <div class="stat"><b>3,966</b><span>JAVE HEIGHT</span></div>
  </div>
-
- <div id="help" class="panel">
-  <strong>W A S D</strong> 이동　<strong>마우스</strong> 시점 회전<br>
-  <strong>SPACE</strong> 점프　<strong>SHIFT</strong> 빠르게 이동<br>
-  <strong>E</strong> 엘리베이터　<strong>ESC</strong> 마우스 해제<br>
-  <span style="color:#6b9dbb">동행 NPC 1명 · 시민 인구 0명</span>
- </div>
-
  <div id="crosshair"></div>
- <div id="prompt">E 키를 눌러 엘리베이터 이용</div>
+ <div id="help">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동　
+  <kbd>SHIFT</kbd> 달리기<br>
+  <kbd>SPACE</kbd> 점프　<kbd>E</kbd> 엘리베이터<br>
+  마우스 이동: 시점 변경　<kbd>ESC</kbd> 마우스 해제
+ </div>
+ <div id="notice">가까운 건물에서 E 키를 눌러 엘리베이터 이용</div>
  <button id="quality">품질: HIGH</button>
 </div>
 
-<div id="toast"></div>
-
-<div id="elevator" class="panel">
- <h3>VERTICAL TRANSIT</h3>
- <p id="elevatorName">JAVE TOWER · EXPRESS LIFT</p>
- <div id="floors"></div>
- <button id="closeElevator">닫기</button>
+<div id="start">
+ <div class="panel">
+  <h1>NEON COAST</h1>
+  <div class="sub">NEXT GENERATION MEGACITY</div>
+  <p>빛나는 미래 도시를 탐험해 봐.<br>제이브 타워와 70개의 초고층 빌딩이 기다리고 있어.</p>
+  <p>WASD로 이동하고 마우스로 주변을 둘러봐.</p>
+  <button class="action" id="startBtn">게임 시작하기</button>
+ </div>
 </div>
 
-<div id="start">
- <div class="start-card">
-  <h1>NEON COAST</h1>
-  <h2>JAVE TOWER · 3,966M</h2>
-  <p>빛으로 완성된 미래 해안 도시.<br>초고층 스카이라인과 거대한 빔 타워를 직접 탐험해 봐.</p>
-  <button id="enter">도시 입장하기</button>
+<div id="elevator">
+ <div class="panel">
+  <h1 style="font-size:28px">ELEVATOR</h1>
+  <p id="elevatorName">건물 엘리베이터</p>
+  <div id="floorButtons"></div>
+  <button class="action" id="closeElevator">닫기</button>
  </div>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   1. 기본 환경
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x020817);
-scene.fog=new THREE.FogExp2(0x06172b,0.000105);
+scene.background=new THREE.Color(0x07182c);
+scene.fog=new THREE.FogExp2(0x102d49,0.000055);
 
-const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,6500);
-camera.position.set(0,2,115);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,10000);
+camera.position.set(0,8,350);
 
-const renderer=new THREE.WebGLRenderer({
- antialias:false,
- powerPreference:'high-performance'
-});
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,.85));
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(Math.min(devicePixelRatio,1));
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.24;
+renderer.toneMappingExposure=1.65;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0x9bdcff,0x07101e,1.25));
-
-const moon=new THREE.DirectionalLight(0x9bcfff,1.5);
-moon.position.set(-500,900,700);
+scene.add(new THREE.HemisphereLight(0xc8edff,0x28466a,2.1));
+const moon=new THREE.DirectionalLight(0xd5edff,2.0);
+moon.position.set(-500,1000,600);
 scene.add(moon);
 
-const cityGlow=new THREE.PointLight(0x168dff,1500,1800);
-cityGlow.position.set(0,180,0);
-scene.add(cityGlow);
+const cityLight=new THREE.PointLight(0x168dff,2600,2600);
+cityLight.position.set(0,260,0);
+scene.add(cityLight);
 
-const boxGeo=new THREE.BoxGeometry(1,1,1);
+const cyan=new THREE.MeshBasicMaterial({color:0x58eaff});
+const whiteLED=new THREE.MeshBasicMaterial({color:0xdafaff});
+const darkMat=new THREE.MeshStandardMaterial({color:0x142d46,metalness:.7,roughness:.28});
+const groundMat=new THREE.MeshStandardMaterial({color:0x10263c,metalness:.35,roughness:.8});
 
-function material(color,rough=.45,metal=.35,emissive=0x000000,intensity=0){
- return new THREE.MeshStandardMaterial({
-  color,roughness:rough,metalness:metal,
-  emissive,emissiveIntensity:intensity
- });
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000),groundMat);
+ground.rotation.x=-Math.PI/2;
+ground.position.y=-2;
+scene.add(ground);
+
+/* 도로와 도시 바닥 라인 */
+const roadMat=new THREE.MeshBasicMaterial({color:0x173d5b});
+for(let x=-1400;x<=1400;x+=400){
+ const road=new THREE.Mesh(new THREE.BoxGeometry(32,.5,3000),roadMat);
+ road.position.set(x,-1,0);
+ scene.add(road);
 }
-
-const trim=material(0x68eaff,.25,.6,0x18bfff,2.2);
-const glass=material(0x183c59,.2,.65,0x062744,.5);
-const dark=material(0x101e32,.35,.72);
-const floorMat=material(0x08182b,.8,.2);
-const roadMat=material(0x0b1424,.85,.2);
-
-function box(parent,w,h,d,mat,x,y,z){
- const m=new THREE.Mesh(boxGeo,mat);
- m.scale.set(w,h,d);
- m.position.set(x,y,z);
- parent.add(m);
- return m;
+for(let z=-1200;z<=1200;z+=400){
+ const road=new THREE.Mesh(new THREE.BoxGeometry(3000,.5,32),roadMat);
+ road.position.set(0,-.8,z);
+ scene.add(road);
 }
-
-function sphere(parent,r,mat,x,y,z){
- const m=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),mat);
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   2. 바닥과 도로
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-box(scene,2600,2,2600,floorMat,0,-1.5,0);
-box(scene,6000,1,6000,material(0x03152b,.22,.7,0x00152d,.4),0,-4,0);
-
-for(let i=-8;i<=8;i++){
- box(scene,24,.15,2600,roadMat,i*120,-.35,0);
- box(scene,2600,.15,24,roadMat,0,-.34,i*120);
-
- if(i%2===0){
-  for(let j=-10;j<=10;j++){
-   box(scene,.5,.08,13,material(0xf5c96a,.6,.2,0x8c5b12,.5),i*120,-.24,j*110);
-   box(scene,13,.08,.5,material(0x4aa8cb,.5,.2,0x0d5e90,.5),j*110,-.23,i*120);
-  }
- }
-}
-
-const grid=new THREE.GridHelper(2600,100,0x16466a,0x0b2944);
-grid.position.y=-.35;
+const grid=new THREE.GridHelper(3000,100,0x247ca0,0x17425e);
+grid.position.y=-.6;
 scene.add(grid);
 
 /* 별 */
 const starGeo=new THREE.BufferGeometry();
-const starPos=[];
-
-for(let i=0;i<1400;i++){
- starPos.push(
-  (Math.random()-.5)*5200,
-  Math.random()*1500+150,
-  (Math.random()-.5)*5200
- );
+const starPositions=[];
+for(let i=0;i<900;i++){
+ starPositions.push((Math.random()-.5)*5000,500+Math.random()*1700,(Math.random()-.5)*5000);
 }
+starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPositions,3));
+scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xbcefff,size:3,sizeAttenuation:false})));
 
-starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));
+/* 건물 좌표: 중앙 랜드마크 광장 확보 */
+const xs=[-1100,-900,-700,-500,-300,300,500,700,900,1100];
+const zs=[-700,-500,-300,300,500,700,900];
+const positions=[];
+for(const z of zs)for(const x of xs)positions.push({x,z});
 
-scene.add(new THREE.Points(
- starGeo,
- new THREE.PointsMaterial({
-  color:0x9bdfff,
-  size:2.2,
-  transparent:true,
-  opacity:.8
- })
-));
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   3. 일반 건물 70개
-   높이 평균 정확히 600m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const buildings=[];
-const names=[
- 'AURORA','VELA','NOVA','ORBIT','LUMEN',
- 'SIRIUS','AZURE','SOLAR','ECLIPSE','MIRAGE',
- 'ATLAS','CIRRUS','ZENITH','POLARIS'
-];
-
-const palette=[
- 0x183b5b,0x1c3150,0x23445e,0x202e49,
- 0x16415a,0x293d5a,0x17324a
-];
-
+/* 높이 평균 정확히 600m */
 const heights=[];
-
 for(let i=0;i<35;i++){
- const a=350+Math.random()*300;
- heights.push(a,1200-a);
+ const h=350+Math.random()*300;
+ heights.push(h,1200-h);
 }
-
 for(let i=heights.length-1;i>0;i--){
  const j=Math.floor(Math.random()*(i+1));
  [heights[i],heights[j]]=[heights[j],heights[i]];
 }
 
-let buildingIndex=0;
+const buildings=[];
+const ledInstances=[];
+const elevatorTargets=[];
 
-for(let gx=-5;gx<=4;gx++){
- for(let gz=-3;gz<=3;gz++){
-  if(buildingIndex>=70)break;
+const unitBox=new THREE.BoxGeometry(1,1,1);
+const ledCount=heights.reduce((sum,h)=>sum+Math.floor(h/28)*4,0);
+const ledMesh=new THREE.InstancedMesh(unitBox,cyan,ledCount);
+ledMesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+let ledIndex=0;
 
-  const x=gx*235+(Math.random()-.5)*45;
-  const z=gz*235+(Math.random()-.5)*45;
-
-  if(Math.abs(x)<130&&Math.abs(z)<130)continue;
-
-  const h=heights[buildingIndex];
-  const w=55+Math.random()*48;
-  const d=55+Math.random()*48;
-
-  const group=new THREE.Group();
-  group.position.set(x,0,z);
-  scene.add(group);
-
-  const baseMat=material(
-   palette[Math.floor(Math.random()*palette.length)],
-   .3,.65
-  );
-
-  /* 기본 건물 */
-  box(group,w,h,d,baseMat,0,h/2,0);
-  box(group,w*.88,h*.985,d*.88,glass,0,h/2,0);
-
-  /* 네 모서리 LED */
-  for(const sx of [-1,1]){
-   for(const sz of [-1,1]){
-    box(
-     group,1.3,h,1.3,trim,
-     sx*(w/2-1),h/2,sz*(d/2-1)
-    );
-   }
-  }
-
-  /* 층별 외관 띠 */
-  for(let f=1;f<Math.floor(h/18);f++){
-   const yy=f*18;
-
-   if(f%2===0){
-    box(group,w*.94,.65,.8,trim,0,yy,d/2+.45);
-    box(group,w*.94,.65,.8,trim,0,yy,-d/2-.45);
-   }
-  }
-
-  /* 창문 */
-  const windowMat=new THREE.MeshBasicMaterial({
-   color:[0x53dfff,0x8bdcff,0xffd98c][Math.floor(Math.random()*3)],
-   transparent:true,
-   opacity:.62
-  });
-
-  for(const side of [-1,1]){
-   for(let row=0;row<Math.min(24,Math.floor(h/28));row++){
-    const yy=30+row*28;
-    if(yy>h-15)break;
-
-    for(let col=-2;col<=2;col++){
-     const xx=col*w*.15;
-
-     box(group,5,5,.5,windowMat,xx,yy,side*(d/2+.3));
-     box(group,.5,5,5,windowMat,side*(w/2+.3),yy,xx);
-    }
-   }
-  }
-
-  /* 옥상 */
-  box(group,w*.72,3,d*.72,trim,0,h+1.5,0);
-
-  const roofH=Math.max(8,h*.025);
-  box(group,w*.42,roofH,d*.42,glass,0,h+roofH/2,0);
-
-  /* 건물 이름 */
-  const name=names[buildingIndex%names.length]+' '+String(buildingIndex+1).padStart(2,'0');
-
-  /* 출입구 */
-  box(group,w*.58,13,4,trim,0,6.5,d/2+2);
-
-  /* 엘리베이터 표시 */
-  const elevatorMark=box(
-   group,8,18,8,
-   material(0x176080,.25,.7,0x26cfff,1.5),
-   w/2-10,9,d/2+4
-  );
-
-  buildings.push({
-   group,h,name,x,z,w,d
-  });
-
-  buildingIndex++;
- }
+function addLED(x,y,z,sx,sy,sz){
+ const m=new THREE.Matrix4();
+ m.compose(
+  new THREE.Vector3(x,y,z),
+  new THREE.Quaternion(),
+  new THREE.Vector3(sx,sy,sz)
+ );
+ ledMesh.setMatrixAt(ledIndex++,m);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   4. 제이브 타워 3,966m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+for(let i=0;i<70;i++){
+ const p=positions[i];
+ const h=heights[i];
+ const w=65+Math.random()*35;
+ const d=65+Math.random()*35;
+ const group=new THREE.Group();
+ group.position.set(p.x,0,p.z);
 
-const H=3966;
-const W=112;
-const D=106;
+ const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),darkMat);
+ body.position.y=h/2;
+ group.add(body);
 
+ const crown=new THREE.Mesh(
+  new THREE.BoxGeometry(w*.72,18,d*.72),
+  new THREE.MeshStandardMaterial({color:0x245575,metalness:.8,roughness:.2,emissive:0x07334d,emissiveIntensity:1.3})
+ );
+ crown.position.y=h+9;
+ group.add(crown);
+
+ /* 규칙적인 외벽 수평 LED */
+ for(let y=28;y<h;y+=28){
+  addLED(0,y,d/2+1,w*1.02,2,2);
+  addLED(0,y,-d/2-1,w*1.02,2,2);
+  addLED(w/2+1,y,0,2,2,d*1.02);
+  addLED(-w/2-1,y,0,2,2,d*1.02);
+ }
+
+ /* 건물 꼭대기 발광 포인트 */
+ const tip=new THREE.Mesh(new THREE.BoxGeometry(5,24,5),whiteLED);
+ tip.position.y=h+27;
+ group.add(tip);
+
+ /* 건물별 외부 엘리베이터 샤프트 */
+ const shaftX=w/2+9;
+ const shaft=new THREE.Mesh(
+  new THREE.BoxGeometry(10,h,12),
+  new THREE.MeshBasicMaterial({color:0x123d58,transparent:true,opacity:.8})
+ );
+ shaft.position.set(shaftX,h/2,0);
+ group.add(shaft);
+
+ const shaftLine=new THREE.Mesh(
+  new THREE.BoxGeometry(2,h,14),
+  whiteLED
+ );
+ shaftLine.position.set(shaftX,h/2,0);
+ group.add(shaftLine);
+
+ const door=new THREE.Mesh(
+  new THREE.BoxGeometry(12,15,2),
+  new THREE.MeshBasicMaterial({color:0x42eaff})
+ );
+ door.position.set(shaftX,8,7);
+ group.add(door);
+
+ scene.add(group);
+ buildings.push({group,x:p.x,z:p.z,h,w,d,name:`NEON ${String(i+1).padStart(2,'0')} TOWER`});
+ elevatorTargets.push({x:p.x,z:p.z,h,name:`NEON ${String(i+1).padStart(2,'0')} TOWER`});
+}
+scene.add(ledMesh);
+
+/* 제이브 타워 */
 const jave=new THREE.Group();
+jave.position.set(0,0,0);
 scene.add(jave);
 
-box(jave,W,H,D,material(0x183a58,.22,.75),0,H/2,0);
-box(jave,W*.94,H*.99,D*.94,material(0x12334e,.2,.7,0x052a45,.8),0,H/2,0);
-
-/* 수직 LED 라인 */
-for(const sx of [-1,1]){
- for(const sz of [-1,1]){
-  box(
-   jave,3,H,3,trim,
-   sx*(W/2-4),H/2,sz*(D/2-4)
-  );
- }
-}
-
-/* 층별 수평 LED */
-for(let y=160;y<H-80;y+=105){
- const ratio=1-.000035*y;
- box(
-  jave,W*ratio,.95,D*ratio,
-  material(0x65dfff,.2,.5,0x1bcaff,2),
-  0,y,0
- );
-}
-
-/* 중간 전망대 */
-for(let k=0;k<4;k++){
- const y=H*(.48+k*.105);
- const width=W*(1-k*.055);
-
- box(jave,width+12,5,D+12,trim,0,y,0);
-}
-
-/* 고급스러운 옥상 */
-const crown=new THREE.Group();
-crown.position.y=H;
-jave.add(crown);
-
-box(
- crown,W*.72,38,D*.72,
- material(0x1b4564,.2,.8,0x0c4a70,1.5),
- 0,19,0
-);
-
-for(let i=-2;i<=2;i++){
- box(crown,2,125,2,trim,i*15,100,0);
-}
-
-const spire=new THREE.Mesh(
- new THREE.ConeGeometry(12,250,8),
+const JH=3966,JW=120,JD=120;
+const javeBody=new THREE.Mesh(
+ new THREE.BoxGeometry(JW,JH,JD),
  new THREE.MeshStandardMaterial({
-  color:0x7defff,
-  emissive:0x2adfff,
-  emissiveIntensity:3,
-  metalness:.5,
-  roughness:.2
+  color:0x102d49,metalness:.82,roughness:.18,
+  emissive:0x073a55,emissiveIntensity:1.8
  })
 );
-spire.position.y=250;
-crown.add(spire);
+javeBody.position.y=JH/2;
+jave.add(javeBody);
 
-/* 전면 LED */
-for(let side of [-1,1]){
- for(let i=0;i<7;i++){
-  box(
-   jave,2,H*.93,1.2,trim,
-   (i-3)*13,H*.49,side*(D/2+1)
-  );
+/* 랜드마크 층별 초고휘도 LED */
+const javeLineMat=new THREE.MeshBasicMaterial({color:0x55f5ff});
+const javeWhiteMat=new THREE.MeshBasicMaterial({color:0xe6fdff});
+for(let y=45;y<JH;y+=48){
+ const ratio=1-(y/JH)*.13;
+ for(const side of [-1,1]){
+  const front=new THREE.Mesh(new THREE.BoxGeometry(JW*ratio,4,3),javeLineMat);
+  front.position.set(0,y,side*(JD/2+2));
+  jave.add(front);
+  const sideLine=new THREE.Mesh(new THREE.BoxGeometry(3,4,JD*ratio),javeLineMat);
+  sideLine.position.set(side*(JW/2+2),y,0);
+  jave.add(sideLine);
  }
 }
+for(const sx of [-1,1])for(const sz of [-1,1]){
+ const edge=new THREE.Mesh(new THREE.BoxGeometry(5,JH,5),javeWhiteMat);
+ edge.position.set(sx*(JW/2-4),JH/2,sz*(JD/2-4));
+ jave.add(edge);
+}
 
-/* 제이브 타워 간판 */
-const signCanvas=document.createElement('canvas');
-signCanvas.width=1024;
-signCanvas.height=256;
-
-const ctx=signCanvas.getContext('2d');
-ctx.fillStyle='#061a2d';
-ctx.fillRect(0,0,1024,256);
-ctx.strokeStyle='#7beeff';
-ctx.lineWidth=8;
-ctx.strokeRect(8,8,1008,240);
-ctx.fillStyle='#d9fbff';
-ctx.font='bold 112px Arial';
-ctx.textAlign='center';
-ctx.fillText('JAVE TOWER',512,164);
-
-const signTex=new THREE.CanvasTexture(signCanvas);
-
-const sign=new THREE.Mesh(
- new THREE.PlaneGeometry(88,22),
- new THREE.MeshBasicMaterial({map:signTex,transparent:true})
+/* 타워 꼭대기 크라운 */
+const crown=new THREE.Mesh(
+ new THREE.CylinderGeometry(42,85,100,8),
+ new THREE.MeshStandardMaterial({color:0x2b7899,metalness:.85,roughness:.15,emissive:0x147da0,emissiveIntensity:2})
 );
+crown.position.y=JH+45;
+jave.add(crown);
 
-sign.position.set(0,H*.72,D/2+2);
+const crownRing=new THREE.Mesh(new THREE.TorusGeometry(72,5,8,64),javeWhiteMat);
+crownRing.rotation.x=Math.PI/2;
+crownRing.position.y=JH+75;
+jave.add(crownRing);
+
+/* 랜드마크 간판 */
+function makeTextTexture(text){
+ const c=document.createElement('canvas');
+ c.width=1024;c.height=256;
+ const ctx=c.getContext('2d');
+ ctx.clearRect(0,0,1024,256);
+ ctx.font='bold 125px Orbitron, sans-serif';
+ ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.shadowColor='#3cecff';ctx.shadowBlur=35;
+ ctx.fillStyle='#e8fdff';ctx.fillText(text,512,128);
+ const tex=new THREE.CanvasTexture(c);
+ return tex;
+}
+const sign=new THREE.Mesh(
+ new THREE.PlaneGeometry(100,25),
+ new THREE.MeshBasicMaterial({map:makeTextTexture('JAVE TOWER'),transparent:true})
+);
+sign.position.set(0,300,JD/2+4);
 jave.add(sign);
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   5. LED 태극기
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const flagGroup=new THREE.Group();
-flagGroup.position.set(100,185,10);
-scene.add(flagGroup);
-
-const pole=new THREE.Mesh(
- new THREE.CylinderGeometry(1.8,2.5,230,10),
- material(0x9ab8ca,.3,.8)
-);
-pole.position.y=115;
-flagGroup.add(pole);
-
+/* 거대한 태극기 */
 const flagCanvas=document.createElement('canvas');
-flagCanvas.width=900;
-flagCanvas.height=600;
-
+flagCanvas.width=600;flagCanvas.height=400;
 const fc=flagCanvas.getContext('2d');
-fc.fillStyle='#f4f8ff';
-fc.fillRect(0,0,900,600);
-
-fc.save();
-fc.translate(450,300);
-
-fc.fillStyle='#cd2e45';
-fc.beginPath();
-fc.arc(0,-36,118,Math.PI,0);
-fc.bezierCurveTo(118,92,-118,92,-118,-36);
-fc.fill();
-
-fc.fillStyle='#0047a0';
-fc.beginPath();
-fc.arc(0,36,118,0,Math.PI);
-fc.bezierCurveTo(-118,-92,118,-92,118,36);
-fc.fill();
-
-fc.restore();
-
-function trigram(x,y,rot){
- fc.save();
- fc.translate(x,y);
- fc.rotate(rot);
+fc.fillStyle='#f8fbff';fc.fillRect(0,0,600,400);
+fc.fillStyle='#d92836';fc.beginPath();fc.arc(300,200,90,Math.PI,0);fc.fill();
+fc.fillStyle='#1456a3';fc.beginPath();fc.arc(300,200,90,0,Math.PI);fc.fill();
+fc.fillStyle='#d92836';fc.beginPath();fc.arc(300,155,45,0,Math.PI*2);fc.fill();
+fc.fillStyle='#1456a3';fc.beginPath();fc.arc(300,245,45,0,Math.PI*2);fc.fill();
+function trigram(x,y,vertical=false){
  fc.fillStyle='#111';
-
- for(let i=0;i<3;i++){
-  fc.fillRect(-60,(i-1)*24,120,12);
+ for(let k=0;k<3;k++){
+  if(vertical){
+   fc.fillRect(x+k*17,y,9,90);
+  }else{
+   fc.fillRect(x,y+k*17,90,9);
+  }
  }
-
- fc.restore();
 }
+trigram(85,65);trigram(425,65);trigram(85,285);trigram(425,285);
+const flagTexture=new THREE.CanvasTexture(flagCanvas);
+const flagGeo=new THREE.PlaneGeometry(210,140,24,16);
+const flag=new THREE.Mesh(flagGeo,new THREE.MeshBasicMaterial({map:flagTexture,side:THREE.DoubleSide}));
+flag.position.set(0,1800,JD/2+7);
+jave.add(flag);
+const flagOriginal=flagGeo.attributes.position.array.slice();
 
-trigram(205,130,-.55);
-trigram(695,470,-.55);
-trigram(695,130,.55);
-trigram(205,470,.55);
+/* 제이브 타워 엘리베이터 */
+const javeShaft=new THREE.Mesh(
+ new THREE.BoxGeometry(16,JH,18),
+ new THREE.MeshBasicMaterial({color:0x1b718f,transparent:true,opacity:.9})
+);
+javeShaft.position.set(JW/2+15,JH/2,0);
+jave.add(javeShaft);
+const javeShaftLine=new THREE.Mesh(new THREE.BoxGeometry(3,JH,20),javeWhiteMat);
+javeShaftLine.position.set(JW/2+15,JH/2,0);
+jave.add(javeShaftLine);
+elevatorTargets.push({x:0,z:0,h:JH,name:'JAVE TOWER'});
 
-const flagTex=new THREE.CanvasTexture(flagCanvas);
-flagTex.colorSpace=THREE.SRGBColorSpace;
-
-const flagGeo=new THREE.PlaneGeometry(170,113,32,16);
-
-const flagMat=new THREE.MeshStandardMaterial({
- map:flagTex,
- emissive:0xffffff,
- emissiveMap:flagTex,
- emissiveIntensity:.72,
- side:THREE.DoubleSide,
- roughness:.55
-});
-
-const flag=new THREE.Mesh(flagGeo,flagMat);
-flag.position.set(86,175,0);
-flagGroup.add(flag);
-
-const flagBase=flagGeo.attributes.position.clone();
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   6. 빔 타워 10개
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const beams=[];
-
-for(let i=0;i<10;i++){
- const angle=i*Math.PI*2/10;
- const r=850;
-
- const x=Math.cos(angle)*r;
- const z=Math.sin(angle)*r;
-
+/* 빔 타워 10개 */
+const beamPositions=[
+ [-1250,-950],[-650,-1100],[0,-1250],[650,-1100],[1250,-950],
+ [-1250,950],[-650,1100],[0,1250],[650,1100],[1250,950]
+];
+const beamMat=new THREE.MeshBasicMaterial({color:0x42eaff});
+const beamCoreMat=new THREE.MeshBasicMaterial({color:0xd9fcff});
+for(const [x,z] of beamPositions){
  const tower=new THREE.Group();
  tower.position.set(x,0,z);
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(16,25,100,12),darkMat);
+ base.position.y=50;tower.add(base);
+ const core=new THREE.Mesh(new THREE.CylinderGeometry(4,8,130,10),beamCoreMat);
+ core.position.y=115;tower.add(core);
+ const beam=new THREE.Mesh(
+  new THREE.ConeGeometry(150,1800,24,1,true),
+  new THREE.MeshBasicMaterial({color:0x29cfff,transparent:true,opacity:.105,depthWrite:false,side:THREE.DoubleSide})
+ );
+ beam.position.y=1050;
+ beam.rotation.z=Math.PI;
+ tower.add(beam);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(28,3,8,32),beamMat);
+ ring.rotation.x=Math.PI/2;ring.position.y=130;tower.add(ring);
  scene.add(tower);
+}
 
- box(tower,26,240,26,material(0x142f4b,.3,.7),0,120,0);
+/* 시민 250명: InstancedMesh로 처리 */
+const citizenCount=250;
+const bodyGeo=new THREE.CapsuleGeometry(2.1,6,3,6);
+const headGeo=new THREE.SphereGeometry(2.1,8,6);
+const bodyMat=new THREE.MeshStandardMaterial({color:0x49b9d8,emissive:0x092a3a,roughness:.8});
+const headMat=new THREE.MeshStandardMaterial({color:0xd9eaff,roughness:.9});
+const citizensBody=new THREE.InstancedMesh(bodyGeo,bodyMat,citizenCount);
+const citizensHead=new THREE.InstancedMesh(headGeo,headMat,citizenCount);
+const citizenData=[];
+const dummy=new THREE.Object3D();
 
- for(let q=-1;q<=1;q++){
-  box(tower,2,240,2,trim,q*10,120,14);
- }
-
- box(tower,42,8,42,trim,0,244,0);
-
- const beamGroup=new THREE.Group();
- beamGroup.position.y=250;
- tower.add(beamGroup);
-
- const beamGeo=new THREE.CylinderGeometry(7,42,1050,18,1,true);
-
- const beamMat=new THREE.MeshBasicMaterial({
-  color:0x38dfff,
-  transparent:true,
-  opacity:.18,
-  side:THREE.DoubleSide,
-  depthWrite:false
+for(let i=0;i<citizenCount;i++){
+ const x=(Math.random()-.5)*2600;
+ const z=(Math.random()-.5)*2600;
+ citizenData.push({
+  x,z,angle:Math.random()*Math.PI*2,
+  speed:8+Math.random()*13,
+  phase:Math.random()*6.28,
+  next:0
  });
-
- const beam=new THREE.Mesh(beamGeo,beamMat);
- beam.position.y=525;
- beamGroup.add(beam);
-
- const core=new THREE.Mesh(
-  new THREE.CylinderGeometry(2.5,13,1030,12,1,true),
-  new THREE.MeshBasicMaterial({
-   color:0x9bf5ff,
-   transparent:true,
-   opacity:.23,
-   side:THREE.DoubleSide,
-   depthWrite:false
-  })
- );
-
- core.position.y=525;
- beamGroup.add(core);
-
- beams.push({
-  beamGroup,beam,core,phase:i*.8
- });
+ dummy.position.set(x,5,z);dummy.rotation.y=0;dummy.updateMatrix();
+ citizensBody.setMatrixAt(i,dummy.matrix);
+ dummy.position.set(x,11,z);dummy.updateMatrix();
+ citizensHead.setMatrixAt(i,dummy.matrix);
 }
+scene.add(citizensBody,citizensHead);
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   7. 동행 NPC
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* 플레이어와 동행 NPC */
+const player={x:0,y:3,z:350,vy:0};
+const companion=new THREE.Group();
+const companionBody=new THREE.Mesh(new THREE.CapsuleGeometry(2.8,7,4,8),new THREE.MeshStandardMaterial({color:0x263f65,emissive:0x06152b}));
+companionBody.position.y=6;
+companion.add(companionBody);
+const companionHead=new THREE.Mesh(new THREE.SphereGeometry(2.6,12,10),new THREE.MeshStandardMaterial({color:0xf0c6a8}));
+companionHead.position.y=13;
+companion.add(companionHead);
+const companionLight=new THREE.PointLight(0x39dfff,25,45);
+companionLight.position.y=10;companion.add(companionLight);
+scene.add(companion);
 
-const npc=new THREE.Group();
-scene.add(npc);
-
-const skin=material(0xd5a27e,.8,.05);
-const jacket=material(0x152b46,.55,.35);
-const pants=material(0x101b2d,.65,.2);
-const shoe=material(0x07101d,.6,.25);
-const hairMat=material(0x17202d,.9,.05);
-
-function limb(parent,r1,r2,len,mat,x,y,z){
- const m=new THREE.Mesh(
-  new THREE.CylinderGeometry(r1,r2,len,9),
-  mat
- );
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
-
-limb(npc,.43,.55,1.15,jacket,0,1.55,0);
-sphere(npc,.36,skin,0,2.35,0);
-
-const hair=sphere(npc,.37,hairMat,0,2.55,-.035);
-hair.scale.set(1,.55,1);
-
-for(const s of [-1,1]){
- limb(npc,.14,.18,.95,jacket,s*.57,1.62,0).rotation.z=s*.18;
- sphere(npc,.15,skin,s*.61,1.1,0);
- limb(npc,.22,.25,.95,pants,s*.23,.55,0);
- limb(npc,.18,.2,.25,shoe,s*.23,.12,.08);
-}
-
-const npcLight=new THREE.PointLight(0x46dfff,2,8);
-npcLight.position.set(0,2.1,.5);
-npc.add(npcLight);
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   8. 플레이어와 조작
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-const player={
- pos:new THREE.Vector3(0,2,115),
- vel:new THREE.Vector3(),
- yaw:0,
- pitch:0,
- onGround:true
-};
-
+/* 키보드와 시점 */
 const keys={};
-
-let locked=false;
-let quality=true;
-let nearBuilding=null;
-let elevatorOpen=false;
-
+let yaw=0,pitch=0;
+let playing=false,elevatorOpen=false;
 const start=document.getElementById('start');
-const prompt=document.getElementById('prompt');
-const elevator=document.getElementById('elevator');
-const toast=document.getElementById('toast');
+const elevatorUI=document.getElementById('elevator');
 
-function notify(text){
- toast.textContent=text;
- toast.classList.add('on');
- setTimeout(()=>toast.classList.remove('on'),1800);
-}
-
-document.getElementById('enter').onclick=()=>{
+function beginGame(){
+ playing=true;
  start.style.display='none';
- renderer.domElement.requestPointerLock();
-};
+ renderer.domElement.requestPointerLock?.();
+}
+document.getElementById('startBtn').addEventListener('click',beginGame);
 
 document.addEventListener('pointerlockchange',()=>{
- locked=document.pointerLockElement===renderer.domElement;
+ if(document.pointerLockElement===renderer.domElement){
+  start.style.display='none';
+ }
 });
-
+renderer.domElement.addEventListener('click',()=>{
+ if(playing&&!elevatorOpen&&document.pointerLockElement!==renderer.domElement){
+  renderer.domElement.requestPointerLock?.();
+ }
+});
 document.addEventListener('mousemove',e=>{
- if(!locked||elevatorOpen)return;
-
- player.yaw-=e.movementX*.0021;
- player.pitch-=e.movementY*.0018;
-
- player.pitch=Math.max(-1.35,Math.min(1.35,player.pitch));
+ if(document.pointerLockElement===renderer.domElement){
+  yaw-=e.movementX*.002;
+  pitch-=e.movementY*.002;
+  pitch=Math.max(-1.35,Math.min(1.35,pitch));
+ }
 });
-
 document.addEventListener('keydown',e=>{
  keys[e.code]=true;
-
- if(e.code==='Space')e.preventDefault();
-
- if(e.code==='KeyE'&&nearBuilding&&!elevatorOpen){
-  openElevator(nearBuilding);
- }
-
- if(e.code==='Escape'&&elevatorOpen){
-  closeElevator();
- }
+ if(e.code==='KeyE'&&playing&&!elevatorOpen)openElevator();
 });
+document.addEventListener('keyup',e=>keys[e.code]=false);
 
-document.addEventListener('keyup',e=>{
- keys[e.code]=false;
-});
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   9. 엘리베이터
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-function openElevator(building){
+/* 엘리베이터 */
+let activeElevator=null;
+function openElevator(){
+ let nearest=null,dist=Infinity;
+ for(const b of elevatorTargets){
+  const d=Math.hypot(player.x-b.x,player.z-b.z);
+  if(d<dist){dist=d;nearest=b;}
+ }
+ if(!nearest||dist>240){
+  document.getElementById('notice').textContent='엘리베이터에 가까이 다가가야 해';
+  return;
+ }
+ activeElevator=nearest;
  elevatorOpen=true;
- document.exitPointerLock();
-
- document.getElementById('elevatorName').textContent=
- building.name+' · VERTICAL TRANSIT';
-
- const floors=document.getElementById('floors');
- floors.innerHTML='';
-
- const floorList=[
-  1,5,12,20,35,50,70,90,110
- ];
-
- floorList.forEach(f=>{
-  const button=document.createElement('button');
-  button.textContent='FLOOR '+f;
-
-  button.onclick=()=>{
-   const height=Math.min(building.h-8,f*18+2);
-
-   player.pos.set(
-    building.x,
-    Math.max(2,height),
-    building.z+15
-   );
-
-   notify('FLOOR '+f+' 도착');
-   closeElevator();
-  };
-
-  floors.appendChild(button);
+ document.exitPointerLock?.();
+ elevatorUI.style.display='flex';
+ document.getElementById('elevatorName').textContent=nearest.name+' · 엘리베이터';
+ const holder=document.getElementById('floorButtons');
+ holder.innerHTML='';
+ const floorCount=Math.max(10,Math.floor(nearest.h/4));
+ const choices=[1,Math.round(floorCount*.1),Math.round(floorCount*.25),Math.round(floorCount*.4),Math.round(floorCount*.55),Math.round(floorCount*.7),Math.round(floorCount*.85),floorCount];
+ [...new Set(choices)].forEach(f=>{
+  const btn=document.createElement('button');
+  btn.className='floor';
+  btn.textContent=f+'층';
+  btn.addEventListener('click',()=>{
+   player.x=nearest.x;
+   player.z=nearest.z+32;
+   player.y=Math.min(nearest.h-5,Math.max(3,(f/floorCount)*nearest.h));
+   elevatorUI.style.display='none';
+   elevatorOpen=false;
+   document.getElementById('notice').textContent=nearest.name+' '+f+'층 도착';
+   renderer.domElement.requestPointerLock?.();
+  });
+  holder.appendChild(btn);
  });
-
- elevator.style.display='block';
 }
-
-function closeElevator(){
+document.getElementById('closeElevator').addEventListener('click',()=>{
+ elevatorUI.style.display='none';
  elevatorOpen=false;
- elevator.style.display='none';
+ renderer.domElement.requestPointerLock?.();
+});
 
- if(start.style.display==='none'){
-  renderer.domElement.requestPointerLock();
- }
-}
+/* 품질 설정 */
+let highQuality=true;
+document.getElementById('quality').addEventListener('click',()=>{
+ highQuality=!highQuality;
+ renderer.setPixelRatio(highQuality?Math.min(devicePixelRatio,1):.65);
+ renderer.setSize(innerWidth,innerHeight);
+ document.getElementById('quality').textContent='품질: '+(highQuality?'HIGH':'LOW');
+});
 
-document.getElementById('closeElevator').onclick=closeElevator;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   10. 건물 엘리베이터 시설
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-for(const b of buildings){
- const shaft=new THREE.Group();
- shaft.position.set(b.x+12,0,b.z+12);
- scene.add(shaft);
-
- const shaftHeight=Math.min(b.h,1200);
-
- box(
-  shaft,7,shaftHeight,7,
-  material(0x153d59,.25,.7,0x0b4164,.8),
-  0,shaftHeight/2,0
- );
-
- box(shaft,8,2,8,trim,0,shaftHeight,0);
-
- box(
-  shaft,14,9,14,
-  material(0x164f6d,.25,.6,0x20bfff,1.2),
-  0,5,0
- );
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   11. 애니메이션
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
+/* 시간과 애니메이션 */
 const clock=new THREE.Clock();
+const forward=new THREE.Vector3();
+const right=new THREE.Vector3();
+const move=new THREE.Vector3();
+const temp=new THREE.Object3D();
 
 function animate(){
  requestAnimationFrame(animate);
-
- const dt=Math.min(clock.getDelta(),.035);
+ const dt=Math.min(clock.getDelta(),.04);
  const t=clock.elapsedTime;
 
- /* 태극기 펄럭임 */
- const p=flagGeo.attributes.position;
-
- for(let i=0;i<p.count;i++){
-  const x=flagBase.getX(i);
-  const y=flagBase.getY(i);
-
-  p.setZ(
-   i,
-   Math.sin(x*.055+t*3.2+y*.018)*5.5*(x+85)/170
-  );
+ /* 시민 이동 */
+ for(let i=0;i<citizenCount;i++){
+  const c=citizenData[i];
+  c.next-=dt;
+  if(c.next<=0){
+   c.angle+=(Math.random()-.5)*2.4;
+   c.next=2+Math.random()*5;
+  }
+  c.x+=Math.sin(c.angle)*c.speed*dt;
+  c.z+=Math.cos(c.angle)*c.speed*dt;
+  if(Math.abs(c.x)>1450||Math.abs(c.z)>1450)c.angle+=Math.PI;
+  const bob=Math.sin(t*5+c.phase)*.7;
+  temp.position.set(c.x,5+bob,c.z);
+  temp.rotation.set(0,c.angle,0);
+  temp.updateMatrix();
+  citizensBody.setMatrixAt(i,temp.matrix);
+  temp.position.set(c.x,11+bob,c.z);
+  temp.updateMatrix();
+  citizensHead.setMatrixAt(i,temp.matrix);
  }
+ citizensBody.instanceMatrix.needsUpdate=true;
+ citizensHead.instanceMatrix.needsUpdate=true;
 
- p.needsUpdate=true;
+ /* 펄럭이는 태극기 */
+ const pos=flagGeo.attributes.position;
+ for(let i=0;i<pos.count;i++){
+  const x=flagOriginal[i*3];
+  const y=flagOriginal[i*3+1];
+  const z=flagOriginal[i*3+2];
+  pos.setZ(i,z+Math.sin(t*2.2+x*.035)*Math.abs(x)*.055+Math.sin(t*3+y*.03)*2);
+ }
+ pos.needsUpdate=true;
  flagGeo.computeVertexNormals();
 
- /* 빔 움직임 */
- beams.forEach((b,i)=>{
-  b.beamGroup.rotation.y=Math.sin(t*.34+b.phase)*.75;
-  b.beamGroup.rotation.z=Math.sin(t*.23+b.phase)*.22;
-
-  b.beam.material.opacity=
-   .13+.07*(.5+.5*Math.sin(t*2+i));
-
-  b.core.material.opacity=
-   .16+.13*(.5+.5*Math.sin(t*2.3+i));
- });
-
- /* NPC 플레이어 따라오기 */
- const behind=new THREE.Vector3(
-  -Math.sin(player.yaw)*5+Math.cos(player.yaw)*2,
-  0,
-  -Math.cos(player.yaw)*5-Math.sin(player.yaw)*2
- );
-
- const target=player.pos.clone().add(behind);
- target.y=0;
-
- const diff=target.sub(npc.position);
-
- npc.position.addScaledVector(
-  diff,
-  Math.min(1,dt*2.5)
- );
-
- npc.position.y=0;
- npc.rotation.y=player.yaw+Math.PI;
-
  /* 플레이어 이동 */
- if(locked&&!elevatorOpen){
-  const forward=new THREE.Vector3(
-   -Math.sin(player.yaw),0,-Math.cos(player.yaw)
-  );
-
-  const right=new THREE.Vector3(
-   Math.cos(player.yaw),0,-Math.sin(player.yaw)
-  );
-
-  const move=new THREE.Vector3();
-
+ if(playing&&!elevatorOpen){
+  const speed=keys.ShiftLeft||keys.ShiftRight?150:85;
+  forward.set(-Math.sin(yaw),0,-Math.cos(yaw));
+  right.set(Math.cos(yaw),0,-Math.sin(yaw));
+  move.set(0,0,0);
   if(keys.KeyW)move.add(forward);
   if(keys.KeyS)move.sub(forward);
   if(keys.KeyD)move.add(right);
   if(keys.KeyA)move.sub(right);
-
   if(move.lengthSq()>0){
-   move.normalize().multiplyScalar(
-    keys.ShiftLeft||keys.ShiftRight?95:48
-   );
+   move.normalize().multiplyScalar(speed*dt);
+   player.x+=move.x;
+   player.z+=move.z;
   }
-
-  player.pos.addScaledVector(move,dt);
-
-  if(keys.Space&&player.onGround){
-   player.vel.y=26;
-   player.onGround=false;
-  }
-
-  player.vel.y-=65*dt;
-  player.pos.y+=player.vel.y*dt;
-
-  if(player.pos.y<2){
-   player.pos.y=2;
-   player.vel.y=0;
-   player.onGround=true;
-  }
-
-  player.pos.x=Math.max(-1250,Math.min(1250,player.pos.x));
-  player.pos.z=Math.max(-1250,Math.min(1250,player.pos.z));
+  if(keys.Space&&player.y<=3.05)player.vy=90;
+  player.vy-=230*dt;
+  player.y+=player.vy*dt;
+  if(player.y<3){player.y=3;player.vy=0;}
+  player.x=THREE.MathUtils.clamp(player.x,-1800,1800);
+  player.z=THREE.MathUtils.clamp(player.z,-1800,1800);
  }
 
- camera.position.copy(player.pos);
- camera.rotation.order='YXZ';
- camera.rotation.y=player.yaw;
- camera.rotation.x=player.pitch;
-
- /* 가장 가까운 엘리베이터 탐색 */
- nearBuilding=null;
- let best=32;
-
- for(const b of buildings){
-  const d=Math.hypot(
-   player.pos.x-b.x,
-   player.pos.z-b.z
-  );
-
-  if(d<best){
-   best=d;
-   nearBuilding=b;
-  }
- }
-
- const jd=Math.hypot(player.pos.x,player.pos.z);
-
- if(jd<80&&jd<best){
-  best=jd;
-
-  nearBuilding={
-   x:0,
-   z:0,
-   h:H,
-   name:'JAVE TOWER'
-  };
- }
-
- prompt.classList.toggle(
-  'show',
-  !!nearBuilding&&!elevatorOpen
+ /* 카메라 */
+ const lookDir=new THREE.Vector3(
+  -Math.sin(yaw)*Math.cos(pitch),
+  Math.sin(pitch),
+  -Math.cos(yaw)*Math.cos(pitch)
  );
+ camera.position.set(player.x,player.y+8,player.z);
+ camera.lookAt(
+  player.x+lookDir.x*100,
+  player.y+8+lookDir.y*100,
+  player.z+lookDir.z*100
+ );
+
+ /* 동행 NPC가 플레이어 뒤를 따라옴 */
+ const followX=player.x+Math.sin(yaw+Math.PI)*32;
+ const followZ=player.z+Math.cos(yaw+Math.PI)*32;
+ companion.position.x+=(followX-companion.position.x)*Math.min(1,dt*2.5);
+ companion.position.z+=(followZ-companion.position.z)*Math.min(1,dt*2.5);
+ companion.position.y=0;
+ companion.rotation.y=yaw;
+
+ /* 빔 타워 은은한 맥동 */
+ for(let i=0;i<scene.children.length;i++){
+  const obj=scene.children[i];
+  if(obj.userData.beam) obj.material.opacity=.07+Math.sin(t*1.4)*.025;
+ }
 
  renderer.render(scene,camera);
 }
-
 animate();
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   12. 그래픽 품질 설정
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-document.getElementById('quality').onclick=()=>{
- quality=!quality;
-
- renderer.setPixelRatio(
-  Math.min(devicePixelRatio,quality?.85:.55)
- );
-
- renderer.setSize(innerWidth,innerHeight);
-
- document.getElementById('quality').textContent=
-  '품질: '+(quality?'HIGH':'LOW');
-};
 
 addEventListener('resize',()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
-
  renderer.setSize(innerWidth,innerHeight);
-
- renderer.setPixelRatio(
-  Math.min(devicePixelRatio,quality?.85:.55)
- );
 });
-
-notify('NEON COAST SYSTEM ONLINE');
-
 </script>
 </body>
 </html>
