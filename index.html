@@ -1,705 +1,472 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>🌍 나만의 세계지도</title>
-
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEON COAST V3</title>
 <style>
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,"Malgun Gothic",sans-serif;
-  background:#eef5ff;
-  color:#17263a;
-}
-
-header{
-  background:linear-gradient(135deg,#287cff,#65c7ff);
-  color:white;
-  padding:18px;
-  text-align:center;
-}
-
-header h1{
-  margin:0;
-  font-size:28px;
-}
-
-header p{
-  margin:6px 0 0;
-  font-size:13px;
-}
-
-.toolbar{
-  background:white;
-  padding:10px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  box-shadow:0 3px 12px #0001;
-  position:relative;
-  z-index:1000;
-}
-
-input,select,button{
-  border:1px solid #d5e2f2;
-  border-radius:10px;
-  padding:10px;
-  font-size:14px;
-}
-
-input{
-  min-width:180px;
-  flex:1;
-}
-
-button{
-  background:#287cff;
-  color:white;
-  border:0;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button.gray{
-  background:#718096;
-}
-
-#map{
-  height:calc(100vh - 150px);
-  min-height:550px;
-}
-
-#panel{
-  position:absolute;
-  right:15px;
-  top:150px;
-  width:270px;
-  background:white;
-  border-radius:16px;
-  box-shadow:0 8px 30px #0003;
-  padding:16px;
-  z-index:999;
-  display:none;
-}
-
-#panel h2{
-  margin:0 0 12px;
-  font-size:20px;
-}
-
-#panel label{
-  display:block;
-  margin-top:10px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-#countryColor{
-  width:100%;
-  height:42px;
-  padding:3px;
-}
-
-#countryNote{
-  width:100%;
-  margin-top:5px;
-}
-
-.panelButtons{
-  display:flex;
-  gap:7px;
-  margin-top:12px;
-}
-
-.panelButtons button{
-  flex:1;
-}
-
-.city-label{
-  background:white;
-  border:1px solid #777;
-  border-radius:5px;
-  padding:2px 5px;
-  font-size:11px;
-  box-shadow:0 1px 4px #0003;
-}
-
-.city-dot{
-  width:8px;
-  height:8px;
-  background:#e63946;
-  border:2px solid white;
-  border-radius:50%;
-  box-shadow:0 1px 4px #0005;
-}
-
-#loading{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  background:white;
-  padding:15px 20px;
-  border-radius:14px;
-  box-shadow:0 5px 20px #0003;
-  z-index:1500;
-}
-
-@media(max-width:700px){
-  #panel{
-    top:auto;
-    bottom:15px;
-    right:10px;
-    left:10px;
-    width:auto;
-  }
-
-  #map{
-    height:calc(100vh - 175px);
-  }
-}
+body{margin:0;overflow:hidden;background:#020713;color:white;font-family:Arial,"Malgun Gothic",sans-serif}
+canvas{display:block}
+#hud{position:fixed;inset:0;pointer-events:none}
+.panel{background:rgba(5,15,35,.78);border:1px solid rgba(80,210,255,.35);border-radius:15px;backdrop-filter:blur(12px);padding:13px 17px;box-shadow:0 0 25px #00aaff18}
+#brand{position:absolute;top:18px;left:18px}
+#brand b{font-size:20px;letter-spacing:3px;color:#6eeaff}
+#brand small{display:block;color:#91a9c9;margin-top:5px}
+#stats{position:absolute;right:18px;top:18px;text-align:right;font-size:12px;line-height:1.8}
+#help{position:absolute;left:18px;bottom:18px;font-size:12px;line-height:1.9;color:#b9d7ee}
+#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;color:#a8f5ff}
+#notice{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:14px;color:#bff7ff;text-shadow:0 0 10px #00cfff}
+#elevator{display:none;pointer-events:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:310px;text-align:center}
+#elevator h2{color:#73eaff;letter-spacing:3px;margin:5px}
+#floorDisplay{font-size:34px;color:white;margin:14px}
+#floors{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#floors button,#exitLift{border:1px solid #4cc9ff;background:#0a2345;color:#dffaff;padding:12px;border-radius:9px;font-size:15px;cursor:pointer}
+#floors button:hover,#exitLift:hover{background:#12618a}
+#exitLift{width:100%;margin-top:12px;background:#123b50}
+#lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,5,15,.72);pointer-events:auto}
+#lock button{border:1px solid #56e5ff;color:white;background:#06385b;padding:18px 28px;border-radius:12px;font-size:17px;cursor:pointer}
+#crosshair{position:absolute;top:50%;left:50%;width:5px;height:5px;border-radius:50%;background:white}
 </style>
 </head>
-
 <body>
-
-<header>
-  <h1>🌍 나만의 세계지도</h1>
-  <p>나라를 클릭해서 직접 색칠하고 도시도 찾아보세요!</p>
-</header>
-
-<div class="toolbar">
-
-  <input
-    id="search"
-    placeholder="🔎 나라 또는 도시 검색">
-
-  <button onclick="searchPlace()">검색</button>
-
-  <button onclick="toggleCities()">
-    🏙️ 도시 표시
-  </button>
-
-  <button onclick="resetMap()" class="gray">
-    🌎 전체보기
-  </button>
-
-  <button onclick="resetAll()" class="gray">
-    ♻️ 초기화
-  </button>
-
-</div>
-
-<div id="map"></div>
-
-<div id="loading">🌍 지도 불러오는 중...</div>
-
-<div id="panel">
-
-  <h2 id="selectedName">나라</h2>
-
-  <label>나라 색상</label>
-  <input id="countryColor" type="color" value="#74b9ff">
-
-  <label>메모</label>
-  <input
-    id="countryNote"
-    placeholder="예: 내가 만든 나라"
-  >
-
-  <div class="panelButtons">
-    <button onclick="saveCountry()">💾 적용</button>
-    <button onclick="closePanel()" class="gray">닫기</button>
+<div id="hud">
+  <div id="brand" class="panel"><b>NEON COAST</b><small>MEGACITY SIMULATOR · V3</small></div>
+  <div id="stats" class="panel">
+    <div>도시 인구 <b>1,000명</b></div>
+    <div>도시 건물 <b>1,000+</b></div>
+    <div>빔 타워 <b>50개</b></div>
+    <div id="heightText">고도 0m</div>
   </div>
-
+  <div id="help" class="panel">
+    <b>이동 조작</b><br>
+    W A S D : 이동　마우스 : 시점<br>
+    SPACE : 점프　SHIFT : 달리기<br>
+    E : 엘리베이터 탑승 / 내리기<br>
+    ESC : 마우스 잠금 해제
+  </div>
+  <div id="cross">+</div>
+  <div id="notice"></div>
+  <div id="elevator" class="panel">
+    <h2>SKY ELEVATOR</h2>
+    <div id="floorDisplay">1F</div>
+    <div style="color:#8caec9;font-size:12px;margin-bottom:12px">이동할 층을 선택해</div>
+    <div id="floors"></div>
+    <button id="exitLift">엘리베이터에서 내리기</button>
+  </div>
+  <div id="lock"><button id="start">도시 탐험 시작하기</button></div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from "three";
+import {EffectComposer} from "three/addons/postprocessing/EffectComposer.js";
+import {RenderPass} from "three/addons/postprocessing/RenderPass.js";
+import {UnrealBloomPass} from "three/addons/postprocessing/UnrealBloomPass.js";
 
-<script>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x020817);
+scene.fog=new THREE.FogExp2(0x06142b,.0017);
 
-const map = L.map("map",{
-  minZoom:2,
-  maxZoom:8,
-  worldCopyJump:true
-}).setView([25,0],2);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,4000);
+camera.position.set(0,3,55);
 
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    attribution:"© OpenStreetMap contributors",
-    maxZoom:19
-  }
-).addTo(map);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.25;
+document.body.appendChild(renderer.domElement);
 
-let countryLayer;
-let selectedLayer=null;
-let countryData={};
-let citiesLayer=null;
-let citiesVisible=false;
+const composer=new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene,camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.15,.55,.18));
 
-const COUNTRY_URL =
-"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson";
+scene.add(new THREE.HemisphereLight(0x8ccaff,0x081225,1.5));
+const moon=new THREE.DirectionalLight(0x75baff,2);
+moon.position.set(-200,400,100);
+scene.add(moon);
 
-const CITIES_URL =
-"https://cdn.jsdelivr.net/gh/drei01/geojson-world-cities@master/cities.geojson";
+const clock=new THREE.Clock();
+const mats={
+ glass:new THREE.MeshStandardMaterial({color:0x102b4c,metalness:.8,roughness:.2}),
+ dark:new THREE.MeshStandardMaterial({color:0x071629,metalness:.7,roughness:.35}),
+ cyan:new THREE.MeshBasicMaterial({color:0x21dfff}),
+ pink:new THREE.MeshBasicMaterial({color:0xff3bc8}),
+ gold:new THREE.MeshBasicMaterial({color:0xffc85b}),
+ window:new THREE.MeshBasicMaterial({color:0x5ceaff}),
+ beam:new THREE.MeshBasicMaterial({color:0x41eaff,transparent:true,opacity:.14,side:THREE.DoubleSide})
+};
 
-
-/* ---------------------------
-   저장된 나라 설정 불러오기
----------------------------- */
-
-try{
-  countryData =
-    JSON.parse(localStorage.getItem("myWorldCountries")) || {};
-}catch(e){
-  countryData={};
+function box(w,h,d,mat,x,y,z,parent=scene){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+ m.position.set(x,y,z);parent.add(m);return m;
 }
 
-
-/* ---------------------------
-   기본 국가 스타일
----------------------------- */
-
-function getCountryCode(feature){
-
-  const p=feature.properties || {};
-
-  return String(
-    p.ISO_A2_EH ||
-    p.ISO_A2 ||
-    p.ADM0_A3 ||
-    p.NAME ||
-    ""
-  ).toUpperCase();
+// 바다
+const ocean=box(2400,2,1800,new THREE.MeshStandardMaterial({
+ color:0x031b36,metalness:.65,roughness:.24
+}),0,-2,-800);
+for(let i=0;i<55;i++){
+ const line=box(1800,.025,.12,new THREE.MeshBasicMaterial({
+ color:i%2?0x0874a7:0x075078,transparent:true,opacity:.45
+ }),0,-.8,-100-i*24);
 }
 
+// 해안 도시 지면
+box(1800,2,1200,new THREE.MeshStandardMaterial({
+ color:0x101c2d,roughness:.8
+}),0,-1,0);
+box(1800,.2,24,new THREE.MeshStandardMaterial({color:0x263c4e}),0,.05,-100);
 
-function getCountryName(feature){
-
-  const p=feature.properties || {};
-
-  return (
-    p.NAME ||
-    p.ADMIN ||
-    p.NAME_EN ||
-    "알 수 없는 나라"
-  );
+// 도로
+for(let x=-850;x<=850;x+=100){
+ box(9,.08,1100,new THREE.MeshStandardMaterial({color:0x111e2d}),x,.12,0);
+ for(let z=-520;z<540;z+=35)box(.18,.04,12,mats.gold,x,.2,z);
+}
+for(let z=-500;z<=500;z+=100){
+ box(1700,.08,8,new THREE.MeshStandardMaterial({color:0x111e2d}),0,.12,z);
 }
 
-
-function getStyle(feature){
-
-  const code=getCountryCode(feature);
-  const saved=countryData[code];
-
-  return {
-    fillColor:saved?.color || "#79bfff",
-    fillOpacity:.72,
-    color:"#ffffff",
-    weight:1
-  };
+// 건물 창문 텍스처
+function makeBuilding(x,z,w,d,h,index){
+ const group=new THREE.Group();group.position.set(x,0,z);scene.add(group);
+ const color=new THREE.Color().setHSL(.55+(index%7)*.012,.38,.12+(index%4)*.025);
+ const bodyMat=new THREE.MeshStandardMaterial({color,metalness:.65,roughness:.28});
+ box(w,h,d,bodyMat,0,h/2,0,group);
+ // 수직 발광 라인
+ const edgeMat=index%3===0?mats.cyan:(index%3===1?mats.pink:mats.window);
+ for(let side of [-1,1]){
+  box(.16,h,d+.2,edgeMat,side*(w/2-.15),h/2,0,group);
+ }
+ // 층별 창문 띠
+ for(let y=3;y<h;y+=5){
+  box(w*.88,.22,.08,mats.window,0,y,d/2+.055,group);
+  box(w*.88,.22,.08,mats.window,0,y,-d/2-.055,group);
+ }
+ // 옥상 장식
+ box(w*.25,1,d*.25,mats.dark,0,h+.5,0,group);
+ return group;
 }
 
+// 1,000개 건물
+let buildingCount=0;
+for(let i=0;i<1000;i++){
+ let x=(Math.random()-.5)*1650;
+ let z=(Math.random()-.5)*1050;
+ if(Math.abs(x)<42&&Math.abs(z)<42){i--;continue;}
+ const w=12+Math.random()*20;
+ const d=12+Math.random()*20;
+ const h=18+Math.random()*190;
+ makeBuilding(x,z,w,d,h,i);
+ buildingCount++;
+}
 
-/* ---------------------------
-   세계 국가 지도
----------------------------- */
+// 빔 타워 정확히 50개
+const beamTowers=[];
+for(let i=0;i<50;i++){
+ const angle=i*Math.PI*2/50;
+ const radius=160+Math.random()*590;
+ const x=Math.cos(angle)*radius;
+ const z=Math.sin(angle)*radius;
+ const h=100+Math.random()*260;
+ const tower=makeBuilding(x,z,15,15,h,1000+i);
+ const emitter=new THREE.Group();
+ emitter.position.set(x,h+2,z);scene.add(emitter);
+ const core=new THREE.Mesh(new THREE.CylinderGeometry(.5,.8,4,12),mats.gold);
+ emitter.add(core);
+ const beam=new THREE.Mesh(new THREE.CylinderGeometry(.12,2,260,12,1,true),mats.beam);
+ beam.rotation.z=Math.PI/2;
+ beam.position.y=0;
+ emitter.add(beam);
+ beamTowers.push({emitter,beam,phase:Math.random()*6});
+}
 
-fetch(COUNTRY_URL)
+// 중앙 1,000m 랜드마크
+const landmark=new THREE.Group();
+scene.add(landmark);
+const towerBody=new THREE.Mesh(
+ new THREE.BoxGeometry(38,1000,38),
+ new THREE.MeshStandardMaterial({color:0x102d4c,metalness:.85,roughness:.18,transparent:true,opacity:.82})
+);
+towerBody.position.y=500;landmark.add(towerBody);
 
-.then(r=>r.json())
+// 외벽 수직 조명
+for(let i=0;i<4;i++){
+ const a=i*Math.PI/2;
+ const x=Math.sin(a)*19.3,z=Math.cos(a)*19.3;
+ const strip=box(.7,1000,.7,mats.cyan,x,500,z,landmark);
+}
+for(let y=10;y<1000;y+=20){
+ box(38.5,.28,38.5,mats.window,0,y,0,landmark);
+}
+// 옥상 전망대
+box(52,4,52,mats.dark,0,1002,0,landmark);
+box(44,.5,44,mats.gold,0,1004,0,landmark);
+const beacon=new THREE.Group();beacon.position.y=1010;landmark.add(beacon);
+const beaconCore=new THREE.Mesh(new THREE.SphereGeometry(3,24,24),mats.gold);
+beacon.add(beaconCore);
+const rotatingBeam=new THREE.Mesh(new THREE.CylinderGeometry(.2,1.5,400,16,1,true),mats.beam);
+rotatingBeam.rotation.z=Math.PI/2;beacon.add(rotatingBeam);
 
-.then(data=>{
+// 랜드마크 엘리베이터 샤프트
+const shaft=new THREE.Group();scene.add(shaft);
+for(const x of [-3,3])for(const z of [-3,3]){
+ box(.5,1000,.5,mats.cyan,x,500,z,shaft);
+}
+for(let y=0;y<=1000;y+=50){
+ box(6,.25,6,mats.dark,0,y,0,shaft);
+}
 
-  countryLayer=L.geoJSON(data,{
+// 엘리베이터 캐빈
+const cabin=new THREE.Group();scene.add(cabin);
+box(5,.35,5,mats.gold,0,0,0,cabin);
+box(5,.25,5,mats.dark,0,3.5,0,cabin);
+for(const x of [-2.4,2.4])for(const z of [-2.4,2.4]){
+ box(.18,3.5,.18,mats.cyan,x,1.75,z,cabin);
+}
+const cabinFloor=box(4.5,.12,4.5,mats.dark,0,.25,0,cabin);
+const cabinLight=new THREE.PointLight(0x5beaff,3,18);
+cabinLight.position.set(0,3,0);cabin.add(cabinLight);
 
-    style:getStyle,
+// 엘리베이터 문 두 짝
+const doorMat=new THREE.MeshStandardMaterial({color:0x1a6684,metalness:.8,roughness:.2});
+const doorL=box(2.4,3.2,.15,doorMat,-1.2,1.8,2.48,cabin);
+const doorR=box(2.4,3.2,.15,doorMat,1.2,1.8,2.48,cabin);
 
-    onEachFeature:function(feature,layer){
+let inElevator=false;
+let currentFloor=1;
+let targetY=0;
+let moving=false;
+let doorOpen=false;
+let doorAmount=0;
+let elevatorUI=false;
+const floorList=[1,20,50,80,120,160,200,240];
+const floorHeight=1000/240;
 
-      const name=getCountryName(feature);
-      const code=getCountryCode(feature);
+const elevatorEl=document.getElementById("elevator");
+const floorDisplay=document.getElementById("floorDisplay");
+const floorsEl=document.getElementById("floors");
+const notice=document.getElementById("notice");
 
-      layer.countryName=name;
-      layer.countryCode=code;
-
-      layer.bindTooltip(
-        name,
-        {
-          sticky:true,
-          direction:"top"
-        }
-      );
-
-      layer.on({
-
-        mouseover:function(e){
-
-          if(selectedLayer!==e.target){
-
-            e.target.setStyle({
-              fillOpacity:.95,
-              weight:2
-            });
-
-          }
-
-        },
-
-        mouseout:function(e){
-
-          if(selectedLayer!==e.target){
-            countryLayer.resetStyle(e.target);
-          }
-
-        },
-
-        click:function(e){
-
-          selectCountry(e.target);
-
-        }
-
-      });
-
-    }
-
-  }).addTo(map);
-
-  document.getElementById("loading").style.display="none";
-
-})
-
-.catch(err=>{
-
-  document.getElementById("loading").textContent=
-    "⚠️ 지도를 불러오지 못했습니다.";
-
-  console.error(err);
-
+floorList.forEach(f=>{
+ const b=document.createElement("button");
+ b.textContent=f+"F";
+ b.onclick=()=>goFloor(f);
+ floorsEl.appendChild(b);
 });
 
+function showNotice(t){
+ notice.textContent=t;
+ clearTimeout(showNotice.timer);
+ showNotice.timer=setTimeout(()=>notice.textContent="",2600);
+}
+function openUI(){
+ elevatorUI=true;elevatorEl.style.display="block";
+ floorDisplay.textContent=currentFloor+"F";
+}
+function closeUI(){
+ elevatorUI=false;elevatorEl.style.display="none";
+}
+function goFloor(f){
+ if(!inElevator)return;
+ currentFloor=f;
+ targetY=f*floorHeight;
+ moving=true;
+ doorOpen=false;
+ closeUI();
+ showNotice(f+"층으로 이동합니다");
+}
+document.getElementById("exitLift").onclick=()=>{
+ if(moving)return;
+ leaveElevator();
+};
 
-/* ---------------------------
-   나라 선택
----------------------------- */
+// 시민 인스턴스 1,000명
+const crowdGeo=new THREE.CapsuleGeometry(.35,1.1,3,6);
+const crowdMat=new THREE.MeshStandardMaterial({color:0x3f9fcb,roughness:.7});
+const crowd=new THREE.InstancedMesh(crowdGeo,crowdMat,1000);
+scene.add(crowd);
+const crowdData=[];
+const dummy=new THREE.Object3D();
+for(let i=0;i<1000;i++){
+ const x=(Math.random()-.5)*1500;
+ const z=(Math.random()-.5)*950;
+ crowdData.push({x,z,phase:Math.random()*10,speed:.5+Math.random()*1.2});
+ dummy.position.set(x,.9,z);
+ dummy.rotation.y=Math.random()*Math.PI*2;
+ dummy.updateMatrix();crowd.setMatrixAt(i,dummy.matrix);
+}
+crowd.instanceMatrix.needsUpdate=true;
 
-function selectCountry(layer){
-
-  if(selectedLayer){
-    countryLayer.resetStyle(selectedLayer);
-  }
-
-  selectedLayer=layer;
-
-  layer.setStyle({
-    fillColor:"#ffd166",
-    fillOpacity:1,
-    color:"#ff9f1c",
-    weight:3
-  });
-
-  const code=layer.countryCode;
-  const saved=countryData[code];
-
-  document.getElementById("selectedName").textContent=
-    "🌎 "+layer.countryName;
-
-  document.getElementById("countryColor").value=
-    saved?.color || "#79bfff";
-
-  document.getElementById("countryNote").value=
-    saved?.note || "";
-
-  document.getElementById("panel").style.display="block";
-
-  map.fitBounds(layer.getBounds(),{
-    padding:[40,40],
-    maxZoom:5
-  });
-
+// 공중 이동 차량
+const vehicles=[];
+for(let i=0;i<18;i++){
+ const g=new THREE.Group();scene.add(g);
+ const body=box(8,1.2,3,mats.dark,0,0,0,g);
+ box(7,.18,2.7,mats.cyan,0,.65,0,g);
+ vehicles.push({g,r:180+Math.random()*650,a:Math.random()*Math.PI*2,y:35+Math.random()*170,s:.04+Math.random()*.025});
 }
 
+// 조작
+const keys={};
+let yaw=0,pitch=0,velocityY=0;
+let grounded=true;
+let pointerLocked=false;
+const lock=document.getElementById("lock");
 
-/* ---------------------------
-   나라 설정 저장
----------------------------- */
+document.getElementById("start").onclick=()=>{
+ renderer.domElement.requestPointerLock();
+};
+document.addEventListener("pointerlockchange",()=>{
+ pointerLocked=document.pointerLockElement===renderer.domElement;
+ lock.style.display=pointerLocked?"none":"flex";
+});
+document.addEventListener("mousemove",e=>{
+ if(!pointerLocked||inElevator)return;
+ yaw-=e.movementX*.002;
+ pitch-=e.movementY*.002;
+ pitch=Math.max(-1.45,Math.min(1.45,pitch));
+});
+document.addEventListener("keydown",e=>{
+ keys[e.code]=true;
+ if(e.code==="Space")e.preventDefault();
+ if(e.code==="KeyE")interact();
+});
+document.addEventListener("keyup",e=>keys[e.code]=false);
 
-function saveCountry(){
-
-  if(!selectedLayer)return;
-
-  const code=selectedLayer.countryCode;
-
-  countryData[code]={
-    color:document.getElementById("countryColor").value,
-    note:document.getElementById("countryNote").value
-  };
-
-  localStorage.setItem(
-    "myWorldCountries",
-    JSON.stringify(countryData)
-  );
-
-  countryLayer.resetStyle(selectedLayer);
-
-  selectedLayer.setStyle({
-    fillColor:countryData[code].color,
-    fillOpacity:.9,
-    color:"#ffffff",
-    weight:1
-  });
-
-  alert(
-    "💾 "+selectedLayer.countryName+
-    " 설정이 저장됐어요!"
-  );
-
+function interact(){
+ if(inElevator){
+  if(moving){showNotice("엘리베이터가 이동 중이야");return;}
+  if(!elevatorUI){openUI();return;}
+  closeUI();return;
+ }
+ const dx=camera.position.x;
+ const dz=camera.position.z;
+ if(Math.hypot(dx,dz-18)<13){
+  inElevator=true;
+  camera.position.set(0,2,0);
+  camera.rotation.set(0,0,0);
+  cabin.position.y=0;
+  doorOpen=true;
+  openUI();
+  showNotice("엘리베이터에 탑승했어");
+ }else{
+  showNotice("엘리베이터 입구 근처에서 E를 눌러");
+ }
+}
+function leaveElevator(){
+ inElevator=false;
+ closeUI();
+ camera.position.set(0,2,cabin.position.y+12);
+ yaw=Math.PI;
+ showNotice(currentFloor+"층에서 내렸어");
 }
 
-
-/* ---------------------------
-   패널 닫기
----------------------------- */
-
-function closePanel(){
-
-  document.getElementById("panel").style.display="none";
-
-  if(selectedLayer){
-    countryLayer.resetStyle(selectedLayer);
-    selectedLayer=null;
-  }
-
+// 충돌 및 이동
+function updatePlayer(dt){
+ if(inElevator){
+  camera.position.set(0,2.1+cabin.position.y,0);
+  camera.rotation.set(0,0,0);
+  return;
+ }
+ if(!pointerLocked)return;
+ const speed=keys.ShiftLeft?32:17;
+ const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+ let move=new THREE.Vector3();
+ if(keys.KeyW)move.add(forward);
+ if(keys.KeyS)move.sub(forward);
+ if(keys.KeyD)move.add(right);
+ if(keys.KeyA)move.sub(right);
+ if(move.length()>0){
+  move.normalize().multiplyScalar(speed*dt);
+  camera.position.add(move);
+ }
+ if(keys.Space&&grounded){velocityY=10;grounded=false;}
+ velocityY-=25*dt;
+ camera.position.y+=velocityY*dt;
+ if(camera.position.y<2){camera.position.y=2;velocityY=0;grounded=true;}
+ camera.rotation.order="YXZ";
+ camera.rotation.y=yaw;
+ camera.rotation.x=pitch;
+ camera.position.x=THREE.MathUtils.clamp(camera.position.x,-880,880);
+ camera.position.z=THREE.MathUtils.clamp(camera.position.z,-580,580);
 }
 
+// 애니메이션
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.04);
+ const t=clock.elapsedTime;
 
-/* ---------------------------
-   도시 표시
----------------------------- */
+ // 빔 회전
+ beamTowers.forEach((b,i)=>{
+  b.emitter.rotation.y=t*.65+b.phase;
+  b.beam.rotation.x=Math.sin(t*.4+i)*.3;
+  b.beam.rotation.z=Math.PI/2+Math.sin(t*.25+i)*.25;
+ });
+ beacon.rotation.y=t*.4;
+ rotatingBeam.rotation.z=t*.9;
 
-async function toggleCities(){
-
-  if(citiesVisible){
-
-    if(citiesLayer){
-      map.removeLayer(citiesLayer);
-    }
-
-    citiesVisible=false;
-
-    return;
+ // 엘리베이터
+ if(moving){
+  const diff=targetY-cabin.position.y;
+  const step=Math.sign(diff)*Math.min(Math.abs(diff),dt*150);
+  cabin.position.y+=step;
+  if(Math.abs(diff)<.8){
+   cabin.position.y=targetY;
+   moving=false;
+   doorOpen=true;
+   showNotice(currentFloor+"층 도착");
   }
+ }
+ const desired=doorOpen?1:0;
+ doorAmount=THREE.MathUtils.damp(doorAmount,desired,5,dt);
+ doorL.position.x=-1.2-doorAmount*1.8;
+ doorR.position.x=1.2+doorAmount*1.8;
 
-  if(citiesLayer){
+ if(inElevator){
+  camera.position.set(0,2.1+cabin.position.y,0);
+  camera.rotation.set(0,0,0);
+  floorDisplay.textContent=currentFloor+"F";
+ }else{
+  updatePlayer(dt);
+ }
+ document.getElementById("heightText").textContent=
+  "고도 "+Math.max(0,Math.round(camera.position.y))+"m";
 
-    citiesLayer.addTo(map);
-    citiesVisible=true;
-    return;
+ // 시민 이동
+ for(let i=0;i<crowdData.length;i++){
+  const p=crowdData[i];
+  p.phase+=dt*p.speed*.25;
+  dummy.position.set(p.x+Math.sin(p.phase)*2,.9+Math.abs(Math.sin(p.phase*3))*.08,p.z+Math.cos(p.phase)*2);
+  dummy.rotation.set(0,p.phase,0);
+  dummy.scale.set(1,1,1);
+  dummy.updateMatrix();crowd.setMatrixAt(i,dummy.matrix);
+ }
+ crowd.instanceMatrix.needsUpdate=true;
 
-  }
+ // 공중 교통
+ vehicles.forEach(v=>{
+  v.a+=dt*v.s;
+  v.g.position.set(Math.cos(v.a)*v.r,v.y+Math.sin(t+v.a)*3,Math.sin(v.a)*v.r);
+  v.g.rotation.y=-v.a;
+ });
 
-  document.getElementById("loading").style.display="block";
-  document.getElementById("loading").textContent=
-    "🏙️ 도시 데이터를 불러오는 중...";
-
-  try{
-
-    const response=await fetch(CITIES_URL);
-    const data=await response.json();
-
-    citiesLayer=L.geoJSON(data,{
-
-      pointToLayer:function(feature,latlng){
-
-        const name=
-          feature.properties?.NAME ||
-          feature.properties?.name ||
-          "도시";
-
-        return L.marker(latlng,{
-          icon:L.divIcon({
-            className:"",
-            html:'<div class="city-dot"></div>',
-            iconSize:[8,8],
-            iconAnchor:[4,4]
-          })
-        }).bindTooltip(
-          "🏙️ "+name,
-          {
-            direction:"top"
-          }
-        );
-
-      }
-
-    });
-
-    citiesLayer.addTo(map);
-    citiesVisible=true;
-
-  }catch(e){
-
-    alert(
-      "도시 데이터를 불러오지 못했습니다."
-    );
-
-    console.error(e);
-
-  }
-
-  document.getElementById("loading").style.display="none";
-
+ composer.render();
 }
+animate();
 
-
-/* ---------------------------
-   나라 / 도시 검색
----------------------------- */
-
-async function searchPlace(){
-
-  const keyword=
-    document.getElementById("search")
-    .value
-    .trim()
-    .toLowerCase();
-
-  if(!keyword)return;
-
-  /* 나라 검색 */
-
-  if(countryLayer){
-
-    let foundCountry=null;
-
-    countryLayer.eachLayer(layer=>{
-
-      if(!foundCountry &&
-         layer.countryName &&
-         layer.countryName.toLowerCase().includes(keyword)){
-
-        foundCountry=layer;
-
-      }
-
-    });
-
-    if(foundCountry){
-
-      selectCountry(foundCountry);
-      return;
-
-    }
-
-  }
-
-
-  /* 도시 검색 */
-
-  if(!citiesLayer){
-
-    await toggleCities();
-
-  }
-
-  let foundCity=null;
-
-  if(citiesLayer){
-
-    citiesLayer.eachLayer(layer=>{
-
-      const name=
-        layer.getTooltip()?.getContent() || "";
-
-      if(
-        !foundCity &&
-        name.toLowerCase().includes(keyword)
-      ){
-
-        foundCity=layer;
-
-      }
-
-    });
-
-  }
-
-  if(foundCity){
-
-    map.setView(
-      foundCity.getLatLng(),
-      8
-    );
-
-    foundCity.openTooltip();
-
-    return;
-
-  }
-
-  alert("🔎 찾지 못했어요.");
-
-}
-
-
-/* ---------------------------
-   전체보기
----------------------------- */
-
-function resetMap(){
-
-  map.setView([25,0],2);
-
-  if(selectedLayer){
-
-    countryLayer.resetStyle(selectedLayer);
-    selectedLayer=null;
-
-  }
-
-  document.getElementById("panel").style.display="none";
-
-}
-
-
-/* ---------------------------
-   모든 국가 설정 초기화
----------------------------- */
-
-function resetAll(){
-
-  if(!confirm(
-    "⚠️ 직접 설정한 모든 나라 색상과 메모를 삭제할까요?"
-  ))return;
-
-  localStorage.removeItem("myWorldCountries");
-
-  countryData={};
-
-  if(countryLayer){
-
-    countryLayer.eachLayer(layer=>{
-      countryLayer.resetStyle(layer);
-    });
-
-  }
-
-  closePanel();
-
-  alert("♻️ 모든 나라 설정이 초기화됐어요.");
-
-}
-
+addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+ composer.setSize(innerWidth,innerHeight);
+});
 </script>
-
 </body>
 </html>
