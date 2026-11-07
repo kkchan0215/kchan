@@ -4,170 +4,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NEON COAST V7</title>
+<title>NEON COAST V8</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#020615;color:white;font-family:Arial,"Malgun Gothic",sans-serif}
+body{margin:0;overflow:hidden;background:#020817;color:white;font-family:Arial,"Malgun Gothic",sans-serif}
 canvas{display:block}
+.panel{background:rgba(3,14,32,.9);border:1px solid #35cfff66;border-radius:13px;padding:12px 15px;backdrop-filter:blur(5px)}
 #hud{position:fixed;inset:0;pointer-events:none}
-.panel{background:rgba(3,13,32,.86);border:1px solid #38cfff66;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 0 20px #00baff22;padding:12px 16px}
-#brand{position:absolute;top:14px;left:14px}
-#brand b{font-size:20px;letter-spacing:4px;color:#8af5ff;text-shadow:0 0 15px #00dfff}
-#brand small{display:block;font-size:10px;letter-spacing:3px;color:#9bbbd3;margin-top:5px}
-#stats{position:absolute;right:14px;top:14px;text-align:right;font-size:12px;line-height:1.9}
-#help{position:absolute;left:14px;bottom:14px;font-size:12px;line-height:1.9;color:#c5eaff}
-#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#b9f8ff;font-size:20px}
-#notice{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);color:#c7faff;text-shadow:0 0 12px #00dfff;font-size:14px;white-space:nowrap}
-#prompt{display:none;position:absolute;left:50%;top:58%;transform:translateX(-50%);padding:11px 18px;border:1px solid #4beaff;border-radius:12px;background:#041b35ed;color:#d8fbff;font-size:14px;white-space:nowrap}
-#elevator{display:none;pointer-events:auto;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,92vw);text-align:center}
+#brand{position:absolute;top:13px;left:13px}
+#brand b{font-size:20px;letter-spacing:4px;color:#8af5ff;text-shadow:0 0 12px #00dfff}
+#brand small{display:block;color:#9bbbd3;font-size:10px;letter-spacing:2px;margin-top:5px}
+#stats{position:absolute;right:13px;top:13px;text-align:right;font-size:12px;line-height:1.9}
+#help{position:absolute;left:13px;bottom:13px;font-size:12px;line-height:1.8;color:#c9eaff}
+#cross{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c8faff}
+#prompt{display:none;position:absolute;top:58%;left:50%;transform:translateX(-50%);background:#06243a;border:1px solid #4beaff;padding:12px 18px;border-radius:10px;white-space:nowrap}
+#notice{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);color:#b9f8ff;text-shadow:0 0 10px #00dfff;white-space:nowrap}
+#elevator{display:none;pointer-events:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(350px,92vw);text-align:center}
 #elevator h2{color:#8af5ff;letter-spacing:3px}
-#floorDisplay{font-size:34px;margin:10px;text-shadow:0 0 15px #00dfff}
-#floorInfo{font-size:12px;color:#9bbbd2;margin-bottom:13px}
-#floors{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:230px;overflow:auto}
-#floors button,#exitLift{border:1px solid #48dfff;background:#092846;color:white;padding:12px;border-radius:9px;cursor:pointer;font-size:14px}
-#floors button:hover,#exitLift:hover{background:#12628b;box-shadow:0 0 15px #00cfff}
+#floorDisplay{font-size:34px;margin:12px}
+#floorInfo{font-size:12px;color:#a5c8dc;margin-bottom:12px}
+#floors{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:220px;overflow:auto}
+button{cursor:pointer}
+#floors button,#exitLift,#settings button{border:1px solid #48dfff;background:#092846;color:white;padding:11px;border-radius:8px}
+#floors button:hover,#exitLift:hover,#settings button:hover{background:#12628b}
 #exitLift{width:100%;margin-top:12px}
 #lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#020817dd;pointer-events:auto}
-#start{border:1px solid #54eaff;background:linear-gradient(120deg,#073451,#075a78);color:white;padding:18px 30px;border-radius:14px;font-size:17px;cursor:pointer;box-shadow:0 0 30px #00cfff33}
+#start{border:1px solid #54eaff;background:linear-gradient(120deg,#073451,#075a78);color:white;padding:18px 30px;border-radius:14px;font-size:17px;box-shadow:0 0 20px #00cfff33}
+#settings{position:absolute;right:13px;bottom:13px;pointer-events:auto}
+#settings button{font-size:11px;padding:8px 10px}
 </style>
 </head>
 <body>
 <div id="hud">
- <div id="brand" class="panel"><b>NEON COAST</b><small>PERFORMANCE EDITION · V7</small></div>
+ <div id="brand" class="panel">
+  <b>NEON COAST</b>
+  <small>V8 · ULTRA LIGHT ENGINE</small>
+ </div>
  <div id="stats" class="panel">
-  <div>도시 건물 <b>70개</b></div>
-  <div>빔 타워 <b>10개</b></div>
-  <div>시민 <b>200명</b></div>
+  <div>건물 <b>70</b></div>
+  <div>빔 타워 <b>10</b></div>
+  <div>시민 <b>200</b></div>
   <div id="heightText">고도 0m</div>
-  <div id="buildingText">주변 건물 탐색 중</div>
+  <div id="buildingText">도시 탐색 중</div>
+  <div id="fpsText">FPS --</div>
  </div>
  <div id="help" class="panel">
   <b>CONTROL</b><br>
   W A S D 이동 · 마우스 시점<br>
   SPACE 점프 · SHIFT 달리기<br>
-  E 엘리베이터 이용<br>
-  ESC 마우스 잠금 해제
+  E 엘리베이터 이용
  </div>
  <div id="cross">+</div>
- <div id="notice"></div>
  <div id="prompt">E 키를 눌러 엘리베이터 탑승</div>
+ <div id="notice"></div>
  <div id="elevator" class="panel">
   <h2>SKY ELEVATOR</h2>
   <div id="floorDisplay">1F</div>
-  <div id="floorInfo">건물 엘리베이터</div>
+  <div id="floorInfo"></div>
   <div id="floors"></div>
   <button id="exitLift">엘리베이터에서 내리기</button>
  </div>
+ <div id="settings"><button id="quality">그래픽: 초경량</button></div>
  <div id="lock"><button id="start">NEON COAST 입장하기</button></div>
 </div>
 
 <script type="importmap">
-{"imports":{
- "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
- "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-}}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
 <script type="module">
 import * as THREE from "three";
-import {EffectComposer} from "three/addons/postprocessing/EffectComposer.js";
-import {RenderPass} from "three/addons/postprocessing/RenderPass.js";
-import {UnrealBloomPass} from "three/addons/postprocessing/UnrealBloomPass.js";
 
-/* 기본 엔진 */
+/* =========================
+   V8 LIGHT ENGINE
+========================= */
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x020817);
-scene.fog=new THREE.FogExp2(0x07152c,.00085);
+scene.fog=new THREE.Fog(0x06172b,250,1150);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,2200);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1600);
 camera.position.set(0,2,70);
 
 const renderer=new THREE.WebGLRenderer({
  antialias:false,
- powerPreference:"high-performance"
+ powerPreference:"high-performance",
+ alpha:false
 });
+renderer.setPixelRatio(Math.min(devicePixelRatio,.65));
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,.75));
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.35;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.NoToneMapping;
 document.body.appendChild(renderer.domElement);
 
-const composer=new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene,camera));
-composer.addPass(new UnrealBloomPass(
- new THREE.Vector2(innerWidth,innerHeight),.9,.35,.2
-));
-
-scene.add(new THREE.HemisphereLight(0x9bdcff,0x101225,1.5));
-const sun=new THREE.DirectionalLight(0x83caff,1.3);
-sun.position.set(-150,300,100);
+scene.add(new THREE.HemisphereLight(0x8ecfff,0x101426,1.6));
+const sun=new THREE.DirectionalLight(0x8bcaff,.8);
+sun.position.set(-100,250,100);
 scene.add(sun);
 
 const clock=new THREE.Clock();
 const boxGeo=new THREE.BoxGeometry(1,1,1);
+const dummy=new THREE.Object3D();
 
-function basic(color,opacity=1){
- return new THREE.MeshBasicMaterial({
-  color,transparent:opacity<1,opacity,
-  blending:opacity<1?THREE.AdditiveBlending:THREE.NormalBlending,
-  depthWrite:opacity>=1
- });
-}
-function box(w,h,d,m,x,y,z,parent=scene){
- const o=new THREE.Mesh(boxGeo,m);
- o.scale.set(w,h,d);
- o.position.set(x,y,z);
- parent.add(o);
- return o;
-}
-const M={
- cyan:basic(0x49eaff),
- blue:basic(0x238dff),
- pink:basic(0xff48d2),
- purple:basic(0x9c7aff),
- gold:basic(0xffd77a),
- white:basic(0xdffaff),
- dark:new THREE.MeshStandardMaterial({color:0x09192c,metalness:.75,roughness:.3}),
- road:new THREE.MeshStandardMaterial({color:0x101c2d,roughness:.9})
+const mats={
+ dark:new THREE.MeshStandardMaterial({color:0x0b1b30,metalness:.65,roughness:.4}),
+ road:new THREE.MeshStandardMaterial({color:0x111d2d,roughness:1}),
+ blue:new THREE.MeshBasicMaterial({color:0x278dff}),
+ cyan:new THREE.MeshBasicMaterial({color:0x47eaff}),
+ white:new THREE.MeshBasicMaterial({color:0xc7faff}),
+ gold:new THREE.MeshBasicMaterial({color:0xffd477})
 };
-const colors=[0x4ceaff,0xff53d5,0x9d80ff,0xffd77a,0x8affdc];
-const lightMats=colors.map(c=>basic(c));
+const palette=[0x46eaff,0xff50d6,0x9b7cff,0xffd477,0x7fffd5];
 
-/* 별: 단일 Points 객체 */
-const starPositions=[];
-for(let i=0;i<500;i++){
- starPositions.push(
-  (Math.random()-.5)*1800,
-  100+Math.random()*700,
-  (Math.random()-.5)*1400
- );
+function mat(color){
+ return new THREE.MeshBasicMaterial({color});
 }
-const starGeo=new THREE.BufferGeometry();
-starGeo.setAttribute("position",new THREE.Float32BufferAttribute(starPositions,3));
-scene.add(new THREE.Points(
- starGeo,
- new THREE.PointsMaterial({color:0xb7eaff,size:1.4,transparent:true,opacity:.75})
-));
+function addBox(parent,w,h,d,material,x,y,z){
+ const mesh=new THREE.Mesh(boxGeo,material);
+ mesh.scale.set(w,h,d);
+ mesh.position.set(x,y,z);
+ parent.add(mesh);
+ return mesh;
+}
+function setInstance(mesh,index,x,y,z,sx,sy,sz,rotation=0){
+ dummy.position.set(x,y,z);
+ dummy.scale.set(sx,sy,sz);
+ dummy.rotation.set(0,rotation,0);
+ dummy.updateMatrix();
+ mesh.setMatrixAt(index,dummy.matrix);
+}
 
-/* 바다와 지면 */
-box(2000,2,1700,new THREE.MeshStandardMaterial({
- color:0x03182e,metalness:.75,roughness:.25
-}),0,-2,-650);
-box(1700,2,1100,new THREE.MeshStandardMaterial({
- color:0x111d30,roughness:.9
-}),0,-1,0);
+/* =========================
+   GROUND / SEA / ROADS
+========================= */
+addBox(scene,1900,2,1700,
+ new THREE.MeshStandardMaterial({color:0x03182b,metalness:.4,roughness:.5}),
+ 0,-2,-500);
 
-/* 도로 */
+addBox(scene,1700,1,1200,mats.road,0,-.7,0);
+
+const roadMarks=new THREE.InstancedMesh(boxGeo,mats.gold,250);
+let roadCount=0;
 for(let x=-800;x<=800;x+=160){
- box(8,.08,1050,M.road,x,.1,0);
- for(let z=-500;z<500;z+=55){
-  box(.13,.035,10,M.gold,x,.17,z);
+ addBox(scene,8,.08,1100,mats.dark,x,.0,0);
+ for(let z=-500;z<500;z+=65){
+  setInstance(roadMarks,roadCount++,x,.06,z,.12,.035,10);
  }
 }
-for(let z=-450;z<=450;z+=160){
- box(1600,.08,8,M.road,0,.1,z);
-}
+roadMarks.count=roadCount;
+roadMarks.instanceMatrix.needsUpdate=true;
+scene.add(roadMarks);
 
-/* 건물 높이: 35쌍의 합이 600m → 평균 정확히 300m */
+/* =========================
+   STARS: SINGLE POINTS
+========================= */
+const starPositions=new Float32Array(900*3);
+for(let i=0;i<900;i++){
+ starPositions[i*3]=(Math.random()-.5)*1700;
+ starPositions[i*3+1]=100+Math.random()*650;
+ starPositions[i*3+2]=(Math.random()-.5)*1300;
+}
+const starGeo=new THREE.BufferGeometry();
+starGeo.setAttribute("position",new THREE.BufferAttribute(starPositions,3));
+scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({
+ color:0xb7eaff,size:1.4,sizeAttenuation:false
+})));
+
+/* =========================
+   BUILDINGS
+   HEIGHT AVERAGE = 300M
+========================= */
 const heights=[];
 for(let i=0;i<35;i++){
  const h=130+Math.random()*340;
@@ -178,349 +182,307 @@ for(let i=heights.length-1;i>0;i--){
  [heights[i],heights[j]]=[heights[j],heights[i]];
 }
 
-/* 조명 인스턴싱: 모든 건물의 수평 띠를 한 번에 렌더링 */
-const maxBands=70*100;
-const bandMeshes=colors.map(c=>{
- const mesh=new THREE.InstancedMesh(
-  boxGeo,
-  basic(c),
-  maxBands
- );
- mesh.count=0;
- scene.add(mesh);
- return mesh;
-});
-const bandCounts=colors.map(()=>0);
-const dummy=new THREE.Object3D();
-
-/* 건물별 데이터 */
 const buildings=[];
-const beamUnits=[];
+const beamData=[];
+const buildingBodies=[];
+const elevatorCabins=[];
+const elevatorDoors=[];
 
-function addBand(colorIndex,x,y,z,w,h,d){
- const mesh=bandMeshes[colorIndex%5];
- const n=bandCounts[colorIndex%5]++;
- if(n>=maxBands)return;
- dummy.position.set(x,y,z);
- dummy.scale.set(w,h,d);
- dummy.rotation.set(0,0,0);
- dummy.updateMatrix();
- mesh.setMatrixAt(n,dummy.matrix);
- mesh.count=n+1;
+/* 창문은 하나의 인스턴스 묶음으로 */
+const windowCapacity=70*120;
+const windowMeshes=palette.map(c=>{
+ const m=new THREE.InstancedMesh(boxGeo,mat(c),windowCapacity);
+ m.count=0;
+ scene.add(m);
+ return m;
+});
+const windowCounts=[0,0,0,0,0];
+
+function addWindow(colorIndex,x,y,z,sx,sy,sz){
+ const idx=colorIndex%5;
+ const n=windowCounts[idx]++;
+ if(n>=windowCapacity)return;
+ setInstance(windowMeshes[idx],n,x,y,z,sx,sy,sz);
+ windowMeshes[idx].count=n+1;
 }
 
-/* 건물 생성 */
-function makeBuilding(index,x,z,w,d,h,isBeam){
- const g=new THREE.Group();
- g.position.set(x,0,z);
- scene.add(g);
+for(let i=0;i<70;i++){
+ const a=i*2.39996;
+ const r=190+(i%5)*90+Math.random()*40;
+ const x=Math.cos(a)*r;
+ const z=Math.sin(a)*r;
+ const w=18+Math.random()*10;
+ const d=18+Math.random()*10;
+ const h=heights[i];
+ const color=palette[i%5];
+ const light=mat(color);
+
+ const group=new THREE.Group();
+ group.position.set(x,0,z);
+ scene.add(group);
 
  const bodyMat=new THREE.MeshStandardMaterial({
-  color:new THREE.Color().setHSL(.56+(index%8)*.012,.4,.13),
-  metalness:.8,roughness:.25
+  color:new THREE.Color().setHSL(.57+(i%7)*.01,.35,.13),
+  metalness:.65,roughness:.35
  });
- box(w,h,d,bodyMat,0,h/2,0,g);
+ addBox(group,w,h,d,bodyMat,0,h/2,0);
 
- const lm=lightMats[index%5];
-
- // 건물 모서리 네온 라인
+ // 네온 모서리
  for(const sx of [-1,1]){
   for(const sz of [-1,1]){
-   box(.11,h,.11,lm,sx*(w/2-.1),h/2,sz*(d/2-.1),g);
+   addBox(group,.09,h,.09,light,sx*(w/2-.1),h/2,sz*(d/2-.1));
   }
  }
 
- // 건물 외벽의 반복 가로 조명은 InstancedMesh
- for(let y=5;y<h;y+=9){
-  addBand(index%5,x,y,z+d/2+.07,w*.88,.065,.07);
-  addBand(index%5,x,y,z-d/2-.07,w*.88,.065,.07);
-  addBand(index%5,x+w/2+.07,y,z,.065,.065,d*.88);
-  addBand(index%5,x-w/2-.07,y,z,.065,.065,d*.88);
+ // 간격을 넓힌 창문 조명
+ for(let y=8;y<h-4;y+=15){
+  addWindow(i,x,y,z+d/2+.06,w*.82,.09,.07);
+  addWindow(i,x,y,z-d/2-.06,w*.82,.09,.07);
+  addWindow(i,x+w/2+.06,y,z,.07,.09,d*.82);
+  addWindow(i,x-w/2-.06,y,z,.07,.09,d*.82);
  }
 
- // 창문 수직 광섬유
- for(let k=1;k<=3;k++){
-  const xx=-w/2+k*w/4;
-  box(.055,h*.92,.06,M.white,xx,h/2,z+d/2+.1);
-  box(.055,h*.92,.06,M.white,xx,h/2,z-d/2-.1);
- }
- for(let k=1;k<=3;k++){
-  const zz=-d/2+k*d/4;
-  box(.06,h*.92,.055,M.white,x+w/2+.1,h/2,zz);
-  box(.06,h*.92,.055,M.white,x-w/2-.1,h/2,zz);
- }
+ // 옥상 네온
+ addBox(group,w,.12,.12,light,0,h+.1,d/2);
+ addBox(group,w,.12,.12,light,0,h+.1,-d/2);
+ addBox(group,.12,.12,d,light,w/2,h+.1,0);
+ addBox(group,.12,.12,d,light,-w/2,h+.1,0);
 
- // 옥상 테두리
- box(w,.13,.13,lm,x,h+.1,z+d/2);
- box(w,.13,.13,lm,x,h+.1,z-d/2);
- box(.13,.13,d,lm,x+w/2,h+.1,z);
- box(.13,.13,d,lm,x-w/2,h+.1,z);
+ // 엘리베이터 승강로
+ const liftZ=d/2+3;
+ addBox(group,.12,h,.12,mats.cyan,-1.8,h/2,liftZ);
+ addBox(group,.12,h,.12,mats.cyan,1.8,h/2,liftZ);
+ addBox(group,.12,h,.12,mats.cyan,-1.8,h/2,liftZ+2.6);
+ addBox(group,.12,h,.12,mats.cyan,1.8,h/2,liftZ+2.6);
 
- // 옥상 장식
- box(w*.25,1.2,d*.25,M.dark,x,h+.65,z);
- box(w*.13,.12,d*.13,M.gold,x,h+1.3,z);
-
- // 외벽 부착형 개별 엘리베이터 승강로
- const liftZ=d/2+2.8;
- const liftX=0;
- const shaftMat=new THREE.MeshStandardMaterial({
-  color:0x17617c,metalness:.8,roughness:.2,
-  transparent:true,opacity:.2
+ // 투명한 승강로 뒷면
+ const glass=new THREE.MeshBasicMaterial({
+  color:0x146b91,transparent:true,opacity:.16,
+  depthWrite:false
  });
+ addBox(group,3.7,h,.08,glass,0,h/2,liftZ+2.6);
 
- box(.13,h,.13,M.cyan,x-1.8,h/2,z+liftZ);
- box(.13,h,.13,M.cyan,x+1.8,h/2,z+liftZ);
- box(.13,h,.13,M.cyan,x-1.8,h/2,z+liftZ+2.6);
- box(.13,h,.13,M.cyan,x+1.8,h/2,z+liftZ+2.6);
-
- // 승강로 뒷판
- box(3.8,h,.12,shaftMat,x,h/2,z+liftZ+2.6);
-
- // 엘리베이터 캐빈
+ // 캐빈
  const cabin=new THREE.Group();
  cabin.position.set(x,0,z+liftZ);
  scene.add(cabin);
+ addBox(cabin,3.2,.18,2.4,mats.dark,0,.1,0);
+ addBox(cabin,3.2,.1,2.4,mats.cyan,0,3.2,0);
 
- box(3.2,.2,2.5,M.dark,0,.1,0,cabin);
- box(3.2,.12,2.5,M.cyan,0,3.2,0,cabin);
-
- const glass=new THREE.MeshStandardMaterial({
-  color:0x54dfff,metalness:.65,roughness:.15,
-  transparent:true,opacity:.22
+ const cabinGlass=new THREE.MeshBasicMaterial({
+  color:0x45dfff,transparent:true,opacity:.2
  });
- box(3.1,3,.1,glass,0,1.65,-1.2,cabin);
- box(.1,3,2.4,glass,-1.55,1.65,0,cabin);
- box(.1,3,2.4,glass,1.55,1.65,0,cabin);
+ addBox(cabin,3.1,3,.08,cabinGlass,0,1.6,-1.17);
+ addBox(cabin,.08,3,2.3,cabinGlass,-1.55,1.6,0);
+ addBox(cabin,.08,3,2.3,cabinGlass,1.55,1.6,0);
 
- // 문 두 짝
- const doorL=box(1.5,3,.12,M.blue,-.75,1.65,1.25,cabin);
- const doorR=box(1.5,3,.12,M.blue,.75,1.65,1.25,cabin);
+ const left=addBox(cabin,1.5,3,.12,mats.blue,-.75,1.6,1.2);
+ const right=addBox(cabin,1.5,3,.12,mats.blue,.75,1.6,1.2);
 
- const cabLight=new THREE.PointLight(0x4ceaff,.7,8);
- cabLight.position.set(0,2.5,0);
- cabin.add(cabLight);
-
- // 정차 층
  const maxFloor=Math.max(2,Math.floor(h/4.5));
  const stops=[1];
  for(let p=.2;p<1;p+=.2){
   stops.push(Math.max(2,Math.round(maxFloor*p)));
  }
  stops.push(maxFloor);
+
  const uniqueStops=[...new Set(stops)];
 
- // 층별 발코니
+ // 대표 층 표시만 생성
  for(const f of uniqueStops){
   const fy=f*4.5;
-  box(w*.55,.28,4,M.dark,x,fy,z+liftZ+2.8);
-  box(w*.55,.08,.08,M.cyan,x,fy+.2,z+liftZ+4.8);
+  addBox(group,w*.5,.22,4,mats.dark,0,fy,liftZ+2.7);
+  addBox(group,w*.5,.07,.08,mats.cyan,0,fy+.15,liftZ+4.7);
  }
 
- let beamData=null;
- if(isBeam){
-  const emitter=new THREE.Group();
-  emitter.position.set(0,h+2,0);
-  g.add(emitter);
-
+ let beam=null;
+ if(i<10){
   const pivot=new THREE.Group();
-  emitter.add(pivot);
+  pivot.position.set(0,h+3,0);
+  group.add(pivot);
 
-  const outer=new THREE.Mesh(
-   new THREE.CylinderGeometry(.1,11,300,16,1,true),
-   new THREE.MeshBasicMaterial({
-    color:colors[index%5],transparent:true,opacity:.09,
-    blending:THREE.AdditiveBlending,depthWrite:false,
-    side:THREE.DoubleSide
-   })
+  const beamMaterial=new THREE.MeshBasicMaterial({
+   color,transparent:true,opacity:.075,
+   depthWrite:false,side:THREE.DoubleSide
+  });
+  const coreMaterial=new THREE.MeshBasicMaterial({
+   color:0xd8fbff,transparent:true,opacity:.23,
+   depthWrite:false,side:THREE.DoubleSide
+  });
+  const cone=new THREE.Mesh(
+   new THREE.CylinderGeometry(.1,10,240,8,1,true),
+   beamMaterial
   );
-  outer.position.y=150;
-  pivot.add(outer);
+  cone.position.y=120;
+  pivot.add(cone);
 
   const core=new THREE.Mesh(
-   new THREE.CylinderGeometry(.035,.9,300,10,1,true),
-   new THREE.MeshBasicMaterial({
-    color:0xd8fbff,transparent:true,opacity:.28,
-    blending:THREE.AdditiveBlending,depthWrite:false,
-    side:THREE.DoubleSide
-   })
+   new THREE.CylinderGeometry(.05,1.1,240,6,1,true),
+   coreMaterial
   );
-  core.position.y=150;
+  core.position.y=120;
   pivot.add(core);
 
-  const haze=new THREE.Mesh(
-   new THREE.CylinderGeometry(.2,17,300,12,1,true),
-   new THREE.MeshBasicMaterial({
-    color:colors[(index+2)%5],transparent:true,opacity:.035,
-    blending:THREE.AdditiveBlending,depthWrite:false,
-    side:THREE.DoubleSide
-   })
-  );
-  haze.position.y=150;
-  pivot.add(haze);
-
-  beamData={pivot,outer,core,haze,phase:index*.8};
-  beamUnits.push(beamData);
+  beam={pivot,cone,core,phase:i*.8};
+  beamData.push(beam);
  }
 
- const data={
-  index,x,z,w,d,h,g,cabin,doorL,doorR,
+ buildings.push({
+  index:i,x,z,w,d,h,group,cabin,left,right,
   liftZ,maxFloor,stops:uniqueStops,
-  activeFloor:1,moving:false,targetY:0,
-  door:1,doorTarget:1,phase:index*.73,
-  isBeam
- };
- buildings.push(data);
- return data;
+  activeFloor:1,targetY:0,moving:false,
+  door:1,doorTarget:1,phase:i*.7,
+  beam
+ });
 }
+windowMeshes.forEach(m=>m.instanceMatrix.needsUpdate=true);
 
-/* 70개 건물: 10개 빔 타워 포함 */
-for(let i=0;i<70;i++){
- const angle=i*2.39996;
- const radius=170+(i%5)*100+Math.random()*60;
- const x=Math.cos(angle)*radius;
- const z=Math.sin(angle)*radius;
- const w=17+Math.random()*12;
- const d=17+Math.random()*12;
- makeBuilding(i,x,z,w,d,heights[i],i<10);
-}
-bandMeshes.forEach((m,i)=>{
- m.instanceMatrix.needsUpdate=true;
-});
+/* =========================
+   CITIZENS: 200 INSTANCES
+========================= */
+const citizenGeo=new THREE.CapsuleGeometry(.3,.7,2,4);
+const citizenMat=new THREE.MeshBasicMaterial({color:0x58a8ca});
+const citizens=new THREE.InstancedMesh(citizenGeo,citizenMat,200);
+scene.add(citizens);
 
-/* 시민 200명: InstancedMesh 한 개 */
-const crowdGeo=new THREE.CapsuleGeometry(.3,.8,2,5);
-const crowdMat=new THREE.MeshStandardMaterial({color:0x4a9fc9,roughness:.8});
-const crowd=new THREE.InstancedMesh(crowdGeo,crowdMat,200);
-scene.add(crowd);
-const crowdData=[];
-const crowdDummy=new THREE.Object3D();
-
+const people=[];
 for(let i=0;i<200;i++){
- const x=(Math.random()-.5)*1300;
- const z=(Math.random()-.5)*800;
- crowdData.push({x,z,phase:Math.random()*6,speed:.4+Math.random()*.5});
- crowdDummy.position.set(x,.8,z);
- crowdDummy.updateMatrix();
- crowd.setMatrixAt(i,crowdDummy.matrix);
+ const p={
+  x:(Math.random()-.5)*1200,
+  z:(Math.random()-.5)*800,
+  phase:Math.random()*6,
+  speed:.25+Math.random()*.3
+ };
+ people.push(p);
+ setInstance(citizens,i,p.x,.7,p.z,.75,1,.75);
 }
-crowd.instanceMatrix.needsUpdate=true;
+citizens.instanceMatrix.needsUpdate=true;
 
-/* 공중 교통 8대 */
+/* =========================
+   AIR TRANSPORT
+========================= */
 const vehicles=[];
 for(let i=0;i<8;i++){
  const g=new THREE.Group();
  scene.add(g);
- box(6,1,2.6,M.dark,0,0,0,g);
- box(5,.13,2.3,M.cyan,0,.55,0,g);
+ addBox(g,6,1,2.6,mats.dark,0,0,0);
+ addBox(g,5,.12,2.3,mats.cyan,0,.55,0);
  vehicles.push({
-  g,r:250+Math.random()*450,
+  g,r:260+Math.random()*430,
   a:Math.random()*6.28,
-  y:45+Math.random()*130,
-  speed:.025+Math.random()*.012
+  y:55+Math.random()*120,
+  speed:.018+Math.random()*.012
  });
 }
 
-/* UI */
-const elevatorEl=document.getElementById("elevator");
-const floorsEl=document.getElementById("floors");
-const floorDisplay=document.getElementById("floorDisplay");
-const floorInfo=document.getElementById("floorInfo");
-const promptEl=document.getElementById("prompt");
-const notice=document.getElementById("notice");
-const lock=document.getElementById("lock");
-
+/* =========================
+   PLAYER / ELEVATOR
+========================= */
+const $=id=>document.getElementById(id);
 let selectedBuilding=null;
 let inElevator=false;
 let gameStarted=false;
 let pointerLocked=false;
-let elevatorUI=false;
 let yaw=0,pitch=0,velocityY=0,grounded=true;
 const keys={};
+let lowQuality=true;
 
-function showNotice(s){
- notice.textContent=s;
- clearTimeout(showNotice.timer);
- showNotice.timer=setTimeout(()=>notice.textContent="",2200);
+function notice(text){
+ $("notice").textContent=text;
+ clearTimeout(notice.timer);
+ notice.timer=setTimeout(()=>$("notice").textContent="",2200);
 }
 
-function openUI(){
- elevatorUI=true;
- elevatorEl.style.display="block";
- if(document.pointerLockElement)document.exitPointerLock();
- renderFloorButtons();
-}
-function closeUI(){
- elevatorUI=false;
- elevatorEl.style.display="none";
- if(gameStarted)renderer.domElement.requestPointerLock();
-}
-function renderFloorButtons(){
+function renderFloors(){
  const b=selectedBuilding;
- if(!b)return;
- floorsEl.innerHTML="";
- floorDisplay.textContent=b.activeFloor+"F";
- floorInfo.textContent=
-  "건물 "+(b.index+1)+" · 높이 "+Math.round(b.h)+"m · "+b.maxFloor+"층";
- b.stops.forEach(f=>{
+ $("floors").innerHTML="";
+ $("floorDisplay").textContent=b.activeFloor+"F";
+ $("floorInfo").textContent=
+  `건물 ${b.index+1} · 높이 ${Math.round(b.h)}m · ${b.maxFloor}층`;
+
+ for(const f of b.stops){
   const btn=document.createElement("button");
   btn.textContent=f+"F";
   btn.onclick=()=>goFloor(f);
-  floorsEl.appendChild(btn);
- });
-}
-function goFloor(f){
- const b=selectedBuilding;
- if(!b||b.moving)return;
- if(f===b.activeFloor){
-  showNotice("이미 도착한 층이야");
-  return;
+  $("floors").appendChild(btn);
  }
- b.activeFloor=f;
- b.targetY=f*4.5;
- b.moving=true;
- b.doorTarget=0;
- closeUI();
- showNotice(f+"층으로 이동합니다");
 }
-function leaveElevator(){
- const b=selectedBuilding;
- if(!inElevator||!b||b.moving||b.door<.94)return;
- inElevator=false;
- elevatorUI=false;
- elevatorEl.style.display="none";
- camera.position.set(
-  b.x,
-  b.cabin.position.y+2,
-  b.z+b.liftZ+7
- );
- yaw=Math.PI;
- pitch=0;
- camera.rotation.set(0,Math.PI,0);
- renderer.domElement.requestPointerLock();
- showNotice("건물 "+(b.index+1)+" · "+b.activeFloor+"층 도착");
-}
-document.getElementById("exitLift").onclick=leaveElevator;
 
+function openElevatorUI(){
+ $("elevator").style.display="block";
+ if(document.pointerLockElement)document.exitPointerLock();
+ renderFloors();
+}
+function closeElevatorUI(){
+ $("elevator").style.display="none";
+ if(gameStarted)renderer.domElement.requestPointerLock();
+}
 function enterElevator(b){
  selectedBuilding=b;
  inElevator=true;
  b.cabin.position.y=(b.activeFloor-1)*4.5;
  camera.position.set(b.x,b.cabin.position.y+2,b.z+b.liftZ);
- yaw=0;
+ openElevatorUI();
+ notice("엘리베이터에 탑승했어");
+}
+function goFloor(f){
+ const b=selectedBuilding;
+ if(!b||b.moving)return;
+ if(f===b.activeFloor){
+  notice("이미 도착한 층이야");
+  return;
+ }
+ b.activeFloor=f;
+ b.targetY=(f-1)*4.5;
+ b.moving=true;
+ b.doorTarget=0;
+ closeElevatorUI();
+ notice(f+"층으로 이동 중");
+}
+function exitElevator(){
+ const b=selectedBuilding;
+ if(!inElevator||!b||b.moving||b.door<.95)return;
+ inElevator=false;
+ $("elevator").style.display="none";
+ camera.position.set(b.x,b.cabin.position.y+2,b.z+b.liftZ+7);
+ yaw=Math.PI;
  pitch=0;
- openUI();
- showNotice("건물 "+(b.index+1)+" 엘리베이터 탑승");
+ renderer.domElement.requestPointerLock();
+ notice(b.activeFloor+"층에 도착했어");
+}
+$("exitLift").onclick=exitElevator;
+
+function nearestBuilding(){
+ let best=null,dist=Infinity;
+ for(const b of buildings){
+  const dx=camera.position.x-b.x;
+  const dz=camera.position.z-(b.z+b.liftZ);
+  const d=dx*dx+dz*dz;
+  if(d<dist){dist=d;best=b;}
+ }
+ return {building:best,distance:Math.sqrt(dist)};
+}
+function interact(){
+ if(inElevator){
+  if($("elevator").style.display==="none")openElevatorUI();
+  else closeElevatorUI();
+  return;
+ }
+ const near=nearestBuilding();
+ if(near.building&&near.distance<9&&camera.position.y<7){
+  enterElevator(near.building);
+ }else{
+  notice("엘리베이터 입구 가까이 이동해 줘");
+ }
 }
 
-/* 시작 및 마우스 */
-document.getElementById("start").onclick=()=>{
+$("start").onclick=()=>{
  gameStarted=true;
- lock.style.display="none";
+ $("lock").style.display="none";
  renderer.domElement.requestPointerLock();
 };
 document.addEventListener("pointerlockchange",()=>{
  pointerLocked=document.pointerLockElement===renderer.domElement;
- lock.style.display=gameStarted?"none":"flex";
 });
 document.addEventListener("mousemove",e=>{
  if(!pointerLocked||inElevator)return;
@@ -535,33 +497,6 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("keyup",e=>keys[e.code]=false);
 
-/* 가장 가까운 엘리베이터 */
-function nearestBuilding(){
- let best=null,dist=Infinity;
- for(const b of buildings){
-  const d=Math.hypot(
-   camera.position.x-b.x,
-   camera.position.z-(b.z+b.liftZ)
-  );
-  if(d<dist){dist=d;best=b;}
- }
- return {building:best,distance:dist};
-}
-function interact(){
- if(inElevator){
-  if(!elevatorUI)openUI();
-  else closeUI();
-  return;
- }
- const {building,distance}=nearestBuilding();
- if(building&&distance<9&&camera.position.y<7){
-  enterElevator(building);
- }else{
-  showNotice("가까운 건물 엘리베이터 입구로 가!");
- }
-}
-
-/* 이동 */
 function updatePlayer(dt){
  if(inElevator){
   if(selectedBuilding){
@@ -576,7 +511,7 @@ function updatePlayer(dt){
  }
  if(!pointerLocked)return;
 
- const speed=keys.ShiftLeft?27:14;
+ const speed=keys.ShiftLeft?26:14;
  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
  const move=new THREE.Vector3();
@@ -585,24 +520,21 @@ function updatePlayer(dt){
  if(keys.KeyS)move.sub(forward);
  if(keys.KeyD)move.add(right);
  if(keys.KeyA)move.sub(right);
- if(move.length()>0){
+ if(move.lengthSq()>0){
   move.normalize().multiplyScalar(speed*dt);
   camera.position.add(move);
  }
-
  if(keys.Space&&grounded){
   velocityY=9;
   grounded=false;
  }
  velocityY-=24*dt;
  camera.position.y+=velocityY*dt;
-
  if(camera.position.y<2){
   camera.position.y=2;
   velocityY=0;
   grounded=true;
  }
-
  camera.position.x=THREE.MathUtils.clamp(camera.position.x,-850,850);
  camera.position.z=THREE.MathUtils.clamp(camera.position.z,-550,550);
  camera.rotation.order="YXZ";
@@ -610,101 +542,135 @@ function updatePlayer(dt){
  camera.rotation.x=pitch;
 }
 
-/* 엘리베이터 애니메이션 */
+/* =========================
+   ONLY MOVING ELEVATORS UPDATE
+========================= */
 function updateElevators(dt){
  for(const b of buildings){
+  if(!b.moving&&b.door===b.doorTarget)continue;
+
   b.door=THREE.MathUtils.damp(b.door,b.doorTarget,5,dt);
-  b.doorL.position.x=-.75-b.door*1.1;
-  b.doorR.position.x=.75+b.door*1.1;
+  b.left.position.x=-.75-b.door*1.05;
+  b.right.position.x=.75+b.door*1.05;
 
   if(b.moving){
    const diff=b.targetY-b.cabin.position.y;
-   b.cabin.position.y+=Math.sign(diff)*Math.min(Math.abs(diff),85*dt);
-   if(Math.abs(diff)<.5){
+   const step=Math.sign(diff)*Math.min(Math.abs(diff),70*dt);
+   b.cabin.position.y+=step;
+
+   if(Math.abs(diff)<.3){
     b.cabin.position.y=b.targetY;
     b.moving=false;
     b.doorTarget=1;
-    showNotice(b.activeFloor+"층 도착!");
-    if(selectedBuilding===b&&inElevator)openUI();
+    notice(b.activeFloor+"층 도착!");
+    if(selectedBuilding===b&&inElevator)openElevatorUI();
    }
   }
  }
 }
 
-/* 메인 루프 */
+/* =========================
+   QUALITY SETTINGS
+========================= */
+$("quality").onclick=()=>{
+ lowQuality=!lowQuality;
+ renderer.setPixelRatio(Math.min(devicePixelRatio,lowQuality?.65:1));
+ $("quality").textContent=lowQuality?"그래픽: 초경량":"그래픽: 표준";
+};
+
+/* =========================
+   PERFORMANCE LOOP
+========================= */
+let frameCount=0;
+let fpsTime=0;
+let displayedFPS=0;
+let crowdTimer=0;
+let crowdIndex=0;
+let lastCrowdUpdate=0;
+
 function animate(){
  requestAnimationFrame(animate);
  const dt=Math.min(clock.getDelta(),.04);
  const t=clock.elapsedTime;
 
- // 건물별 조명 밝기: 건물당 한 번만 갱신
- for(const b of buildings){
-  b.lm=lightMats[b.index%5];
-  b.lm.opacity=.72+Math.sin(t*1.5+b.phase)*.22;
- }
+ updatePlayer(dt);
+ updateElevators(dt);
 
- // 상하좌우 움직이는 빔
- for(const b of beamUnits){
-  b.pivot.rotation.y=Math.sin(t*.32+b.phase)*1.35;
-  b.pivot.rotation.z=Math.sin(t*.55+b.phase*1.4)*.78;
-  b.outer.material.opacity=.065+.045*(.5+.5*Math.sin(t*2+b.phase));
-  b.core.material.opacity=.19+.13*(.5+.5*Math.sin(t*2.4+b.phase));
-  b.haze.material.opacity=.02+.02*(.5+.5*Math.sin(t*1.3+b.phase));
+ // 빔 타워 10개만 애니메이션
+ for(const b of beamData){
+  b.pivot.rotation.y=Math.sin(t*.28+b.phase)*1.15;
+  b.pivot.rotation.z=Math.sin(t*.4+b.phase)*.62;
  }
-
- // 시민 이동
- for(let i=0;i<200;i++){
-  const p=crowdData[i];
-  p.phase+=dt*p.speed*.1;
-  crowdDummy.position.set(
-   p.x+Math.sin(p.phase)*1.1,.8,
-   p.z+Math.cos(p.phase)*1.1
-  );
-  crowdDummy.rotation.set(0,p.phase,0);
-  crowdDummy.updateMatrix();
-  crowd.setMatrixAt(i,crowdDummy.matrix);
- }
- crowd.instanceMatrix.needsUpdate=true;
 
  // 공중 교통
  for(const v of vehicles){
   v.a+=dt*v.speed;
   v.g.position.set(
    Math.cos(v.a)*v.r,
-   v.y+Math.sin(t+v.a)*2,
+   v.y+Math.sin(t+v.a)*1.5,
    Math.sin(v.a)*v.r
   );
   v.g.rotation.y=-v.a;
  }
 
- updateElevators(dt);
- updatePlayer(dt);
-
- if(!inElevator){
-  const near=nearestBuilding();
-  const visible=near.distance<10&&camera.position.y<7;
-  promptEl.style.display=visible?"block":"none";
-  document.getElementById("buildingText").textContent=
-   visible?"건물 "+(near.building.index+1)+" · E 키":"주변 건물 탐색 중";
- }else{
-  promptEl.style.display="none";
-  document.getElementById("buildingText").textContent=
-   "건물 "+(selectedBuilding.index+1)+" 엘리베이터";
+ // 시민은 한 번에 일부씩만 업데이트
+ crowdTimer+=dt;
+ if(crowdTimer>.09){
+  crowdTimer=0;
+  for(let n=0;n<25;n++){
+   const i=crowdIndex%200;
+   const p=people[i];
+   p.phase+=p.speed*.09;
+   setInstance(
+    citizens,i,
+    p.x+Math.sin(p.phase)*.8,
+    .7,
+    p.z+Math.cos(p.phase)*.8,
+    .75,1,.75,p.phase
+   );
+   crowdIndex++;
+  }
+  citizens.instanceMatrix.needsUpdate=true;
  }
 
- document.getElementById("heightText").textContent=
-  "고도 "+Math.max(0,Math.round(camera.position.y))+"m";
+ // UI 거리 확인은 10프레임마다
+ lastCrowdUpdate++;
+ if(lastCrowdUpdate>=10){
+  lastCrowdUpdate=0;
+  if(!inElevator){
+   const near=nearestBuilding();
+   const visible=near.distance<10&&camera.position.y<7;
+   $("prompt").style.display=visible?"block":"none";
+   $("buildingText").textContent=visible?
+    "건물 "+(near.building.index+1)+" · E 키":"도시 탐색 중";
+  }else{
+   $("prompt").style.display="none";
+   $("buildingText").textContent="엘리베이터 탑승 중";
+  }
+  $("heightText").textContent="고도 "+Math.max(0,Math.round(camera.position.y))+"m";
+ }
 
- composer.render();
+ // FPS 측정
+ frameCount++;
+ fpsTime+=dt;
+ if(fpsTime>=1){
+  displayedFPS=frameCount;
+  frameCount=0;
+  fpsTime=0;
+  $("fpsText").textContent="FPS "+displayedFPS;
+ }
+
+ renderer.render(scene,camera);
 }
 animate();
 
-/* 창 크기 */
+/* =========================
+   RESIZE
+========================= */
 addEventListener("resize",()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
  renderer.setSize(innerWidth,innerHeight);
- composer.setSize(innerWidth,innerHeight);
 });
 </script>
 </body>
