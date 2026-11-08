@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+＼<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -77,7 +77,7 @@ camera.position.set(0,2,130);
 
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,.68));
+renderer.setPixelRatio(Math.min(devicePixelRatio,.55));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.65;
@@ -92,7 +92,6 @@ const mat=(c,e=0,rough=.35,metal=.5)=>new THREE.MeshStandardMaterial({
  color:c,emissive:c,emissiveIntensity:e,roughness:rough,metalness:metal
 });
 const dark=mat(0x101d2c,.15,.4,.8);
-
 function addGradientGlow(material,height,intensity=2.4){
  material.onBeforeCompile=(shader)=>{
   shader.uniforms.uGlowHeight={value:height};
@@ -113,14 +112,12 @@ function addGradientGlow(material,height,intensity=2.4){
  material.customProgramCacheKey=()=>`gradient-${height}-${intensity}`;
  return material;
 }
-
 const shell=addGradientGlow(mat(0x142b40,.3,.22,.8),650,2.15);
 const facadeGlow=addGradientGlow(new THREE.MeshStandardMaterial({
  color:0x17395c,emissive:0x102c70,emissiveIntensity:.8,
  transparent:true,opacity:.22,roughness:.25,metalness:.65,
  side:THREE.DoubleSide,depthWrite:false
 }),650,1.8);
-
 const glass=new THREE.MeshPhysicalMaterial({
  color:0x387da0,metalness:.5,roughness:.1,transparent:true,opacity:.36,
  side:THREE.DoubleSide,depthWrite:false
@@ -131,6 +128,25 @@ const ice=mat(0xa6f2ff,4.5);
 const gold=mat(0xffd58c,4.5);
 const pink=mat(0xff62db,3.5);
 const floorMat=mat(0x30495d,.3,.45,.7);
+
+// 반복되는 창문과 층 조명은 개별 Mesh 대신 InstancedMesh로 한 번에 렌더링
+const instDummy=new THREE.Object3D();
+const instanced={
+ ice:new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),ice,12000),
+ gold:new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),gold,4000),
+ cyan:new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),cyan,24000)
+};
+const instCount={ice:0,gold:0,cyan:0};
+for(const m of Object.values(instanced)){scene.add(m);}
+function addGlowInstance(type,x,y,z,w,h,d){
+ const m=instanced[type],i=instCount[type];
+ if(i>=m.count)return;
+ instDummy.position.set(x,y,z);
+ instDummy.scale.set(w,h,d);
+ instDummy.updateMatrix();
+ m.setMatrixAt(i,instDummy.matrix);
+ instCount[type]++;
+}
 const interiorMat=mat(0x1b3347,.25,.5,.7);
 
 function meshBox(w,h,d,material,x=0,y=0,z=0,parent=scene){
@@ -162,7 +178,7 @@ for(let i=-4;i<=4;i++){
 
 // 별빛
 {
- const count=500,positions=new Float32Array(count*3);
+ const count=320,positions=new Float32Array(count*3);
  for(let i=0;i<count;i++){
   positions[i*3]=(Math.random()-.5)*4500;
   positions[i*3+1]=250+Math.random()*1100;
@@ -216,10 +232,6 @@ function createBuilding(i,x,z,w,d,h){
  for(let f=0;f<floors;f++){
   const y=f*fh;
   addWalkFloor(x,y,z,w-1.5,d-1.5);
-  if(f%4===0){
-   meshBox(w*.48,.10,.16,ice,0,y+fh-.35,0,g);
-   meshBox(.12,.10,d*.42,gold,-w*.28,y+fh-.35,0,g);
-  }
  }
 
  // 외벽 유리 패널. 정면 중앙은 출입구로 비워 둠
@@ -243,9 +255,9 @@ function createBuilding(i,x,z,w,d,h){
  // 건물 전면의 층별 네온 창문
  for(let f=1;f<floors;f++){
   const y=f*fh;
-  meshBox(w*.72,.16,.22,f%4===0?gold:ice,0,y,d/2+.23,g);
-  meshBox(.12,.12,.22,cyan,-w*.38,y,d/2+.23,g);
-  meshBox(.12,.12,.22,cyan,w*.38,y,d/2+.23,g);
+  addGlowInstance(f%4===0?"gold":"ice",x,y,z+d/2+.23,w*.72,.16,.22);
+  addGlowInstance("cyan",x-w*.38,y,z+d/2+.23,.12,.12,.22);
+  addGlowInstance("cyan",x+w*.38,y,z+d/2+.23,.12,.12,.22);
  }
 
  // 건물 모서리 수직 네온 라인
@@ -312,6 +324,10 @@ for(let i=0;i<70;i++){
  const r=430+Math.floor(i/14)*155+Math.random()*45;
  const x=Math.cos(a)*r,z=Math.sin(a)*r;
  createBuilding(i,x,z,22+Math.random()*8,22+Math.random()*8,230+Math.random()*370);
+}
+for(const type of Object.keys(instanced)){
+ instanced[type].count=instCount[type];
+ instanced[type].instanceMatrix.needsUpdate=true;
 }
 
 // JAVE TOWER
@@ -451,10 +467,8 @@ for(const f of walkFloors){
  const x0=Math.floor((f.x-f.w/2)/FLOOR_CELL),x1=Math.floor((f.x+f.w/2)/FLOOR_CELL);
  const z0=Math.floor((f.z-f.d/2)/FLOOR_CELL),z1=Math.floor((f.z+f.d/2)/FLOOR_CELL);
  for(let ix=x0;ix<=x1;ix++)for(let iz=z0;iz<=z1;iz++){
-  const key=floorCellKey(ix,iz);
-  let bucket=floorGrid.get(key);
-  if(!bucket)floorGrid.set(key,bucket=[]);
-  bucket.push(f);
+  const key=floorCellKey(ix,iz);let bucket=floorGrid.get(key);
+  if(!bucket)floorGrid.set(key,bucket=[]);bucket.push(f);
  }
 }
 
@@ -543,7 +557,6 @@ function beam(parent,length,color,phase=0,width=18){
  pivot.add(halo);
  beamPivots.push({pivot,phase});
 }
-
 for(let i=0;i<12;i++){
  beam(observatory,1100,i%3===0?0xffd58c:i%2?0x4ccfff:0xc0f5ff,i*Math.PI/6,24);
 }
@@ -584,7 +597,7 @@ for(let i=0;i<16;i++){
 }
 
 // 폭죽 파티클
-const particleCount=420;
+const particleCount=260;
 const firePos=new Float32Array(particleCount*3);
 const fireVel=new Float32Array(particleCount*3);
 const fireLife=new Float32Array(particleCount);
@@ -602,7 +615,7 @@ let fireIndex=0;
 function burst(){
  const origin=[(Math.random()-.5)*35,JH+30+Math.random()*80,(Math.random()-.5)*35];
  const color=new THREE.Color().setHSL(Math.random(),.9,.65);
- for(let n=0;n<55;n++){
+ for(let n=0;n<36;n++){
   const i=(fireIndex++)%particleCount;
   const a=Math.random()*Math.PI*2;
   const u=Math.random()*2-1;
@@ -662,22 +675,14 @@ $("enter").onclick=()=>{
 
 // 바닥 충돌: 플레이어가 지나간 높이와 현재 높이 사이의 바닥을 탐색
 function findFloor(previousY){
- const feetBefore=previousY-1.7;
- const feetNow=player.y-1.7;
- const candidates=floorGrid.get(floorCellKey(
-  Math.floor(player.x/FLOOR_CELL),
-  Math.floor(player.z/FLOOR_CELL)
- ));
+ const feetBefore=previousY-1.7,feetNow=player.y-1.7;
+ const candidates=floorGrid.get(floorCellKey(Math.floor(player.x/FLOOR_CELL),Math.floor(player.z/FLOOR_CELL)));
  if(!candidates)return -Infinity;
-
  let best=-Infinity;
  for(let i=0;i<candidates.length;i++){
   const p=candidates[i];
-  if(Math.abs(player.x-p.x)<=p.w/2-.25&&
-     Math.abs(player.z-p.z)<=p.d/2-.25&&
-     feetBefore>=p.y-.35&&feetNow<=p.y+.25&&p.y>best){
-   best=p.y;
-  }
+  if(Math.abs(player.x-p.x)<=p.w/2-.25&&Math.abs(player.z-p.z)<=p.d/2-.25&&
+     feetBefore>=p.y-.35&&feetNow<=p.y+.25&&p.y>best)best=p.y;
  }
  return best;
 }
@@ -868,10 +873,7 @@ function notifyPrompt(){
  $("notice").textContent="E 키를 눌러 엘리베이터 이용";
  $("notice").style.display="block";
  clearTimeout(notifyPrompt.timer);
- notifyPrompt.timer=setTimeout(()=>{
-  $("notice").style.display="none";
-  promptVisible=false;
- },900);
+ notifyPrompt.timer=setTimeout(()=>{$("notice").style.display="none";promptVisible=false;},900);
 }
 
 // 폭죽 업데이트
@@ -894,15 +896,13 @@ function updateFireworks(dt){
  fireGeo.attributes.position.needsUpdate=true;
 }
 
-// 렌더링: 최대 45FPS 제한
+// 렌더링: 최대 40FPS 제한
 let lastFrameTime=0;
-const FRAME_INTERVAL=1000/45;
-
+const FRAME_INTERVAL=1000/40;
 function animate(now=0){
  requestAnimationFrame(animate);
  if(now-lastFrameTime<FRAME_INTERVAL)return;
  lastFrameTime=now;
-
  const dt=Math.min(clock.getDelta(),.04);
  const t=clock.elapsedTime;
 
