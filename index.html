@@ -72,7 +72,7 @@ import * as THREE from "three";
 const $=id=>document.getElementById(id);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x030914);
-scene.fog=new THREE.FogExp2(0x071523,.00022);
+scene.fog=new THREE.FogExp2(0x102b43,.00012);
 
 const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.1,9000);
 camera.position.set(0,1.7,150);
@@ -87,23 +87,29 @@ renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,.85));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.55;
+renderer.toneMappingExposure=1.9;
 renderer.shadowMap.enabled=false;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xa9dcff,0x101a2a,2.1));
-const sun=new THREE.DirectionalLight(0x9bdfff,1.3);
+scene.add(new THREE.HemisphereLight(0xc9edff,0x24364a,3.2));
+const sun=new THREE.DirectionalLight(0xb9e7ff,2.1);
 sun.position.set(-300,800,300);
 scene.add(sun);
+const cityFill=new THREE.PointLight(0x55bfff,1800,1800);
+cityFill.position.set(0,260,150);
+scene.add(cityFill);
+const towerFill=new THREE.PointLight(0x3acfff,2400,1250);
+towerFill.position.set(0,1450,0);
+scene.add(towerFill);
 
 const mat=(c,e=0,r=.35,m=.5)=>new THREE.MeshStandardMaterial({
  color:c,emissive:c,emissiveIntensity:e,roughness:r,metalness:m
 });
 const dark=mat(0x101d2c,.12,.42,.8);
-const cyan=mat(0x27dfff,4.5);
-const ice=mat(0xa6f2ff,3.8);
-const gold=mat(0xffd58c,3.8);
-const pink=mat(0xff62db,3.2);
+const cyan=mat(0x27dfff,6.2);
+const ice=mat(0xa6f2ff,5.4);
+const gold=mat(0xffd58c,5.2);
+const pink=mat(0xff62db,4.6);
 const blue=mat(0x168dff,3.2);
 const glass=new THREE.MeshPhysicalMaterial({
  color:0x387da0,metalness:.45,roughness:.12,
@@ -123,6 +129,12 @@ function cylinder(rt,rb,h,material,x,y,z,parent=scene,segments=24){
  parent.add(m);
  return m;
 }
+function gradientWall(w,h,d,x,y,z,parent){
+ const m=new THREE.Mesh(makeGradientGeometry(w,h,d),gradientMaterial);
+ m.position.set(x,y,z);
+ parent.add(m);
+ return m;
+}
 function torus(parent,r,y,t,material){
  const m=new THREE.Mesh(new THREE.TorusGeometry(r,t,8,72),material);
  m.rotation.x=Math.PI/2;
@@ -131,9 +143,8 @@ function torus(parent,r,y,t,material){
  return m;
 }
 
-// 지면: 화면에 보이는 바닥과 충돌 바닥을 같은 높이 0으로 통일
 const ground=box(5000,2,5000,mat(0x07111d),0,-1,0);
-const roadMat=mat(0x111e2c,.1,.8,.2);
+const roadMat=mat(0x1b3043,.28,.8,.2);
 
 for(let i=-4;i<=4;i++){
  box(32,.12,2400,roadMat,i*260,.05,0);
@@ -142,7 +153,6 @@ for(let i=-4;i<=4;i++){
  box(2400,.08,.3,cyan,0,.15,i*260-15);
 }
 
-// 별
 {
  const n=260;
  const p=new Float32Array(n*3);
@@ -158,7 +168,6 @@ for(let i=-4;i<=4;i++){
  })));
 }
 
-// 건물 외벽 그라데이션
 function makeGradientGeometry(w,h,d){
  const g=new THREE.BoxGeometry(w,h,d);
  const p=g.attributes.position;
@@ -183,7 +192,7 @@ const gradientMaterial=new THREE.MeshStandardMaterial({
  color:0xffffff,
  vertexColors:true,
  emissive:0x174c8a,
- emissiveIntensity:.75,
+ emissiveIntensity:1.65,
  metalness:.72,
  roughness:.2
 });
@@ -192,7 +201,7 @@ const facadeMaterial=new THREE.MeshStandardMaterial({
  color:0xffffff,
  vertexColors:true,
  emissive:0x173b70,
- emissiveIntensity:1.05,
+ emissiveIntensity:2.0,
  metalness:.68,
  roughness:.18,
  side:THREE.DoubleSide
@@ -205,9 +214,8 @@ const floorGrid=new Map();
 
 function key(ix,iz){return ix+","+iz;}
 
-// 바닥 상단 높이를 기준으로 저장. 시각용 바닥과 충돌 높이를 동일하게 맞춤.
 const floorGeometry=new THREE.BoxGeometry(1,.2,1);
-const floorMaterial=mat(0x203d52,.28,.4,.7);
+const floorMaterial=mat(0x31566e,.55,.35,.65);
 const MAX_FLOORS=18000;
 const floorInstances=new THREE.InstancedMesh(
  floorGeometry,floorMaterial,MAX_FLOORS
@@ -220,7 +228,6 @@ let floorInstanceCount=0;
 function addFloor(x,z,w,d,topY){
  const f={x,z,w,d,y:topY};
  floors.push(f);
-
  const x0=Math.floor((x-w/2)/FLOOR_CELL);
  const x1=Math.floor((x+w/2)/FLOOR_CELL);
  const z0=Math.floor((z-d/2)/FLOOR_CELL);
@@ -243,12 +250,28 @@ function addFloor(x,z,w,d,topY){
  }
 }
 
+function addCollisionFloor(x,z,w,d,topY){
+ const f={x,z,w,d,y:topY};
+ floors.push(f);
+ const x0=Math.floor((x-w/2)/FLOOR_CELL);
+ const x1=Math.floor((x+w/2)/FLOOR_CELL);
+ const z0=Math.floor((z-d/2)/FLOOR_CELL);
+ const z1=Math.floor((z+d/2)/FLOOR_CELL);
+ for(let ix=x0;ix<=x1;ix++){
+  for(let iz=z0;iz<=z1;iz++){
+   const k=key(ix,iz);
+   let list=floorGrid.get(k);
+   if(!list)floorGrid.set(k,list=[]);
+   list.push(f);
+  }
+ }
+}
+
 function finishFloors(){
  floorInstances.count=floorInstanceCount;
  floorInstances.instanceMatrix.needsUpdate=true;
 }
 
-// 반복 창문은 InstancedMesh로 처리
 const windowGeo=new THREE.BoxGeometry(1,1,1);
 const windowMeshes={
  ice:new THREE.InstancedMesh(windowGeo,ice,16000),
@@ -270,29 +293,34 @@ function addWindow(type,x,y,z,w,h,d){
  windowCounts[type]++;
 }
 
-// 건물 70개
 function createBuilding(i,x,z,w,d,h){
  const g=new THREE.Group();
  g.position.set(x,0,z);
  scene.add(g);
 
- const body=new THREE.Mesh(makeGradientGeometry(w,h,d),gradientMaterial);
- body.position.y=h/2;
- g.add(body);
+ const wall=.9,doorW=6.4,doorH=4.2;
+ gradientWall(w,h,wall,0,h/2,-d/2,g);
+ gradientWall(wall,h,d,w/2,h/2,0,g);
+ gradientWall(wall,h,d,-w/2,h/2,0,g);
+ gradientWall((w-doorW)/2,h,wall,-(w+doorW)/4,h/2,d/2,g);
+ gradientWall((w-doorW)/2,h,wall,(w+doorW)/4,h/2,d/2,g);
+ gradientWall(doorW,h-doorH,wall,0,(h+doorH)/2,d/2,g);
 
- // 건물 앞면의 깊은 유리 파사드
- const front=box(w*.78,h*.94,.16,glass,0,h/2,d/2+.06,g);
- const side=box(.16,h*.94,d*.88,glass,w/2+.06,h/2,0,g);
- const back=box(w*.78,h*.94,.16,glass,0,h/2,-d/2-.06,g);
+ box(w*.32,h*.94,.12,glass,-w*.33,h/2,d/2+.08,g);
+ box(w*.32,h*.94,.12,glass,w*.33,h/2,d/2+.08,g);
+ box(.12,h*.94,d*.86,glass,w/2+.08,h/2,0,g);
+ box(.12,h*.94,d*.86,glass,-w/2-.08,h/2,0,g);
 
- // 모서리 네온 라인
+ box(.22,doorH,.28,cyan,-doorW/2,h/2,d/2+.22,g);
+ box(.22,doorH,.28,ice,doorW/2,h/2,d/2+.22,g);
+ box(doorW,.22,.28,gold,0,doorH,d/2+.22,g);
+
  for(const sx of [-1,1]){
   for(const sz of [-1,1]){
    box(.32,h+.5,.32,cyan,sx*(w/2-.25),h/2,sz*(d/2-.25),g);
   }
  }
 
- // 정면의 층별 창문
  const count=Math.max(12,Math.floor(h/5));
  const fh=h/count;
 
@@ -303,21 +331,20 @@ function createBuilding(i,x,z,w,d,h){
   addWindow("cyan",x+w*.39,y,z+d/2+.2,.12,.12,.2);
  }
 
- // 수평 발광 띠
  box(w+.5,.3,.45,cyan,0,h*.28,d/2+.2,g);
  box(w+.5,.25,.45,pink,0,h*.68,d/2+.2,g);
  box(w+.5,.45,.45,gold,0,h,d/2+.2,g);
 
- // 지붕
  box(w+1,.5,d+1,dark,0,h+.25,0,g);
  torus(g,Math.max(w,d)*.55,h+.7,.2,cyan);
 
- // 내부 층 바닥
  for(let f=0;f<count;f++){
   addFloor(x,z,w-1.3,d-1.3,f*fh);
+  if(f>0&&f%3===0){
+   box(w*.55,.10,.16,f%2?cyan:gold,0,f*fh-.18,0,g);
+  }
  }
 
- // 엘리베이터 샤프트
  const sx=w/2+2.5;
  box(4,h+1,4,glass,sx,h/2,0,g);
  box(.2,h+1,.2,cyan,sx-2,h/2,0,g);
@@ -330,7 +357,6 @@ function createBuilding(i,x,z,w,d,h){
  box(3.3,.12,3.3,ice,0,1.65,0,cabin);
  cabin.position.set(sx,1.8,0);
 
- // 엘리베이터 앞 발판
  for(let f=0;f<count;f++){
   addFloor(x+sx,z,5,5,f*fh);
  }
@@ -341,9 +367,12 @@ function createBuilding(i,x,z,w,d,h){
  });
 }
 
+// 건물 70개를 더 가까운 도시 블록 형태로 배치
 for(let i=0;i<70;i++){
- const a=i*2.399;
- const r=430+Math.floor(i/14)*155+(i%4)*18;
+ const band=Math.floor(i/10);
+ const slot=i%10;
+ const a=slot*.31+band*.17;
+ const r=150+band*38;
  const x=Math.cos(a)*r;
  const z=Math.sin(a)*r;
  createBuilding(
@@ -370,10 +399,10 @@ function javeWidth(y){
  const indices=[];
  const N=120;
 
- const c1=new THREE.Color(0x11dfff);
- const c2=new THREE.Color(0x2366ff);
- const c3=new THREE.Color(0xb02cff);
- const c4=new THREE.Color(0xffd37b);
+ const c1=new THREE.Color(0x32106f);
+ const c2=new THREE.Color(0x7024d6);
+ const c3=new THREE.Color(0xc13cff);
+ const c4=new THREE.Color(0xff9cf5);
 
  for(let i=0;i<=N;i++){
   const t=i/N;
@@ -413,10 +442,13 @@ function javeWidth(y){
  const material=new THREE.MeshStandardMaterial({
   color:0xffffff,
   vertexColors:true,
-  emissive:0x2866aa,
-  emissiveIntensity:1.8,
-  metalness:.8,
-  roughness:.12,
+  emissive:0x8a20d8,
+  emissiveIntensity:3.1,
+  metalness:.72,
+  roughness:.1,
+  transparent:true,
+  opacity:.58,
+  depthWrite:false,
   side:THREE.DoubleSide
  });
 
@@ -438,12 +470,24 @@ for(let side=0;side<4;side++){
 
  const curve=new THREE.CatmullRomCurve3(pts);
  jave.add(new THREE.Mesh(
-  new THREE.TubeGeometry(curve,180,1.15,6,false),cyan
+  new THREE.TubeGeometry(curve,180,1.45,6,false),mat(0xd34cff,7)
  ));
  jave.add(new THREE.Mesh(
-  new THREE.TubeGeometry(curve,180,.42,6,false),gold
+  new THREE.TubeGeometry(curve,180,.5,6,false),mat(0xffa8ff,6)
  ));
 }
+
+// 타워 지상 출입구
+const javeGate=new THREE.Group();
+jave.add(javeGate);
+javeGate.position.set(0,0,JD/2+1.2);
+box(3,22,2,cyan,-18,11,0,javeGate);
+box(3,22,2,ice,18,11,0,javeGate);
+box(39,3,2,gold,0,22,0,javeGate);
+box(31,.35,1.2,pink,0,2,0,javeGate);
+const gateGlow=new THREE.PointLight(0x39dfff,85,150);
+gateGlow.position.set(0,13,JD/2+15);
+scene.add(gateGlow);
 
 // 타워 층별 발판
 const JFLOORS=880;
@@ -472,7 +516,8 @@ jave.add(new THREE.Mesh(
 
 const javeCabin=new THREE.Group();
 jave.add(javeCabin);
-box(5,5,5,mat(0x155a80,2),0,0,0,javeCabin);
+javeCabin.position.set(javeWidth(0)/2+3,0,JD*.15);
+box(5,5,5,mat(0x155a80,3),0,0,0,javeCabin);
 box(5.3,.15,5.3,cyan,0,-2.5,0,javeCabin);
 box(5.3,.15,5.3,gold,0,2.5,0,javeCabin);
 
@@ -482,30 +527,30 @@ const observatory=new THREE.Group();
 observatory.position.y=topY;
 jave.add(observatory);
 
-cylinder(68,74,5,mat(0x193e59,.9,.14,.85),0,0,0,observatory,72);
+torus(observatory,68,0,.9,cyan);
+torus(observatory,42,-.5,.55,gold);
 
 const skyGlass=new THREE.Mesh(
- new THREE.CylinderGeometry(70,70,.3,80),
+ new THREE.CylinderGeometry(90,90,.3,96),
  new THREE.MeshPhysicalMaterial({
   color:0x76dfff,
   metalness:.3,
   roughness:.08,
   transparent:true,
-  opacity:.4,
+  opacity:.58,
   clearcoat:1
  })
 );
 skyGlass.position.y=2.7;
 observatory.add(skyGlass);
 
-// 넓은 외부 전망 데크
 const outerDeck=new THREE.Mesh(
  new THREE.CylinderGeometry(94,94,.28,80),
  new THREE.MeshPhysicalMaterial({
   color:0x8beaff,
   transparent:true,
-  opacity:.22,
-  roughness:.08,
+  opacity:.34,
+  roughness:.06,
   metalness:.25,
   side:THREE.DoubleSide
  })
@@ -513,8 +558,7 @@ const outerDeck=new THREE.Mesh(
 outerDeck.position.y=3;
 observatory.add(outerDeck);
 
-// 전망대 바닥 충돌
-addFloor(0,0,184,184,topY+2.84);
+addCollisionFloor(0,0,184,184,topY+3.14);
 
 for(let i=-5;i<=5;i++){
  box(140,.08,.15,i%2?cyan:ice,i,2.95,0,observatory);
@@ -538,7 +582,6 @@ railTop.rotation.x=Math.PI/2;
 railTop.position.y=8;
 observatory.add(railTop);
 
-// 중앙 라운지
 cylinder(28,31,2.5,mat(0x1c4b68,.8,.15,.8),0,4,0,observatory,64);
 torus(observatory,29,5.3,1,gold);
 torus(observatory,23,5.5,.6,cyan);
@@ -569,7 +612,7 @@ for(let i=0;i<3;i++){
 cylinder(1.2,.3,32,ice,0,27,0,observatory,12);
 cylinder(.45,.1,22,gold,0,52,0,observatory,12);
 
-const topLight=new THREE.PointLight(0x4edfff,10,280);
+const topLight=new THREE.PointLight(0xd66bff,18,360);
 topLight.position.set(0,20,0);
 observatory.add(topLight);
 
@@ -610,10 +653,9 @@ for(let i=0;i<12;i++){
  );
 }
 
-// 타워 외부 장식 링
 for(let i=0;i<9;i++){
  const y=300+i*390;
- torus(jave,javeWidth(y)*.78,y,.65,i%2?gold:cyan);
+ torus(jave,javeWidth(y)*.78,y,.85,i%2?mat(0xff9cf5,6):mat(0xb33cff,7));
 }
 
 // 일반 빔 건물
@@ -632,35 +674,29 @@ const plaza=new THREE.Mesh(
  new THREE.CylinderGeometry(105,115,2,64),
  dark
 );
-plaza.position.set(0,0,150);
+plaza.position.set(0,-1,150);
 scene.add(plaza);
 
-torus(scene,108,1.1,1.1,cyan).position.z=150;
-torus(scene,90,1.2,.4,gold).position.z=150;
+torus(scene,108,.1,1.1,cyan).position.z=150;
+torus(scene,90,.2,.4,gold).position.z=150;
 
 for(let i=0;i<16;i++){
  const a=i*Math.PI*2/16;
  cylinder(.5,.5,5,cyan,
-  Math.cos(a)*70,3,150+Math.sin(a)*70,scene,8);
+  Math.cos(a)*70,2,150+Math.sin(a)*70,scene,8);
 }
 
-// 창문 인스턴스 적용
 for(const type of Object.keys(windowMeshes)){
  windowMeshes[type].count=windowCounts[type];
  windowMeshes[type].instanceMatrix.needsUpdate=true;
 }
-
-// 바닥 인스턴스 최종 반영
 finishFloors();
 
-// 바닥 충돌 탐색
 function findFloor(previousY){
  const feetBefore=previousY-1.7;
  const feetNow=player.y-1.7;
-
  let best=0;
 
- // 도시 지면은 항상 존재하는 독립 충돌면
  if(feetBefore>=-.6&&feetNow<=.15){
   best=0;
  }
@@ -672,7 +708,6 @@ function findFloor(previousY){
  if(list){
   for(let i=0;i<list.length;i++){
    const f=list[i];
-
    if(
     Math.abs(player.x-f.x)<=f.w/2-.2&&
     Math.abs(player.z-f.z)<=f.d/2-.2&&
@@ -684,20 +719,17 @@ function findFloor(previousY){
    }
   }
  }
-
  return best;
 }
 
 // 플레이어
 const player={x:0,y:1.7,z:150};
 const keys={};
-
 let vy=0;
 let onGround=true;
 let yaw=0;
 let pitch=0;
 let locked=false;
-
 let insideLift=false;
 let activeLift=null;
 let liftTarget=0;
@@ -771,7 +803,6 @@ function nearestElevator(){
  if(d<dist){
   best={type:"jave",x,z,dist:d};
  }
-
  return best;
 }
 
@@ -832,7 +863,7 @@ function exitLift(){
   if(liftTarget>=868){
    player.x=0;
    player.z=0;
-   player.y=topY+4.55;
+   player.y=topY+4.84;
    $("viewLabel").style.display="block";
   }else{
    player.x=w/2-5;
@@ -842,7 +873,7 @@ function exitLift(){
   }
  }else{
   const b=activeLift.b;
-  player.x=b.x+b.w/2+1.4;
+  player.x=b.x+b.sx;
   player.z=b.z;
   player.y=liftTarget*b.fh+1.7;
   $("viewLabel").style.display="none";
@@ -853,7 +884,6 @@ function exitLift(){
  insideLift=false;
  liftMoving=false;
  activeLift=null;
-
  $("lift").style.display="none";
  notify("도착했습니다.");
 }
@@ -875,6 +905,8 @@ function updateLift(dt){
 
  if(activeLift.type==="jave"){
   javeCabin.position.y=next;
+  javeCabin.position.x=javeWidth(next)/2+3;
+  javeCabin.position.z=JD*(javeWidth(next)/JB)*.15;
  }else{
   activeLift.b.cabin.position.y=next;
  }
@@ -887,7 +919,6 @@ function updateLift(dt){
  }
 }
 
-// 플레이어 이동
 function updatePlayer(dt){
  if(insideLift)return;
 
@@ -896,14 +927,8 @@ function updatePlayer(dt){
  camera.rotation.x=pitch;
 
  const previousY=player.y;
-
- const forward=new THREE.Vector3(
-  -Math.sin(yaw),0,-Math.cos(yaw)
- );
- const right=new THREE.Vector3(
-  Math.cos(yaw),0,-Math.sin(yaw)
- );
-
+ const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
  const move=new THREE.Vector3();
 
  if(keys.KeyW)move.add(forward);
@@ -938,7 +963,6 @@ function updatePlayer(dt){
   onGround=false;
  }
 
- // 혹시 바닥 판정을 놓쳐도 도시 아래로 무한 낙하하지 않게 복구
  if(player.y<1.7){
   player.y=1.7;
   vy=0;
@@ -947,7 +971,6 @@ function updatePlayer(dt){
 
  player.x=THREE.MathUtils.clamp(player.x,-2400,2400);
  player.z=THREE.MathUtils.clamp(player.z,-2400,2400);
-
  camera.position.set(player.x,player.y,player.z);
 
  const lift=nearestElevator();
@@ -987,7 +1010,6 @@ function burst(){
   JH+30+Math.random()*80,
   (Math.random()-.5)*35
  ];
-
  const color=new THREE.Color().setHSL(Math.random(),.9,.65);
 
  for(let n=0;n<32;n++){
@@ -1004,7 +1026,6 @@ function burst(){
   fireVel[i*3]=Math.cos(a)*q*s;
   fireVel[i*3+1]=u*s;
   fireVel[i*3+2]=Math.sin(a)*q*s;
-
   fireLife[i]=1.5+Math.random();
 
   fireColor[i*3]=color.r;
@@ -1029,7 +1050,6 @@ function updateFireworks(dt){
   firePos[i*3+1]+=fireVel[i*3+1]*dt;
   firePos[i*3+2]+=fireVel[i*3+2]*dt;
  }
-
  fireGeo.attributes.position.needsUpdate=true;
 }
 
@@ -1038,12 +1058,10 @@ let lastFrame=0;
 let frameSamples=0;
 let sampleTime=0;
 let adaptiveScale=Math.min(devicePixelRatio,.85);
-
 const clock=new THREE.Clock();
 
 function animate(now=0){
  requestAnimationFrame(animate);
-
  const dt=Math.min(clock.getDelta(),.04);
  const t=clock.elapsedTime;
 
@@ -1056,15 +1074,13 @@ function animate(now=0){
   b.pivot.rotation.z=Math.sin(t*.13+b.phase)*.25;
  }
 
- topLight.intensity=12+Math.sin(t*2)*4;
-
+ topLight.intensity=18+Math.sin(t*2)*5;
  updateFireworks(dt);
 
  $("pos").textContent=insideLift
   ?"ELEVATOR"
   :Math.round(player.x)+", "+Math.round(player.z);
 
- // FPS가 낮으면 렌더 해상도를 자동으로 줄임
  frameSamples++;
  sampleTime+=dt;
 
@@ -1084,10 +1100,8 @@ function animate(now=0){
   sampleTime=0;
  }
 
- // 최대 45FPS로 렌더링
  if(now-lastFrame<1000/45)return;
  lastFrame=now;
-
  renderer.render(scene,camera);
 }
 
