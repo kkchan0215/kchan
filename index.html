@@ -25,11 +25,15 @@ button:hover{background:#17628b;box-shadow:0 0 15px #21cfff}
 #help{position:absolute;bottom:16px;left:16px;padding:12px 15px;font-size:12px;line-height:1.8;color:#b1cce0}
 #cross{position:absolute;left:50%;top:50%;width:7px;height:7px;border:1px solid #e8fcff;border-radius:50%;transform:translate(-50%,-50%)}
 #notice{position:absolute;top:82px;left:50%;transform:translateX(-50%);padding:10px 16px;display:none}
-#lift{position:absolute;right:16px;top:90px;width:260px;padding:15px;display:none;pointer-events:auto}
+#lift{position:fixed;z-index:20;right:clamp(10px,2vw,24px);top:50%;transform:translateY(-50%);width:min(280px,calc(100vw - 24px));max-height:calc(100dvh - 28px);overflow:hidden;padding:15px;display:none;pointer-events:auto}
 #lift h3{margin:0;color:#9deaff}
 #lift p{font-size:12px;color:#9bb8d1}
-#floors{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:45vh;overflow:auto}
-#liftClose{width:100%;margin-top:10px}
+#floors{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:min(42dvh,420px);overflow-y:auto;overflow-x:hidden;padding:2px}
+#liftClose{width:100%;margin-top:10px;flex:0 0 auto}
+@media(max-width:600px){
+ #lift{right:10px;width:min(260px,calc(100vw - 20px));padding:12px}
+ #floors{grid-template-columns:repeat(4,minmax(0,1fr));max-height:38dvh}
+}
 #viewLabel{position:absolute;left:50%;top:18px;transform:translateX(-50%);padding:9px 15px;display:none;color:#baf1ff;letter-spacing:2px}
 #unlock{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);padding:12px 18px;display:none;font-size:12px}
 #quality{position:absolute;right:16px;bottom:16px;padding:8px 12px;font-size:11px;color:#9ecce2}
@@ -46,7 +50,7 @@ button:hover{background:#17628b;box-shadow:0 0 15px #21cfff}
 </div>
 
 <div id="hud">
-<div id="brand" class="panel"><b>NEON COAST</b><small>FUTURE CITY · ULTIMATE EDITION</small></div>
+<div id="brand" class="panel"><b>NEON COAST</b><small>FUTURE CITY · REAL LIGHT EDITION</small></div>
 <div id="info" class="panel">현재 위치<br><strong id="pos">CITY PLAZA</strong></div>
 <div id="help" class="panel">WASD 이동 · 마우스 시점<br>SPACE 점프 · SHIFT 달리기<br>E 엘리베이터 · ESC 마우스 해제</div>
 <div id="cross"></div>
@@ -106,11 +110,11 @@ const mat=(c,e=0,r=.35,m=.5)=>new THREE.MeshStandardMaterial({
  color:c,emissive:c,emissiveIntensity:e,roughness:r,metalness:m
 });
 const dark=mat(0x101d2c,.12,.42,.8);
-const cyan=mat(0x27dfff,6.2);
-const ice=mat(0xa6f2ff,5.4);
-const gold=mat(0xffd58c,5.2);
-const pink=mat(0xff62db,4.6);
-const blue=mat(0x168dff,3.2);
+const cyan=mat(0x27dfff,1.65,.3,.7);
+const ice=mat(0xa6f2ff,1.45,.28,.72);
+const gold=mat(0xffd58c,1.7,.3,.65);
+const pink=mat(0xff62db,1.35,.3,.65);
+const blue=mat(0x168dff,1.2,.35,.6);
 const glass=new THREE.MeshPhysicalMaterial({
  color:0x387da0,metalness:.45,roughness:.12,
  transparent:true,opacity:.34,side:THREE.DoubleSide,
@@ -143,6 +147,7 @@ function torus(parent,r,y,t,material){
  return m;
 }
 
+// 지면
 const ground=box(5000,2,5000,mat(0x07111d),0,-1,0);
 const roadMat=mat(0x1b3043,.28,.8,.2);
 
@@ -153,6 +158,7 @@ for(let i=-4;i<=4;i++){
  box(2400,.08,.3,cyan,0,.15,i*260-15);
 }
 
+// 별
 {
  const n=260;
  const p=new Float32Array(n*3);
@@ -168,6 +174,7 @@ for(let i=-4;i<=4;i++){
  })));
 }
 
+// 건물 외벽 그라데이션
 function makeGradientGeometry(w,h,d){
  const g=new THREE.BoxGeometry(w,h,d);
  const p=g.attributes.position;
@@ -189,12 +196,13 @@ function makeGradientGeometry(w,h,d){
 }
 
 const gradientMaterial=new THREE.MeshStandardMaterial({
- color:0xffffff,
- vertexColors:true,
- emissive:0x174c8a,
- emissiveIntensity:1.65,
- metalness:.72,
- roughness:.2
+ color:0x080d17,
+ vertexColors:false,
+ emissive:0x020711,
+ emissiveIntensity:.12,
+ metalness:.82,
+ roughness:.28,
+ side:THREE.DoubleSide
 });
 
 const facadeMaterial=new THREE.MeshStandardMaterial({
@@ -214,6 +222,7 @@ const floorGrid=new Map();
 
 function key(ix,iz){return ix+","+iz;}
 
+// 바닥 인스턴스
 const floorGeometry=new THREE.BoxGeometry(1,.2,1);
 const floorMaterial=mat(0x31566e,.55,.35,.65);
 const MAX_FLOORS=18000;
@@ -228,6 +237,7 @@ let floorInstanceCount=0;
 function addFloor(x,z,w,d,topY){
  const f={x,z,w,d,y:topY};
  floors.push(f);
+
  const x0=Math.floor((x-w/2)/FLOOR_CELL);
  const x1=Math.floor((x+w/2)/FLOOR_CELL);
  const z0=Math.floor((z-d/2)/FLOOR_CELL);
@@ -266,12 +276,12 @@ function addCollisionFloor(x,z,w,d,topY){
   }
  }
 }
-
 function finishFloors(){
  floorInstances.count=floorInstanceCount;
  floorInstances.instanceMatrix.needsUpdate=true;
 }
 
+// 반복 창문
 const windowGeo=new THREE.BoxGeometry(1,1,1);
 const windowMeshes={
  ice:new THREE.InstancedMesh(windowGeo,ice,16000),
@@ -293,12 +303,14 @@ function addWindow(type,x,y,z,w,h,d){
  windowCounts[type]++;
 }
 
+// 건물 70개
 function createBuilding(i,x,z,w,d,h){
  const g=new THREE.Group();
  g.position.set(x,0,z);
  scene.add(g);
 
- const wall=.9,doorW=6.4,doorH=4.2;
+ const wall=.9, doorW=6.4, doorH=4.2;
+
  gradientWall(w,h,wall,0,h/2,-d/2,g);
  gradientWall(wall,h,d,w/2,h/2,0,g);
  gradientWall(wall,h,d,-w/2,h/2,0,g);
@@ -306,21 +318,23 @@ function createBuilding(i,x,z,w,d,h){
  gradientWall((w-doorW)/2,h,wall,(w+doorW)/4,h/2,d/2,g);
  gradientWall(doorW,h-doorH,wall,0,(h+doorH)/2,d/2,g);
 
- box(w*.32,h*.94,.12,glass,-w*.33,h/2,d/2+.08,g);
- box(w*.32,h*.94,.12,glass,w*.33,h/2,d/2+.08,g);
- box(.12,h*.94,d*.86,glass,w/2+.08,h/2,0,g);
- box(.12,h*.94,d*.86,glass,-w/2-.08,h/2,0,g);
+ box(w*.32,h*.94,.16,dark,-w*.33,h/2,d/2+.08,g);
+ box(w*.32,h*.94,.16,dark,w*.33,h/2,d/2+.08,g);
+ box(.16,h*.94,d*.86,dark,w/2+.08,h/2,0,g);
+ box(.16,h*.94,d*.86,dark,-w/2-.08,h/2,0,g);
 
  box(.22,doorH,.28,cyan,-doorW/2,h/2,d/2+.22,g);
  box(.22,doorH,.28,ice,doorW/2,h/2,d/2+.22,g);
  box(doorW,.22,.28,gold,0,doorH,d/2+.22,g);
 
+ // 모서리 네온 라인
  for(const sx of [-1,1]){
   for(const sz of [-1,1]){
-   box(.32,h+.5,.32,cyan,sx*(w/2-.25),h/2,sz*(d/2-.25),g);
+   box(.075,h+.5,.075,mat(0x7cbbd0,.48,.4,.65),sx*(w/2-.25),h/2,sz*(d/2-.25),g);
   }
  }
 
+ // 층별 창문
  const count=Math.max(12,Math.floor(h/5));
  const fh=h/count;
 
@@ -331,20 +345,24 @@ function createBuilding(i,x,z,w,d,h){
   addWindow("cyan",x+w*.39,y,z+d/2+.2,.12,.12,.2);
  }
 
- box(w+.5,.3,.45,cyan,0,h*.28,d/2+.2,g);
- box(w+.5,.25,.45,pink,0,h*.68,d/2+.2,g);
- box(w+.5,.45,.45,gold,0,h,d/2+.2,g);
+ // 수평 발광 띠
+ box(w+.25,.075,.12,mat(0x6eb5c8,.8,.38,.65),0,h*.28,d/2+.12,g);
+ box(w+.25,.06,.12,mat(0x9b78bb,.65,.4,.62),0,h*.68,d/2+.12,g);
+ box(w+.25,.08,.12,mat(0xd0b78e,.7,.38,.65),0,h,d/2+.12,g);
 
+ // 지붕
  box(w+1,.5,d+1,dark,0,h+.25,0,g);
- torus(g,Math.max(w,d)*.55,h+.7,.2,cyan);
+ torus(g,Math.max(w,d)*.52,h+.55,.08,mat(0x73b9cb,.7,.4,.65));
 
+ // 내부 층 바닥
  for(let f=0;f<count;f++){
   addFloor(x,z,w-1.3,d-1.3,f*fh);
-  if(f>0&&f%3===0){
+  if(f>0 && f%3===0){
    box(w*.55,.10,.16,f%2?cyan:gold,0,f*fh-.18,0,g);
   }
  }
 
+ // 엘리베이터 샤프트
  const sx=w/2+2.5;
  box(4,h+1,4,glass,sx,h/2,0,g);
  box(.2,h+1,.2,cyan,sx-2,h/2,0,g);
@@ -367,14 +385,14 @@ function createBuilding(i,x,z,w,d,h){
  });
 }
 
-// 건물 70개를 더 가까운 도시 블록 형태로 배치
 for(let i=0;i<70;i++){
  const band=Math.floor(i/10);
  const slot=i%10;
- const a=slot*.31+band*.17;
- const r=150+band*38;
+ const a=slot*(Math.PI*2/10)+band*.105;
+ const r=270+band*105;
  const x=Math.cos(a)*r;
  const z=Math.sin(a)*r;
+
  createBuilding(
   i,x,z,
   23+(i%4)*2,
@@ -384,7 +402,7 @@ for(let i=0;i<70;i++){
 }
 
 // 제이브 타워
-const JH=3960,JB=94,JD=66;
+const JH=3960,JB=132,JD=96;
 const jave=new THREE.Group();
 scene.add(jave);
 
@@ -446,9 +464,9 @@ function javeWidth(y){
   emissiveIntensity:3.1,
   metalness:.72,
   roughness:.1,
-  transparent:true,
-  opacity:.58,
-  depthWrite:false,
+  transparent:false,
+  opacity:1,
+  depthWrite:true,
   side:THREE.DoubleSide
  });
 
@@ -477,7 +495,7 @@ for(let side=0;side<4;side++){
  ));
 }
 
-// 타워 지상 출입구
+// 지상 출입구 네온 게이트
 const javeGate=new THREE.Group();
 jave.add(javeGate);
 javeGate.position.set(0,0,JD/2+1.2);
@@ -527,61 +545,68 @@ const observatory=new THREE.Group();
 observatory.position.y=topY;
 jave.add(observatory);
 
-torus(observatory,68,0,.9,cyan);
-torus(observatory,42,-.5,.55,gold);
+torus(observatory,112,0,.9,cyan);
+torus(observatory,72,-.5,.55,gold);
 
 const skyGlass=new THREE.Mesh(
- new THREE.CylinderGeometry(90,90,.3,96),
+ new THREE.CylinderGeometry(124,124,.3,112),
  new THREE.MeshPhysicalMaterial({
-  color:0x76dfff,
-  metalness:.3,
-  roughness:.08,
+  color:0xb9efff,
+  metalness:.08,
+  roughness:.025,
   transparent:true,
-  opacity:.58,
+  opacity:.19,
+  transmission:.72,
+  thickness:.35,
   clearcoat:1
  })
 );
 skyGlass.position.y=2.7;
 observatory.add(skyGlass);
 
+// 외부 전망 데크
 const outerDeck=new THREE.Mesh(
- new THREE.CylinderGeometry(94,94,.28,80),
+ new THREE.CylinderGeometry(130,130,.28,112),
  new THREE.MeshPhysicalMaterial({
-  color:0x8beaff,
+  color:0xbcefff,
   transparent:true,
-  opacity:.34,
-  roughness:.06,
-  metalness:.25,
+  opacity:.13,
+  roughness:.025,
+  metalness:.08,
+  transmission:.78,
+  thickness:.25,
   side:THREE.DoubleSide
  })
 );
 outerDeck.position.y=3;
 observatory.add(outerDeck);
 
-addCollisionFloor(0,0,184,184,topY+3.14);
+// 전망대 바닥 충돌
+addCollisionFloor(0,0,256,256,topY+3.14);
 
 for(let i=-5;i<=5;i++){
- box(140,.08,.15,i%2?cyan:ice,i,2.95,0,observatory);
- box(.15,.08,140,i%2?ice:cyan,0,2.95,i,observatory);
+ box(220,.045,.10,i%2?cyan:ice,i*2,2.95,0,observatory);
+ box(.10,.045,220,i%2?ice:cyan,0,2.95,i*2,observatory);
 }
 
-torus(observatory,72,3.3,1.4,gold);
-torus(observatory,86,3.3,.9,cyan);
-torus(observatory,94,3.1,.55,ice);
-torus(observatory,55,3.4,.5,pink);
+torus(observatory,100,3.3,1.4,gold);
+torus(observatory,116,3.3,.9,cyan);
+torus(observatory,128,3.1,.55,ice);
+torus(observatory,78,3.4,.5,pink);
 
 for(let i=0;i<48;i++){
  const a=i*Math.PI*2/48;
- cylinder(.25,.25,5,cyan,Math.cos(a)*89,5.5,Math.sin(a)*89,observatory,8);
+ cylinder(.18,.18,5,cyan,Math.cos(a)*122,5.5,Math.sin(a)*122,observatory,8);
 }
 
 const railTop=new THREE.Mesh(
- new THREE.TorusGeometry(89,.3,8,100),gold
+ new THREE.TorusGeometry(122,.3,8,112),gold
 );
 railTop.rotation.x=Math.PI/2;
 railTop.position.y=8;
 observatory.add(railTop);
 
+// 중앙 라운지
 cylinder(28,31,2.5,mat(0x1c4b68,.8,.15,.8),0,4,0,observatory,64);
 torus(observatory,29,5.3,1,gold);
 torus(observatory,23,5.5,.6,cyan);
@@ -653,6 +678,7 @@ for(let i=0;i<12;i++){
  );
 }
 
+// 타워 외부 장식 링
 for(let i=0;i<9;i++){
  const y=300+i*390;
  torus(jave,javeWidth(y)*.78,y,.85,i%2?mat(0xff9cf5,6):mat(0xb33cff,7));
@@ -686,15 +712,20 @@ for(let i=0;i<16;i++){
   Math.cos(a)*70,2,150+Math.sin(a)*70,scene,8);
 }
 
+// 창문 인스턴스 적용
 for(const type of Object.keys(windowMeshes)){
  windowMeshes[type].count=windowCounts[type];
  windowMeshes[type].instanceMatrix.needsUpdate=true;
 }
+
+// 바닥 인스턴스 최종 반영
 finishFloors();
 
+// 바닥 충돌 탐색
 function findFloor(previousY){
  const feetBefore=previousY-1.7;
  const feetNow=player.y-1.7;
+
  let best=0;
 
  if(feetBefore>=-.6&&feetNow<=.15){
@@ -708,6 +739,7 @@ function findFloor(previousY){
  if(list){
   for(let i=0;i<list.length;i++){
    const f=list[i];
+
    if(
     Math.abs(player.x-f.x)<=f.w/2-.2&&
     Math.abs(player.z-f.z)<=f.d/2-.2&&
@@ -719,17 +751,20 @@ function findFloor(previousY){
    }
   }
  }
+
  return best;
 }
 
 // 플레이어
 const player={x:0,y:1.7,z:150};
 const keys={};
+
 let vy=0;
 let onGround=true;
 let yaw=0;
 let pitch=0;
 let locked=false;
+
 let insideLift=false;
 let activeLift=null;
 let liftTarget=0;
@@ -803,6 +838,7 @@ function nearestElevator(){
  if(d<dist){
   best={type:"jave",x,z,dist:d};
  }
+
  return best;
 }
 
@@ -884,6 +920,7 @@ function exitLift(){
  insideLift=false;
  liftMoving=false;
  activeLift=null;
+
  $("lift").style.display="none";
  notify("도착했습니다.");
 }
@@ -907,11 +944,16 @@ function updateLift(dt){
   javeCabin.position.y=next;
   javeCabin.position.x=javeWidth(next)/2+3;
   javeCabin.position.z=JD*(javeWidth(next)/JB)*.15;
+  player.x=javeCabin.position.x;
+  player.z=javeCabin.position.z;
  }else{
   activeLift.b.cabin.position.y=next;
+  player.x=activeLift.b.x+activeLift.b.sx;
+  player.z=activeLift.b.z;
  }
 
- camera.position.y=next+2;
+ player.y=next+1.7;
+ camera.position.set(player.x,player.y,player.z);
 
  if(Math.abs(next-target)<1.2){
   liftMoving=false;
@@ -919,6 +961,7 @@ function updateLift(dt){
  }
 }
 
+// 플레이어 이동
 function updatePlayer(dt){
  if(insideLift)return;
 
@@ -927,8 +970,14 @@ function updatePlayer(dt){
  camera.rotation.x=pitch;
 
  const previousY=player.y;
- const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
- const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+
+ const forward=new THREE.Vector3(
+  -Math.sin(yaw),0,-Math.cos(yaw)
+ );
+ const right=new THREE.Vector3(
+  Math.cos(yaw),0,-Math.sin(yaw)
+ );
+
  const move=new THREE.Vector3();
 
  if(keys.KeyW)move.add(forward);
@@ -971,6 +1020,7 @@ function updatePlayer(dt){
 
  player.x=THREE.MathUtils.clamp(player.x,-2400,2400);
  player.z=THREE.MathUtils.clamp(player.z,-2400,2400);
+
  camera.position.set(player.x,player.y,player.z);
 
  const lift=nearestElevator();
@@ -1010,6 +1060,7 @@ function burst(){
   JH+30+Math.random()*80,
   (Math.random()-.5)*35
  ];
+
  const color=new THREE.Color().setHSL(Math.random(),.9,.65);
 
  for(let n=0;n<32;n++){
@@ -1026,6 +1077,7 @@ function burst(){
   fireVel[i*3]=Math.cos(a)*q*s;
   fireVel[i*3+1]=u*s;
   fireVel[i*3+2]=Math.sin(a)*q*s;
+
   fireLife[i]=1.5+Math.random();
 
   fireColor[i*3]=color.r;
@@ -1050,6 +1102,7 @@ function updateFireworks(dt){
   firePos[i*3+1]+=fireVel[i*3+1]*dt;
   firePos[i*3+2]+=fireVel[i*3+2]*dt;
  }
+
  fireGeo.attributes.position.needsUpdate=true;
 }
 
@@ -1058,10 +1111,12 @@ let lastFrame=0;
 let frameSamples=0;
 let sampleTime=0;
 let adaptiveScale=Math.min(devicePixelRatio,.85);
+
 const clock=new THREE.Clock();
 
 function animate(now=0){
  requestAnimationFrame(animate);
+
  const dt=Math.min(clock.getDelta(),.04);
  const t=clock.elapsedTime;
 
@@ -1074,7 +1129,8 @@ function animate(now=0){
   b.pivot.rotation.z=Math.sin(t*.13+b.phase)*.25;
  }
 
- topLight.intensity=18+Math.sin(t*2)*5;
+ topLight.intensity=12+Math.sin(t*2)*4;
+
  updateFireworks(dt);
 
  $("pos").textContent=insideLift
@@ -1102,6 +1158,7 @@ function animate(now=0){
 
  if(now-lastFrame<1000/45)return;
  lastFrame=now;
+
  renderer.render(scene,camera);
 }
 
@@ -1111,6 +1168,9 @@ addEventListener("resize",()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
  renderer.setSize(innerWidth,innerHeight);
+ if($("lift").style.display==="block"){
+  $("lift").style.maxHeight=Math.max(180,innerHeight-28)+"px";
+ }
 });
 </script>
 </body>
