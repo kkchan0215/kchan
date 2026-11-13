@@ -1,1176 +1,296 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NEON COAST — ULTIMATE CITY</title>
+<title>성경 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#030814;color:#eafaff;font-family:Arial,"Malgun Gothic",sans-serif}
-canvas{display:block}
-#start{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,#174b70,#071525 55%,#020711)}
-#start section{text-align:center;padding:35px}
-#start h1{font-size:clamp(38px,7vw,76px);letter-spacing:10px;margin:0;color:#e8fbff;text-shadow:0 0 15px #42dfff,0 0 45px #168dff,0 0 90px #168dff}
-#start p{color:#b4d9ec;line-height:2;letter-spacing:2px}
-button{cursor:pointer;color:#eafaff;background:#102d47;border:1px solid #3a9bc8;border-radius:9px;padding:10px 14px}
-button:hover{background:#17628b;box-shadow:0 0 15px #21cfff}
-#enter{margin-top:18px;padding:16px 44px;background:linear-gradient(110deg,#087cae,#55d8f1);border:0;font-size:16px;box-shadow:0 0 30px #159bdb}
-#hud{position:fixed;inset:0;pointer-events:none}
-.panel{background:#06182bdc;border:1px solid #4dcbff66;border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 30px #0008,0 0 18px #008bd522}
-#brand{position:absolute;top:16px;left:16px;padding:13px 17px}
-#brand b{letter-spacing:3px;color:#a7efff;text-shadow:0 0 12px #19bfff}
-#brand small{display:block;color:#7395b2;margin-top:4px;font-size:10px;letter-spacing:2px}
-#info{position:absolute;top:16px;right:16px;padding:12px 15px;text-align:right;font-size:12px;color:#9bbbd4}
-#info strong{color:#fff;font-size:15px}
-#help{position:absolute;bottom:16px;left:16px;padding:12px 15px;font-size:12px;line-height:1.8;color:#b1cce0}
-#cross{position:absolute;left:50%;top:50%;width:7px;height:7px;border:1px solid #e8fcff;border-radius:50%;transform:translate(-50%,-50%)}
-#notice{position:absolute;top:82px;left:50%;transform:translateX(-50%);padding:10px 16px;display:none}
-#lift{position:fixed;z-index:20;right:clamp(10px,2vw,24px);top:50%;transform:translateY(-50%);width:min(280px,calc(100vw - 24px));max-height:calc(100dvh - 28px);overflow:hidden;padding:15px;display:none;pointer-events:auto}
-#lift h3{margin:0;color:#9deaff}
-#lift p{font-size:12px;color:#9bb8d1}
-#floors{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:min(42dvh,420px);overflow-y:auto;overflow-x:hidden;padding:2px}
-#liftClose{width:100%;margin-top:10px;flex:0 0 auto}
-@media(max-width:600px){
- #lift{right:10px;width:min(260px,calc(100vw - 20px));padding:12px}
- #floors{grid-template-columns:repeat(4,minmax(0,1fr));max-height:38dvh}
-}
-#viewLabel{position:absolute;left:50%;top:18px;transform:translateX(-50%);padding:9px 15px;display:none;color:#baf1ff;letter-spacing:2px}
-#unlock{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);padding:12px 18px;display:none;font-size:12px}
-#quality{position:absolute;right:16px;bottom:16px;padding:8px 12px;font-size:11px;color:#9ecce2}
+body{margin:0;background:#f3f5fa;color:#222b42;font-family:'Gowun Dodum',sans-serif}
+header{padding:35px 15px 40px;text-align:center;color:white;background:linear-gradient(135deg,#344ba8,#7588e8);border-radius:0 0 28px 28px}
+header h1{font-size:29px;margin:0}
+header p{opacity:.9;margin:8px 0 0}
+main{max-width:700px;margin:22px auto;padding:0 14px}
+.card{background:white;border-radius:22px;padding:23px;margin-bottom:16px;box-shadow:0 6px 25px #1c2c5010}
+h2{margin-top:0}
+.books{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.book{border:2px solid #e8eaf2;border-radius:16px;padding:20px 8px;text-align:center;background:white;font-family:inherit;cursor:pointer}
+.book b{font-size:21px;display:block}
+.book.selected{border-color:#5066cb;background:#f1f3ff;color:#344ba8}
+button{font-family:inherit;font-size:16px;font-weight:bold;border:0;border-radius:13px;padding:14px;cursor:pointer}
+.primary{background:#465dc4;color:white}
+.light{background:#edf0fb;color:#4054ad}
+.full{width:100%;margin-top:12px}
+.info{font-size:13px;color:#858ca0}
+.progress{height:8px;background:#edf0f6;border-radius:20px;overflow:hidden;margin:15px 0}
+.progress div{height:100%;background:#5369ce;width:0;transition:.3s}
+.question{font-size:21px;line-height:1.65;margin:25px 0}
+input{width:100%;padding:16px;border:2px solid #e4e7f0;border-radius:13px;font:17px 'Gowun Dodum';outline:none}
+input:focus{border-color:#5268ce}
+.actions{display:flex;gap:10px;margin-top:12px}
+.actions button{flex:1}
+.hidden{display:none}
+.tag{display:inline-block;background:#eef1ff;color:#4359bd;padding:5px 11px;border-radius:20px;font-size:13px}
+.score{font-size:43px;color:#455dc4;font-weight:bold;text-align:center}
+.review{border-bottom:1px solid #eee;padding:13px 0}
+.good{color:#19845a}.bad{color:#d34b58}
 </style>
 </head>
 <body>
-
-<div id="start">
-<section>
-<h1>NEON COAST</h1>
-<p>THE CITY OF LIGHT<br>미래 도시의 가장 높은 곳을 탐험하세요.</p>
-<button id="enter">도시 입장하기</button>
+<header>
+<h1>성경 퀴즈</h1>
+<p>말씀을 기억하고 직접 풀어보세요</p>
+</header>
+<main>
+<section class="card" id="home">
+<h2>① 성경 선택</h2>
+<div class="books">
+<button class="book selected" onclick="pickBook('사도행전',this)"><b>사도행전</b><small>50문제</small></button>
+<button class="book" onclick="pickBook('마태복음',this)"><b>마태복음</b><small>50문제</small></button>
+</div>
+<p class="info">② 쉬움·보통·어려움 문제가 무작위로 섞여 출제됩니다.</p>
+<button class="primary full" onclick="start()">퀴즈 시작하기 →</button>
 </section>
+
+<section class="card hidden" id="quiz">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="tag" id="level"></span>
+<span class="info" id="count"></span>
 </div>
-
-<div id="hud">
-<div id="brand" class="panel"><b>NEON COAST</b><small>FUTURE CITY · REAL LIGHT EDITION</small></div>
-<div id="info" class="panel">현재 위치<br><strong id="pos">CITY PLAZA</strong></div>
-<div id="help" class="panel">WASD 이동 · 마우스 시점<br>SPACE 점프 · SHIFT 달리기<br>E 엘리베이터 · ESC 마우스 해제</div>
-<div id="cross"></div>
-<div id="notice" class="panel"></div>
-<div id="viewLabel" class="panel">JAVE TOWER · SKY OBSERVATORY</div>
-<div id="unlock" class="panel">화면을 클릭하면 다시 조작</div>
-<div id="quality" class="panel">OPTIMIZED RENDER</div>
-<div id="lift" class="panel">
-<h3 id="liftName">ELEVATOR</h3>
-<p id="liftDesc">이동할 층을 선택하세요.</p>
-<div id="floors"></div>
-<button id="liftClose">엘리베이터에서 내리기</button>
+<div class="progress"><div id="bar"></div></div>
+<div class="question" id="question"></div>
+<input id="answer" placeholder="정답을 입력하세요" autocomplete="off">
+<div class="actions">
+<button class="light" onclick="skip()">건너뛰기</button>
+<button class="primary" onclick="check()">정답 확인</button>
 </div>
-</div>
-
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
-</script>
-
-<script type="module">
-import * as THREE from "three";
-
-const $=id=>document.getElementById(id);
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x030914);
-scene.fog=new THREE.FogExp2(0x102b43,.00012);
-
-const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.1,9000);
-camera.position.set(0,1.7,150);
-
-const renderer=new THREE.WebGLRenderer({
- antialias:false,
- powerPreference:"high-performance",
- stencil:false,
- depth:true
-});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,.85));
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.9;
-renderer.shadowMap.enabled=false;
-document.body.appendChild(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xc9edff,0x24364a,3.2));
-const sun=new THREE.DirectionalLight(0xb9e7ff,2.1);
-sun.position.set(-300,800,300);
-scene.add(sun);
-const cityFill=new THREE.PointLight(0x55bfff,1800,1800);
-cityFill.position.set(0,260,150);
-scene.add(cityFill);
-const towerFill=new THREE.PointLight(0x3acfff,2400,1250);
-towerFill.position.set(0,1450,0);
-scene.add(towerFill);
-
-const mat=(c,e=0,r=.35,m=.5)=>new THREE.MeshStandardMaterial({
- color:c,emissive:c,emissiveIntensity:e,roughness:r,metalness:m
-});
-const dark=mat(0x101d2c,.12,.42,.8);
-const cyan=mat(0x27dfff,1.65,.3,.7);
-const ice=mat(0xa6f2ff,1.45,.28,.72);
-const gold=mat(0xffd58c,1.7,.3,.65);
-const pink=mat(0xff62db,1.35,.3,.65);
-const blue=mat(0x168dff,1.2,.35,.6);
-const glass=new THREE.MeshPhysicalMaterial({
- color:0x387da0,metalness:.45,roughness:.12,
- transparent:true,opacity:.34,side:THREE.DoubleSide,
- depthWrite:false
-});
-
-function box(w,h,d,material,x=0,y=0,z=0,parent=scene){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
-function cylinder(rt,rb,h,material,x,y,z,parent=scene,segments=24){
- const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,segments),material);
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
-function gradientWall(w,h,d,x,y,z,parent){
- const m=new THREE.Mesh(makeGradientGeometry(w,h,d),gradientMaterial);
- m.position.set(x,y,z);
- parent.add(m);
- return m;
-}
-function torus(parent,r,y,t,material){
- const m=new THREE.Mesh(new THREE.TorusGeometry(r,t,8,72),material);
- m.rotation.x=Math.PI/2;
- m.position.y=y;
- parent.add(m);
- return m;
-}
-
-// 지면
-const ground=box(5000,2,5000,mat(0x07111d),0,-1,0);
-const roadMat=mat(0x1b3043,.28,.8,.2);
-
-for(let i=-4;i<=4;i++){
- box(32,.12,2400,roadMat,i*260,.05,0);
- box(2400,.12,32,roadMat,0,.06,i*260);
- box(.3,.08,2400,cyan,i*260-15,.14,0);
- box(2400,.08,.3,cyan,0,.15,i*260-15);
-}
-
-// 별
-{
- const n=260;
- const p=new Float32Array(n*3);
- for(let i=0;i<n;i++){
-  p[i*3]=(Math.random()-.5)*4400;
-  p[i*3+1]=250+Math.random()*1000;
-  p[i*3+2]=(Math.random()-.5)*4400;
- }
- const g=new THREE.BufferGeometry();
- g.setAttribute("position",new THREE.BufferAttribute(p,3));
- scene.add(new THREE.Points(g,new THREE.PointsMaterial({
-  color:0xa8dcff,size:2.1,sizeAttenuation:true
- })));
-}
-
-// 건물 외벽 그라데이션
-function makeGradientGeometry(w,h,d){
- const g=new THREE.BoxGeometry(w,h,d);
- const p=g.attributes.position;
- const colors=[];
- const low=new THREE.Color(0x13cfff);
- const mid=new THREE.Color(0x2465ff);
- const high=new THREE.Color(0xa72cff);
- const top=new THREE.Color(0xffbd62);
-
- for(let i=0;i<p.count;i++){
-  const t=THREE.MathUtils.clamp((p.getY(i)+h/2)/h,0,1);
-  const c=t<.36?low.clone().lerp(mid,t/.36):
-   t<.76?mid.clone().lerp(high,(t-.36)/.4):
-   high.clone().lerp(top,(t-.76)/.24);
-  colors.push(c.r,c.g,c.b);
- }
- g.setAttribute("color",new THREE.Float32BufferAttribute(colors,3));
- return g;
-}
-
-const gradientMaterial=new THREE.MeshStandardMaterial({
- color:0x080d17,
- vertexColors:false,
- emissive:0x020711,
- emissiveIntensity:.12,
- metalness:.82,
- roughness:.28,
- side:THREE.DoubleSide
-});
-
-const facadeMaterial=new THREE.MeshStandardMaterial({
- color:0xffffff,
- vertexColors:true,
- emissive:0x173b70,
- emissiveIntensity:2.0,
- metalness:.68,
- roughness:.18,
- side:THREE.DoubleSide
-});
-
-const buildings=[];
-const floors=[];
-const FLOOR_CELL=64;
-const floorGrid=new Map();
-
-function key(ix,iz){return ix+","+iz;}
-
-// 바닥 인스턴스
-const floorGeometry=new THREE.BoxGeometry(1,.2,1);
-const floorMaterial=mat(0x31566e,.55,.35,.65);
-const MAX_FLOORS=18000;
-const floorInstances=new THREE.InstancedMesh(
- floorGeometry,floorMaterial,MAX_FLOORS
-);
-floorInstances.count=0;
-scene.add(floorInstances);
-const dummy=new THREE.Object3D();
-let floorInstanceCount=0;
-
-function addFloor(x,z,w,d,topY){
- const f={x,z,w,d,y:topY};
- floors.push(f);
-
- const x0=Math.floor((x-w/2)/FLOOR_CELL);
- const x1=Math.floor((x+w/2)/FLOOR_CELL);
- const z0=Math.floor((z-d/2)/FLOOR_CELL);
- const z1=Math.floor((z+d/2)/FLOOR_CELL);
-
- for(let ix=x0;ix<=x1;ix++){
-  for(let iz=z0;iz<=z1;iz++){
-   const k=key(ix,iz);
-   let list=floorGrid.get(k);
-   if(!list)floorGrid.set(k,list=[]);
-   list.push(f);
-  }
- }
-
- if(floorInstanceCount<MAX_FLOORS){
-  dummy.position.set(x,topY-.1,z);
-  dummy.scale.set(w,1,d);
-  dummy.updateMatrix();
-  floorInstances.setMatrixAt(floorInstanceCount++,dummy.matrix);
- }
-}
-
-function addCollisionFloor(x,z,w,d,topY){
- const f={x,z,w,d,y:topY};
- floors.push(f);
- const x0=Math.floor((x-w/2)/FLOOR_CELL);
- const x1=Math.floor((x+w/2)/FLOOR_CELL);
- const z0=Math.floor((z-d/2)/FLOOR_CELL);
- const z1=Math.floor((z+d/2)/FLOOR_CELL);
- for(let ix=x0;ix<=x1;ix++){
-  for(let iz=z0;iz<=z1;iz++){
-   const k=key(ix,iz);
-   let list=floorGrid.get(k);
-   if(!list)floorGrid.set(k,list=[]);
-   list.push(f);
-  }
- }
-}
-function finishFloors(){
- floorInstances.count=floorInstanceCount;
- floorInstances.instanceMatrix.needsUpdate=true;
-}
-
-// 반복 창문
-const windowGeo=new THREE.BoxGeometry(1,1,1);
-const windowMeshes={
- ice:new THREE.InstancedMesh(windowGeo,ice,16000),
- cyan:new THREE.InstancedMesh(windowGeo,cyan,16000),
- gold:new THREE.InstancedMesh(windowGeo,gold,5000)
-};
-const windowCounts={ice:0,cyan:0,gold:0};
-
-for(const m of Object.values(windowMeshes))scene.add(m);
-
-function addWindow(type,x,y,z,w,h,d){
- const m=windowMeshes[type];
- const i=windowCounts[type];
- if(i>=m.instanceMatrix.count)return;
- dummy.position.set(x,y,z);
- dummy.scale.set(w,h,d);
- dummy.updateMatrix();
- m.setMatrixAt(i,dummy.matrix);
- windowCounts[type]++;
-}
-
-// 건물 70개
-function createBuilding(i,x,z,w,d,h){
- const g=new THREE.Group();
- g.position.set(x,0,z);
- scene.add(g);
-
- const wall=.9, doorW=6.4, doorH=4.2;
-
- gradientWall(w,h,wall,0,h/2,-d/2,g);
- gradientWall(wall,h,d,w/2,h/2,0,g);
- gradientWall(wall,h,d,-w/2,h/2,0,g);
- gradientWall((w-doorW)/2,h,wall,-(w+doorW)/4,h/2,d/2,g);
- gradientWall((w-doorW)/2,h,wall,(w+doorW)/4,h/2,d/2,g);
- gradientWall(doorW,h-doorH,wall,0,(h+doorH)/2,d/2,g);
-
- box(w*.32,h*.94,.16,dark,-w*.33,h/2,d/2+.08,g);
- box(w*.32,h*.94,.16,dark,w*.33,h/2,d/2+.08,g);
- box(.16,h*.94,d*.86,dark,w/2+.08,h/2,0,g);
- box(.16,h*.94,d*.86,dark,-w/2-.08,h/2,0,g);
-
- box(.22,doorH,.28,cyan,-doorW/2,h/2,d/2+.22,g);
- box(.22,doorH,.28,ice,doorW/2,h/2,d/2+.22,g);
- box(doorW,.22,.28,gold,0,doorH,d/2+.22,g);
-
- // 모서리 네온 라인
- for(const sx of [-1,1]){
-  for(const sz of [-1,1]){
-   box(.075,h+.5,.075,mat(0x7cbbd0,.48,.4,.65),sx*(w/2-.25),h/2,sz*(d/2-.25),g);
-  }
- }
-
- // 층별 창문
- const count=Math.max(12,Math.floor(h/5));
- const fh=h/count;
-
- for(let f=1;f<count;f++){
-  const y=f*fh;
-  addWindow(f%5===0?"gold":"ice",x,y,z+d/2+.2,w*.67,.14,.2);
-  addWindow("cyan",x-w*.39,y,z+d/2+.2,.12,.12,.2);
-  addWindow("cyan",x+w*.39,y,z+d/2+.2,.12,.12,.2);
- }
-
- // 수평 발광 띠
- box(w+.25,.075,.12,mat(0x6eb5c8,.8,.38,.65),0,h*.28,d/2+.12,g);
- box(w+.25,.06,.12,mat(0x9b78bb,.65,.4,.62),0,h*.68,d/2+.12,g);
- box(w+.25,.08,.12,mat(0xd0b78e,.7,.38,.65),0,h,d/2+.12,g);
-
- // 지붕
- box(w+1,.5,d+1,dark,0,h+.25,0,g);
- torus(g,Math.max(w,d)*.52,h+.55,.08,mat(0x73b9cb,.7,.4,.65));
-
- // 내부 층 바닥
- for(let f=0;f<count;f++){
-  addFloor(x,z,w-1.3,d-1.3,f*fh);
-  if(f>0 && f%3===0){
-   box(w*.55,.10,.16,f%2?cyan:gold,0,f*fh-.18,0,g);
-  }
- }
-
- // 엘리베이터 샤프트
- const sx=w/2+2.5;
- box(4,h+1,4,glass,sx,h/2,0,g);
- box(.2,h+1,.2,cyan,sx-2,h/2,0,g);
- box(.2,h+1,.2,cyan,sx+2,h/2,0,g);
-
- const cabin=new THREE.Group();
- g.add(cabin);
- box(3.1,3.3,3.1,mat(0x14516d,1),0,0,0,cabin);
- box(3.3,.12,3.3,cyan,0,-1.65,0,cabin);
- box(3.3,.12,3.3,ice,0,1.65,0,cabin);
- cabin.position.set(sx,1.8,0);
-
- for(let f=0;f<count;f++){
-  addFloor(x+sx,z,5,5,f*fh);
- }
-
- buildings.push({
-  x,z,w,d,h,count,fh,sx,cabin,g,
-  name:"SKY "+String(i+1).padStart(2,"0")
- });
-}
-
-for(let i=0;i<70;i++){
- const band=Math.floor(i/10);
- const slot=i%10;
- const a=slot*(Math.PI*2/10)+band*.105;
- const r=270+band*105;
- const x=Math.cos(a)*r;
- const z=Math.sin(a)*r;
-
- createBuilding(
-  i,x,z,
-  23+(i%4)*2,
-  23+(i%3)*2,
-  230+(i%9)*35
- );
-}
-
-// 제이브 타워
-const JH=3960,JB=132,JD=96;
-const jave=new THREE.Group();
-scene.add(jave);
-
-function javeWidth(y){
- const t=THREE.MathUtils.clamp(y/JH,0,1);
- return JB*(1-Math.pow(t,1.18)*.986);
-}
-
-{
- const positions=[];
- const colors=[];
- const indices=[];
- const N=120;
-
- const c1=new THREE.Color(0x32106f);
- const c2=new THREE.Color(0x7024d6);
- const c3=new THREE.Color(0xc13cff);
- const c4=new THREE.Color(0xff9cf5);
-
- for(let i=0;i<=N;i++){
-  const t=i/N;
-  const y=t*JH;
-  const w=javeWidth(y);
-  const d=JD*(w/JB);
-
-  const c=t<.35?c1.clone().lerp(c2,t/.35):
-   t<.75?c2.clone().lerp(c3,(t-.35)/.4):
-   c3.clone().lerp(c4,(t-.75)/.25);
-
-  for(const p of [
-   [-w/2,y,-d/2],[w/2,y,-d/2],
-   [w/2,y,d/2],[-w/2,y,d/2]
-  ]){
-   positions.push(...p);
-   colors.push(c.r,c.g,c.b);
-  }
- }
-
- for(let i=0;i<N;i++){
-  for(let s=0;s<4;s++){
-   const a=i*4+s;
-   const b=i*4+(s+1)%4;
-   const c=(i+1)*4+(s+1)%4;
-   const d=(i+1)*4+s;
-   indices.push(a,b,d,b,c,d);
-  }
- }
-
- const geo=new THREE.BufferGeometry();
- geo.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
- geo.setAttribute("color",new THREE.Float32BufferAttribute(colors,3));
- geo.setIndex(indices);
- geo.computeVertexNormals();
-
- const material=new THREE.MeshStandardMaterial({
-  color:0xffffff,
-  vertexColors:true,
-  emissive:0x8a20d8,
-  emissiveIntensity:3.1,
-  metalness:.72,
-  roughness:.1,
-  transparent:false,
-  opacity:1,
-  depthWrite:true,
-  side:THREE.DoubleSide
- });
-
- jave.add(new THREE.Mesh(geo,material));
-}
-
-// 타워 수직 발광선
-for(let side=0;side<4;side++){
- const pts=[];
- for(let i=0;i<=100;i++){
-  const t=i/100;
-  const y=t*JH;
-  const w=javeWidth(y);
-  const d=JD*w/JB;
-  const x=side===0?-w/2-1:side===1?w/2+1:0;
-  const z=side===2?-d/2-1:side===3?d/2+1:0;
-  pts.push(new THREE.Vector3(x,y,z));
- }
-
- const curve=new THREE.CatmullRomCurve3(pts);
- jave.add(new THREE.Mesh(
-  new THREE.TubeGeometry(curve,180,1.45,6,false),mat(0xd34cff,7)
- ));
- jave.add(new THREE.Mesh(
-  new THREE.TubeGeometry(curve,180,.5,6,false),mat(0xffa8ff,6)
- ));
-}
-
-// 지상 출입구 네온 게이트
-const javeGate=new THREE.Group();
-jave.add(javeGate);
-javeGate.position.set(0,0,JD/2+1.2);
-box(3,22,2,cyan,-18,11,0,javeGate);
-box(3,22,2,ice,18,11,0,javeGate);
-box(39,3,2,gold,0,22,0,javeGate);
-box(31,.35,1.2,pink,0,2,0,javeGate);
-const gateGlow=new THREE.PointLight(0x39dfff,85,150);
-gateGlow.position.set(0,13,JD/2+15);
-scene.add(gateGlow);
-
-// 타워 층별 발판
-const JFLOORS=880;
-for(let f=0;f<JFLOORS;f++){
- const y=f*4.5;
- const w=javeWidth(y);
- const d=JD*w/JB;
- if(w>7&&d>7)addFloor(0,0,w-3,d-3,y);
-}
-
-// 타워 엘리베이터
-const railPoints=[];
-for(let i=0;i<=100;i++){
- const y=JH*i/100;
- railPoints.push(new THREE.Vector3(
-  javeWidth(y)/2+3,y,JD*.15
- ));
-}
-const railCurve=new THREE.CatmullRomCurve3(railPoints);
-jave.add(new THREE.Mesh(
- new THREE.TubeGeometry(railCurve,200,2.1,8,false),glass
-));
-jave.add(new THREE.Mesh(
- new THREE.TubeGeometry(railCurve,200,.55,8,false),cyan
-));
-
-const javeCabin=new THREE.Group();
-jave.add(javeCabin);
-javeCabin.position.set(javeWidth(0)/2+3,0,JD*.15);
-box(5,5,5,mat(0x155a80,3),0,0,0,javeCabin);
-box(5.3,.15,5.3,cyan,0,-2.5,0,javeCabin);
-box(5.3,.15,5.3,gold,0,2.5,0,javeCabin);
-
-// 전망대
-const topY=JH-55;
-const observatory=new THREE.Group();
-observatory.position.y=topY;
-jave.add(observatory);
-
-torus(observatory,112,0,.9,cyan);
-torus(observatory,72,-.5,.55,gold);
-
-const skyGlass=new THREE.Mesh(
- new THREE.CylinderGeometry(124,124,.3,112),
- new THREE.MeshPhysicalMaterial({
-  color:0xb9efff,
-  metalness:.08,
-  roughness:.025,
-  transparent:true,
-  opacity:.19,
-  transmission:.72,
-  thickness:.35,
-  clearcoat:1
- })
-);
-skyGlass.position.y=2.7;
-observatory.add(skyGlass);
-
-// 외부 전망 데크
-const outerDeck=new THREE.Mesh(
- new THREE.CylinderGeometry(130,130,.28,112),
- new THREE.MeshPhysicalMaterial({
-  color:0xbcefff,
-  transparent:true,
-  opacity:.13,
-  roughness:.025,
-  metalness:.08,
-  transmission:.78,
-  thickness:.25,
-  side:THREE.DoubleSide
- })
-);
-outerDeck.position.y=3;
-observatory.add(outerDeck);
-
-// 전망대 바닥 충돌
-addCollisionFloor(0,0,256,256,topY+3.14);
-
-for(let i=-5;i<=5;i++){
- box(220,.045,.10,i%2?cyan:ice,i*2,2.95,0,observatory);
- box(.10,.045,220,i%2?ice:cyan,0,2.95,i*2,observatory);
-}
-
-torus(observatory,100,3.3,1.4,gold);
-torus(observatory,116,3.3,.9,cyan);
-torus(observatory,128,3.1,.55,ice);
-torus(observatory,78,3.4,.5,pink);
-
-for(let i=0;i<48;i++){
- const a=i*Math.PI*2/48;
- cylinder(.18,.18,5,cyan,Math.cos(a)*122,5.5,Math.sin(a)*122,observatory,8);
-}
-
-const railTop=new THREE.Mesh(
- new THREE.TorusGeometry(122,.3,8,112),gold
-);
-railTop.rotation.x=Math.PI/2;
-railTop.position.y=8;
-observatory.add(railTop);
-
-// 중앙 라운지
-cylinder(28,31,2.5,mat(0x1c4b68,.8,.15,.8),0,4,0,observatory,64);
-torus(observatory,29,5.3,1,gold);
-torus(observatory,23,5.5,.6,cyan);
-
-const dome=new THREE.Mesh(
- new THREE.SphereGeometry(25,40,20,0,Math.PI*2,0,Math.PI/2),
- new THREE.MeshPhysicalMaterial({
-  color:0x9ceaff,
-  transparent:true,
-  opacity:.19,
-  metalness:.2,
-  roughness:.05,
-  side:THREE.DoubleSide
- })
-);
-dome.position.y=5.3;
-observatory.add(dome);
-
-for(let i=0;i<32;i++){
- const a=i*Math.PI*2/32;
- cylinder(.18,.18,9,gold,Math.cos(a)*26,8,Math.sin(a)*26,observatory,8);
-}
-
-for(let i=0;i<3;i++){
- torus(observatory,35+i*7,12+i*1.5,.35,i===1?gold:cyan);
-}
-
-cylinder(1.2,.3,32,ice,0,27,0,observatory,12);
-cylinder(.45,.1,22,gold,0,52,0,observatory,12);
-
-const topLight=new THREE.PointLight(0xd66bff,18,360);
-topLight.position.set(0,20,0);
-observatory.add(topLight);
-
-// 빔
-const beamPivots=[];
-
-function addBeam(parent,length,color,phase,width=18){
- const pivot=new THREE.Group();
- parent.add(pivot);
-
- const cone=new THREE.Mesh(
-  new THREE.ConeGeometry(width,length,10,1,true),
-  new THREE.MeshBasicMaterial({
-   color,transparent:true,opacity:.14,
-   side:THREE.DoubleSide,depthWrite:false
-  })
- );
- cone.rotation.x=-Math.PI/2;
- cone.position.z=-length/2;
- pivot.add(cone);
-
- const core=new THREE.Mesh(
-  new THREE.CylinderGeometry(.5,.7,length,6),
-  new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8})
- );
- core.rotation.x=Math.PI/2;
- core.position.z=-length/2;
- pivot.add(core);
-
- beamPivots.push({pivot,phase});
-}
-
-for(let i=0;i<12;i++){
- addBeam(
-  observatory,1100,
-  i%3===0?0xffd58c:i%2?0x4ccfff:0xc0f5ff,
-  i*Math.PI/6,22
- );
-}
-
-// 타워 외부 장식 링
-for(let i=0;i<9;i++){
- const y=300+i*390;
- torus(jave,javeWidth(y)*.78,y,.85,i%2?mat(0xff9cf5,6):mat(0xb33cff,7));
-}
-
-// 일반 빔 건물
-for(let i=0;i<5;i++){
- const b=buildings[i*12];
- const roof=new THREE.Group();
- roof.position.set(b.x,b.h,b.z);
- scene.add(roof);
- box(8,1.5,8,dark,0,0,0,roof);
- torus(roof,5,1,.35,cyan);
- addBeam(roof,450,0x48bfff,i*.8,12);
-}
-
-// 광장
-const plaza=new THREE.Mesh(
- new THREE.CylinderGeometry(105,115,2,64),
- dark
-);
-plaza.position.set(0,-1,150);
-scene.add(plaza);
-
-torus(scene,108,.1,1.1,cyan).position.z=150;
-torus(scene,90,.2,.4,gold).position.z=150;
-
-for(let i=0;i<16;i++){
- const a=i*Math.PI*2/16;
- cylinder(.5,.5,5,cyan,
-  Math.cos(a)*70,2,150+Math.sin(a)*70,scene,8);
-}
-
-// 창문 인스턴스 적용
-for(const type of Object.keys(windowMeshes)){
- windowMeshes[type].count=windowCounts[type];
- windowMeshes[type].instanceMatrix.needsUpdate=true;
-}
-
-// 바닥 인스턴스 최종 반영
-finishFloors();
-
-// 바닥 충돌 탐색
-function findFloor(previousY){
- const feetBefore=previousY-1.7;
- const feetNow=player.y-1.7;
-
- let best=0;
-
- if(feetBefore>=-.6&&feetNow<=.15){
-  best=0;
- }
-
- const ix=Math.floor(player.x/FLOOR_CELL);
- const iz=Math.floor(player.z/FLOOR_CELL);
- const list=floorGrid.get(key(ix,iz));
-
- if(list){
-  for(let i=0;i<list.length;i++){
-   const f=list[i];
-
-   if(
-    Math.abs(player.x-f.x)<=f.w/2-.2&&
-    Math.abs(player.z-f.z)<=f.d/2-.2&&
-    feetBefore>=f.y-.5&&
-    feetNow<=f.y+.15&&
-    f.y>best
-   ){
-    best=f.y;
-   }
-  }
- }
-
- return best;
-}
-
-// 플레이어
-const player={x:0,y:1.7,z:150};
-const keys={};
-
-let vy=0;
-let onGround=true;
-let yaw=0;
-let pitch=0;
-let locked=false;
-
-let insideLift=false;
-let activeLift=null;
-let liftTarget=0;
-let liftMoving=false;
-
-function lockPointer(){
- renderer.domElement.requestPointerLock?.();
-}
-function unlockPointer(){
- if(document.pointerLockElement)document.exitPointerLock();
-}
-
-document.addEventListener("pointerlockchange",()=>{
- locked=document.pointerLockElement===renderer.domElement;
- $("unlock").style.display=locked?"none":"block";
-});
-
-document.addEventListener("mousemove",e=>{
- if(!locked||insideLift)return;
- yaw-=e.movementX*.002;
- pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.4,1.4);
-});
-
-renderer.domElement.addEventListener("click",()=>{
- if(!locked&&!insideLift&&$("start").style.display==="none"){
-  lockPointer();
- }
-});
-
-$("enter").onclick=()=>{
- $("start").style.display="none";
- lockPointer();
+<p class="info" id="feedback"></p>
+</section>
+
+<section class="card hidden" id="result">
+<h2 style="text-align:center">퀴즈 완료!</h2>
+<div class="score" id="score"></div>
+<p id="summary" style="text-align:center"></p>
+<button class="primary full" onclick="review()">채점 결과 보기</button>
+<button class="light full" onclick="location.reload()">처음으로</button>
+</section>
+
+<section class="card hidden" id="reviews">
+<h2>채점 결과</h2>
+<div id="reviewList"></div>
+<button class="primary full" onclick="location.reload()">처음으로</button>
+</section>
+</main>
+
+<script>
+const make=(level,items)=>items.map(([q,a])=>({level,q,a:Array.isArray(a)?a:[a]}));
+
+const bank={
+"사도행전":[
+...make("쉬움",[
+["예수님께서 승천하신 후 제자들에게 약속하신 분은 누구인가요?",["성령","성령님"]],
+["오순절에 제자들에게 임한 것은 무엇인가요?",["성령","성령님"]],
+["예수님 승천 후 제자들이 모여 기도한 곳은 어디인가요?",["다락방","마가의 다락방"]],
+["베드로의 설교를 듣고 세례를 받은 사람은 약 몇 명인가요?",["삼천 명","3000명","삼천명"]],
+["성전 미문에서 베드로와 요한이 만난 사람은 어떤 사람이었나요?",["걷지 못하는 사람","나면서 못 걷게 된 사람","앉은뱅이"]],
+["일곱 집사 중 순교한 사람은 누구인가요?","스데반"],
+["사울은 어느 도시로 가던 중 예수님을 만났나요?",["다메섹","다마스쿠스"]],
+["사울의 눈을 다시 보게 해 준 제자는 누구인가요?","아나니아"],
+["베드로가 환상을 본 도시는 어디인가요?","욥바"],
+["베드로가 방문한 이방인의 이름은 무엇인가요?","고넬료"],
+["안디옥에서 제자들이 처음 불린 이름은 무엇인가요?","그리스도인"],
+["사도행전 마지막 부분에서 바울은 어느 도시에서 복음을 전하나요?","로마"],
+["빌립이 광야 길에서 만난 사람은 어느 나라 사람이었나요?",["에티오피아","구스"]],
+["베드로가 살린 여제자의 이름은 무엇인가요?",["다비다","도르가"]],
+["바울과 바나바가 선교 여행을 시작한 교회는 어디인가요?","안디옥 교회"],
+["아나니아의 아내 이름은 무엇인가요?","삽비라"],
+["사도행전의 저자는 누구인가요?","누가"],
+["예수님 승천 후 사도들은 유다를 대신할 사람으로 누구를 뽑았나요?","맛디아"],
+["빌립보에서 바울과 함께 감옥에 갇힌 사람은 누구인가요?","실라"],
+["바울이 로마에서 복음을 전한 기간은 몇 년인가요?",["2년","이 년","두 해"]]
+]),
+...make("보통",[
+["오순절에 베드로가 인용한 선지자는 누구인가요?","요엘"],
+["사도들을 죽이지 말라고 조언한 율법교사는 누구인가요?","가말리엘"],
+["스데반이 순교할 때 그의 옷을 지키던 청년은 누구인가요?","사울"],
+["고넬료는 어떤 직책을 가진 사람이었나요?","백부장"],
+["고넬료는 어느 부대의 백부장이었나요?",["이탈리아 부대","이달리야 부대"]],
+["바울과 바나바가 구브로에서 만난 마술사의 이름은 무엇인가요?",["바예수","엘루마"]],
+["빌립보 감옥의 간수는 바울에게 무엇을 물었나요?",["내가 어떻게 하여야 구원을 받으리이까","어떻게 해야 구원을 받습니까"]],
+["바울이 아테네에서 설교한 장소는 어디인가요?","아레오바고"],
+["바울과 함께 천막 만드는 일을 한 부부는 누구인가요?",["브리스길라와 아굴라","아굴라와 브리스길라"]],
+["바울이 드로아에서 설교할 때 창문에서 떨어진 청년은 누구인가요?","유두고"],
+["바울이 예루살렘으로 가는 길에 에베소 장로들과 작별한 곳은 어디인가요?","밀레도"],
+["바울과 바나바가 루스드라에서 각각 어떤 신으로 불렸나요?",["바나바는 제우스, 바울은 헤르메스","제우스와 헤르메스"]],
+["사울이 회심한 뒤 며칠 동안 보지 못했나요?",["사흘","3일","삼일"]],
+["베드로가 욥바에서 머물렀던 무두장이의 이름은 무엇인가요?","시몬"],
+["예루살렘 회의에서 이방인 신자들에게 피하라고 권한 것 중 하나는 무엇인가요?",["우상의 제물","우상 제물"]],
+["바울과 실라가 빌립보 감옥에 있을 때 일어난 자연 현상은 무엇인가요?","지진"],
+["바울이 에베소에서 복음을 전할 때 마술 책을 불태운 사람들은 무엇을 했나요?",["책을 불태웠다","마술 책을 불태웠다"]],
+["바울이 고린도에서 만난 동역자 부부는 누구인가요?",["브리스길라와 아굴라","아굴라와 브리스길라"]],
+["바울이 예루살렘에서 체포된 후 재판을 받으러 간 총독은 누구인가요?","벨릭스"],
+["바울이 가이사에게 상소한 이유는 무엇인가요?",["로마 시민이었기 때문에","가이사에게 재판받기 위해","황제에게 상소하기 위해"]]
+]),
+...make("어려움",[
+["오순절에 베드로가 인용한 요엘서의 핵심 약속은 무엇인가요?",["내 영을 모든 육체에 부어 주리니","성령을 부어 주리니"]],
+["일곱 사람 중 안디옥 출신 개종자로 소개된 사람은 누구인가요?","니골라"],
+["사도행전 6장에서 일곱 사람 중 믿음과 성령이 충만한 사람으로 소개된 사람은 누구인가요?","스데반"],
+["바울과 바나바가 구브로에서 만난 총독은 누구인가요?","서기오 바울"],
+["바울이 루스드라에서 돌에 맞은 후 어디로 들어갔나요?","성"],
+["바울이 고린도에서 만난 유대인 회당장의 이름은 무엇인가요?","그리스보"],
+["바울이 에베소에서 두란노 서원에서 강론한 기간은 얼마인가요?",["두 해","2년"]],
+["에베소에서 바울의 손수건이나 앞치마를 가져다가 병자에게 놓았을 때 어떤 일이 일어났나요?",["병이 떠나고 악귀가 나갔다","병이 나았다"]],
+["바울이 예루살렘으로 가는 길에 머물렀던 두로에서 제자들과 며칠을 보냈나요?",["이레","7일","칠 일"]],
+["바울이 로마로 가는 배에서 만난 백부장의 이름은 무엇인가요?","율리오"]
+])
+],
+"마태복음":[
+...make("쉬움",[
+["예수님의 어머니 이름은 무엇인가요?","마리아"],
+["예수님이 태어나신 마을은 어디인가요?","베들레헴"],
+["예수님의 탄생을 알려 준 천사는 누구인가요?","천사"],
+["동방박사들은 아기 예수님께 무엇을 드렸나요?",["황금과 유향과 몰약","황금 유향 몰약"]],
+["예수님께 세례를 베푼 사람은 누구인가요?","세례 요한"],
+["예수님이 광야에서 금식하신 기간은 얼마인가요?",["40일","사십 일","사십일"]],
+["예수님이 처음 부르신 제자 중 형제인 두 사람은 누구인가요?",["베드로와 안드레","안드레와 베드로"]],
+["예수님은 제자들에게 세상의 무엇이라고 말씀하셨나요?",["소금과 빛","세상의 소금과 빛"]],
+["예수님이 가르쳐 주신 기도의 이름은 무엇인가요?","주기도문"],
+["예수님이 물 위를 걸으셨을 때 배에서 내린 제자는 누구인가요?","베드로"],
+["예수님이 나귀를 타고 예루살렘에 들어가신 사건은 무엇이라고 하나요?",["예루살렘 입성","승리의 입성"]],
+["예수님을 은 삼십에 판 제자는 누구인가요?","가룟 유다"],
+["예수님이 십자가에 못 박히신 장소는 어디인가요?",["골고다","해골의 곳"]],
+["예수님의 무덤을 찾아간 여인 중 한 명은 누구인가요?","막달라 마리아"],
+["예수님은 부활하신 후 제자들에게 무엇을 하라고 명령하셨나요?",["모든 민족을 제자로 삼으라","제자를 삼으라"]],
+["예수님이 태어나셨을 때 유대의 왕은 누구였나요?","헤롯"],
+["예수님께서 가르치신 유명한 설교는 무엇인가요?","산상수훈"],
+["예수님이 베드로에게 사람을 낚는 어부가 되게 하겠다고 말씀하신 사람은 누구인가요?","베드로"],
+["예수님이 제자들과 함께 배를 타고 가실 때 바람과 바다를 꾸짖어 잠잠하게 하셨나요?",["예","그렇다","네"]],
+["예수님의 열두 제자 중 세리였던 사람은 누구인가요?",["마태","레위"]]
+]),
+...make("보통",[
+["예수님의 족보에서 다윗의 아버지는 누구인가요?","이새"],
+["예수님이 태어나신 소식을 듣고 아기들을 죽이려 한 왕은 누구인가요?","헤롯"],
+["예수님이 광야에서 시험을 받으실 때 시험한 자는 누구인가요?",["마귀","사탄"]],
+["예수님이 산상수훈에서 복이 있다고 말씀하신 마음이 가난한 사람은 어떤 사람인가요?",["심령이 가난한 자","마음이 가난한 자"]],
+["예수님이 가르치신 기도에서 하나님의 이름이 거룩히 여김을 받도록 무엇을 구하나요?",["이름이 거룩히 여김을 받으시오며","하나님의 이름"]],
+["예수님이 물 위를 걸으실 때 베드로는 무엇을 하다가 물에 빠졌나요?",["예수님께 가려고 물 위를 걷다가","물 위를 걷다가"]],
+["예수님께서 변화산에서 함께 나타난 구약 인물 두 명은 누구인가요?",["모세와 엘리야","엘리야와 모세"]],
+["예수님께서 베드로에게 천국 열쇠를 주겠다고 말씀하신 곳은 어디인가요?",["가이사랴 빌립보","가이사랴"]],
+["예수님을 시험하며 표적을 요구한 종교 지도자들은 누구인가요?",["바리새인과 사두개인","바리새인들"]],
+["예수님께서 가장 큰 계명으로 말씀하신 첫째 계명은 무엇인가요?",["마음을 다하고 목숨을 다하고 뜻을 다하여 하나님을 사랑하라","하나님을 사랑하라"]],
+["예수님께서 가장 큰 계명 다음으로 말씀하신 계명은 무엇인가요?",["네 이웃을 네 자신과 같이 사랑하라","이웃을 사랑하라"]],
+["예수님이 예루살렘 입성 때 타신 동물은 무엇인가요?","나귀"],
+["예수님이 성전을 깨끗하게 하시며 성전을 무엇이라 부르셨나요?",["기도하는 집","내 집은 기도하는 집"]],
+["예수님을 넘겨주기 위해 유다가 받은 돈은 얼마인가요?",["은 삼십","은 30","삼십 은"]],
+["예수님을 세 번 모른다고 한 제자는 누구인가요?","베드로"],
+["예수님이 십자가에 달리셨을 때 예수님 곁에 함께 못 박힌 사람은 몇 명인가요?",["두 명","2명"]],
+["예수님의 무덤을 지키도록 명령받은 사람들은 누구인가요?",["경비병","군인"]],
+["예수님이 부활하신 뒤 제자들에게 만나자고 하신 갈릴리의 산은 어떤 산인가요?",["지정하신 산","예수님이 정하신 산"]],
+["예수님이 세례를 받으실 때 하늘에서 들린 말씀은 누구의 음성이었나요?",["하나님의 음성","아버지의 음성"]],
+["마태복음 마지막에서 예수님은 제자들과 항상 함께하겠다고 약속하신 기간은 언제까지인가요?",["세상 끝날까지","세상 끝까지"]]
+]),
+...make("어려움",[
+["마태복음 1장에서 예수님의 이름을 임마누엘이라고 부른다는 예언은 누구를 통해 주어졌나요?","이사야"],
+["동방박사들이 예루살렘에 와서 찾은 분은 누구인가요?",["유대인의 왕으로 나신 이","유대인의 왕"]],
+["예수님이 광야에서 첫 번째 시험을 받으실 때 돌을 무엇으로 만들라는 유혹을 받으셨나요?",["떡","빵"]],
+["예수님이 광야에서 성전 꼭대기에서 뛰어내리라는 시험을 받을 때 인용하신 말씀은 무엇을 하지 말라는 것이었나요?",["주 너의 하나님을 시험하지 말라","하나님을 시험하지 말라"]],
+["예수님이 산상수훈에서 화평하게 하는 자는 무엇이라 일컬음을 받는다고 하셨나요?",["하나님의 아들","하나님의 아들들이"]],
+["예수님이 변화산에서 얼굴과 옷이 어떻게 변하셨나요?",["얼굴이 해 같이 빛나고 옷이 빛과 같이 희어졌다","해 같이 빛났다"]],
+["예수님이 베드로에게 형제를 몇 번까지 용서하라고 말씀하셨나요?",["일흔 번씩 일곱 번","490번","칠십 번씩 일곱 번"]],
+["예수님께서 비유로 말씀하신 열 처녀 중 슬기로운 처녀는 몇 명인가요?",["다섯","5명"]],
+["달란트 비유에서 한 달란트를 받은 종은 그 돈을 어떻게 했나요?",["땅에 감추었다","땅에 묻었다"]],
+["마태복음에서 예수님은 마지막 심판 때 양과 염소를 무엇으로 구분하신다고 말씀하셨나요?",["오른편과 왼편","오른쪽과 왼쪽"]]
+])]
 };
 
-document.addEventListener("keydown",e=>{
- keys[e.code]=true;
- if(e.code==="Escape")unlockPointer();
- if(e.code==="KeyE"&&!insideLift)tryLift();
-});
-
-document.addEventListener("keyup",e=>{
- keys[e.code]=false;
-});
-
-function notify(msg){
- $("notice").textContent=msg;
- $("notice").style.display="block";
- clearTimeout(notify.timer);
- notify.timer=setTimeout(()=>$("notice").style.display="none",2000);
+let book="사도행전",questions=[],pos=0,records=[],locked=false;
+function pickBook(name,el){
+ book=name;
+ document.querySelectorAll(".book").forEach(b=>b.classList.remove("selected"));
+ el.classList.add("selected");
 }
-
-function nearestElevator(){
- let best=null;
- let dist=Infinity;
-
- for(const b of buildings){
-  const x=b.x+b.sx;
-  const z=b.z;
-  const d=Math.hypot(player.x-x,player.z-z);
-  if(d<dist){
-   dist=d;
-   best={type:"normal",b,x,z,dist:d};
-  }
+function shuffle(arr){
+ let a=[...arr];
+ for(let i=a.length-1;i>0;i--){
+ let j=Math.floor(Math.random()*(i+1));
+ [a[i],a[j]]=[a[j],a[i]];
  }
-
- const y=THREE.MathUtils.clamp(player.y,0,JH);
- const x=javeWidth(y)/2+3;
- const z=JD*.15;
- const d=Math.hypot(player.x-x,player.z-z);
-
- if(d<dist){
-  best={type:"jave",x,z,dist:d};
- }
-
- return best;
+ return a;
 }
-
-function tryLift(){
- const lift=nearestElevator();
-
- if(!lift||lift.dist>14){
-  notify("엘리베이터 가까이에서 E를 누르세요");
-  return;
- }
-
- activeLift=lift;
- insideLift=true;
- unlockPointer();
-
- $("lift").style.display="block";
- $("floors").innerHTML="";
-
- $("liftName").textContent=lift.type==="jave"
-  ?"JAVE TOWER ELEVATOR"
-  :lift.b.name+" ELEVATOR";
-
- $("liftDesc").textContent="이동할 층을 선택하세요.";
-
- const max=lift.type==="jave"?868:lift.b.count;
- const step=lift.type==="jave"?20:Math.max(1,Math.ceil(max/28));
- const stops=[];
-
- for(let f=0;f<=max;f+=step)stops.push(f);
- if(!stops.includes(max))stops.push(max);
-
- for(const f of stops){
-  const button=document.createElement("button");
-  button.textContent=f===0?"G":f+"F";
-  button.onclick=()=>goFloor(f);
-  $("floors").appendChild(button);
- }
+function start(){
+ questions=shuffle(bank[book]);
+ pos=0;records=[];locked=false;
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("reviews").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ show();
 }
-
-function javeLiftY(f){
- return f>=868?topY+3.05:f*4.5;
+function show(){
+ locked=false;
+ let q=questions[pos];
+ document.getElementById("level").textContent=q.level+" 난이도 · "+book;
+ document.getElementById("count").textContent=(pos+1)+" / "+questions.length;
+ document.getElementById("bar").style.width=(pos/questions.length*100)+"%";
+ document.getElementById("question").textContent=(pos+1)+". "+q.q;
+ document.getElementById("answer").value="";
+ document.getElementById("answer").disabled=false;
+ document.getElementById("feedback").textContent="";
+ document.getElementById("answer").focus();
 }
-
-function goFloor(f){
- if(!activeLift)return;
- liftTarget=f;
- liftMoving=true;
- $("liftDesc").textContent=f+"층으로 이동 중...";
+function norm(s){
+ return s.toLowerCase().replace(/\s/g,"").replace(/[.,!?·~'"]/g,"");
 }
-
-function exitLift(){
- if(!activeLift)return;
-
- if(activeLift.type==="jave"){
-  const y=javeLiftY(liftTarget);
-  const w=javeWidth(y);
-
-  if(liftTarget>=868){
-   player.x=0;
-   player.z=0;
-   player.y=topY+4.84;
-   $("viewLabel").style.display="block";
-  }else{
-   player.x=w/2-5;
-   player.z=JD*.15;
-   player.y=y+1.7;
-   $("viewLabel").style.display="block";
-  }
- }else{
-  const b=activeLift.b;
-  player.x=b.x+b.sx;
-  player.z=b.z;
-  player.y=liftTarget*b.fh+1.7;
-  $("viewLabel").style.display="none";
- }
-
- vy=0;
- onGround=true;
- insideLift=false;
- liftMoving=false;
- activeLift=null;
-
- $("lift").style.display="none";
- notify("도착했습니다.");
+function check(){
+ if(locked)return;
+ let input=document.getElementById("answer").value.trim();
+ if(!input){document.getElementById("feedback").textContent="답을 입력해 주세요.";return}
+ let q=questions[pos],n=norm(input);
+ let ok=q.a.some(a=>norm(a)===n);
+ records.push({q:q.q,input,ok,answer:q.a[0]});
+ locked=true;
+ document.getElementById("answer").disabled=true;
+ document.getElementById("feedback").innerHTML=ok?
+ '<span class="good">정답입니다!</span>':
+ '<span class="bad">아쉬워요. 정답: '+q.a[0]+'</span>';
+ setTimeout(next,1000);
 }
-
-$("liftClose").onclick=exitLift;
-
-function updateLift(dt){
- if(!insideLift||!activeLift||!liftMoving)return;
-
- const current=activeLift.type==="jave"
-  ?javeCabin.position.y
-  :activeLift.b.cabin.position.y;
-
- const target=activeLift.type==="jave"
-  ?javeLiftY(liftTarget)
-  :liftTarget*activeLift.b.fh;
-
- const next=THREE.MathUtils.damp(current,target,1.5,dt);
-
- if(activeLift.type==="jave"){
-  javeCabin.position.y=next;
-  javeCabin.position.x=javeWidth(next)/2+3;
-  javeCabin.position.z=JD*(javeWidth(next)/JB)*.15;
-  player.x=javeCabin.position.x;
-  player.z=javeCabin.position.z;
- }else{
-  activeLift.b.cabin.position.y=next;
-  player.x=activeLift.b.x+activeLift.b.sx;
-  player.z=activeLift.b.z;
- }
-
- player.y=next+1.7;
- camera.position.set(player.x,player.y,player.z);
-
- if(Math.abs(next-target)<1.2){
-  liftMoving=false;
-  $("liftDesc").textContent="도착했습니다. 아래 버튼을 눌러 내리세요.";
- }
+function skip(){
+ if(locked)return;
+ let q=questions[pos];
+ records.push({q:q.q,input:"건너뜀",ok:false,answer:q.a[0]});
+ locked=true;
+ document.getElementById("answer").disabled=true;
+ document.getElementById("feedback").innerHTML='<span class="bad">정답: '+q.a[0]+'</span>';
+ setTimeout(next,1000);
 }
-
-// 플레이어 이동
-function updatePlayer(dt){
- if(insideLift)return;
-
- camera.rotation.order="YXZ";
- camera.rotation.y=yaw;
- camera.rotation.x=pitch;
-
- const previousY=player.y;
-
- const forward=new THREE.Vector3(
-  -Math.sin(yaw),0,-Math.cos(yaw)
- );
- const right=new THREE.Vector3(
-  Math.cos(yaw),0,-Math.sin(yaw)
- );
-
- const move=new THREE.Vector3();
-
- if(keys.KeyW)move.add(forward);
- if(keys.KeyS)move.sub(forward);
- if(keys.KeyD)move.add(right);
- if(keys.KeyA)move.sub(right);
-
- if(move.lengthSq()>0){
-  move.normalize();
-  move.multiplyScalar(
-   (keys.ShiftLeft||keys.ShiftRight?32:18)*dt
-  );
-  player.x+=move.x;
-  player.z+=move.z;
- }
-
- if(keys.Space&&onGround){
-  vy=13;
-  onGround=false;
- }
-
- vy-=29*dt;
- player.y+=vy*dt;
-
- const floor=findFloor(previousY);
-
- if(vy<=0&&player.y-1.7<=floor+.12){
-  player.y=floor+1.7;
-  vy=0;
-  onGround=true;
- }else{
-  onGround=false;
- }
-
- if(player.y<1.7){
-  player.y=1.7;
-  vy=0;
-  onGround=true;
- }
-
- player.x=THREE.MathUtils.clamp(player.x,-2400,2400);
- player.z=THREE.MathUtils.clamp(player.z,-2400,2400);
-
- camera.position.set(player.x,player.y,player.z);
-
- const lift=nearestElevator();
- if(lift&&lift.dist<14&&!insideLift){
-  $("notice").textContent="E 키를 눌러 엘리베이터 이용";
-  $("notice").style.display="block";
- }else if(!insideLift){
-  $("notice").style.display="none";
- }
+function next(){
+ pos++;
+ if(pos>=questions.length){finish();return}
+ show();
 }
-
-// 폭죽
-const particleCount=240;
-const firePos=new Float32Array(particleCount*3);
-const fireVel=new Float32Array(particleCount*3);
-const fireLife=new Float32Array(particleCount);
-const fireColor=new Float32Array(particleCount*3);
-
-const fireGeo=new THREE.BufferGeometry();
-fireGeo.setAttribute("position",new THREE.BufferAttribute(firePos,3));
-fireGeo.setAttribute("color",new THREE.BufferAttribute(fireColor,3));
-
-const firePoints=new THREE.Points(
- fireGeo,
- new THREE.PointsMaterial({
-  size:4.5,vertexColors:true,transparent:true,
-  opacity:.9,depthWrite:false
- })
-);
-scene.add(firePoints);
-
-let fireIndex=0;
-
-function burst(){
- const origin=[
-  (Math.random()-.5)*35,
-  JH+30+Math.random()*80,
-  (Math.random()-.5)*35
- ];
-
- const color=new THREE.Color().setHSL(Math.random(),.9,.65);
-
- for(let n=0;n<32;n++){
-  const i=(fireIndex++)%particleCount;
-  const a=Math.random()*Math.PI*2;
-  const u=Math.random()*2-1;
-  const s=15+Math.random()*30;
-  const q=Math.sqrt(1-u*u);
-
-  firePos[i*3]=origin[0];
-  firePos[i*3+1]=origin[1];
-  firePos[i*3+2]=origin[2];
-
-  fireVel[i*3]=Math.cos(a)*q*s;
-  fireVel[i*3+1]=u*s;
-  fireVel[i*3+2]=Math.sin(a)*q*s;
-
-  fireLife[i]=1.5+Math.random();
-
-  fireColor[i*3]=color.r;
-  fireColor[i*3+1]=color.g;
-  fireColor[i*3+2]=color.b;
- }
+function finish(){
+ document.getElementById("quiz").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ let correct=records.filter(x=>x.ok).length;
+ document.getElementById("score").textContent=correct+" / "+questions.length;
+ document.getElementById("summary").textContent=book+" · 정답률 "+Math.round(correct/questions.length*100)+"%";
 }
-
-let burstTimer=0;
-function updateFireworks(dt){
- burstTimer+=dt;
- if(burstTimer>2.8){
-  burstTimer=0;
-  burst();
- }
-
- for(let i=0;i<particleCount;i++){
-  if(fireLife[i]<=0)continue;
-  fireLife[i]-=dt;
-  fireVel[i*3+1]-=10*dt;
-  firePos[i*3]+=fireVel[i*3]*dt;
-  firePos[i*3+1]+=fireVel[i*3+1]*dt;
-  firePos[i*3+2]+=fireVel[i*3+2]*dt;
- }
-
- fireGeo.attributes.position.needsUpdate=true;
+function review(){
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("reviews").classList.remove("hidden");
+ let wrong=records.filter(x=>!x.ok);
+ document.getElementById("reviewList").innerHTML=wrong.length?
+ wrong.map((x,i)=>`<div class="review">
+ <b>${i+1}. ${x.q}</b>
+ <p class="bad">내 답: ${x.input}</p>
+ <p class="good">정답: ${x.answer}</p>
+ </div>`).join(""):"<p class='good'>모든 문제를 맞혔어요!</p>";
 }
-
-// 자동 렌더링 품질 조절
-let lastFrame=0;
-let frameSamples=0;
-let sampleTime=0;
-let adaptiveScale=Math.min(devicePixelRatio,.85);
-
-const clock=new THREE.Clock();
-
-function animate(now=0){
- requestAnimationFrame(animate);
-
- const dt=Math.min(clock.getDelta(),.04);
- const t=clock.elapsedTime;
-
- if(insideLift)updateLift(dt);
- else updatePlayer(dt);
-
- for(const b of beamPivots){
-  b.pivot.rotation.y=Math.sin(t*.22+b.phase)*.9;
-  b.pivot.rotation.x=Math.cos(t*.17+b.phase)*.4;
-  b.pivot.rotation.z=Math.sin(t*.13+b.phase)*.25;
- }
-
- topLight.intensity=12+Math.sin(t*2)*4;
-
- updateFireworks(dt);
-
- $("pos").textContent=insideLift
-  ?"ELEVATOR"
-  :Math.round(player.x)+", "+Math.round(player.z);
-
- frameSamples++;
- sampleTime+=dt;
-
- if(sampleTime>2){
-  const fps=frameSamples/sampleTime;
-
-  if(fps<27){
-   adaptiveScale=Math.max(.5,adaptiveScale-.08);
-   renderer.setPixelRatio(adaptiveScale);
-  }else if(fps>48){
-   adaptiveScale=Math.min(Math.min(devicePixelRatio,.85),adaptiveScale+.025);
-   renderer.setPixelRatio(adaptiveScale);
-  }
-
-  $("quality").textContent="RENDER "+Math.round(fps)+" FPS";
-  frameSamples=0;
-  sampleTime=0;
- }
-
- if(now-lastFrame<1000/45)return;
- lastFrame=now;
-
- renderer.render(scene,camera);
-}
-
-animate();
-
-addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
- if($("lift").style.display==="block"){
-  $("lift").style.maxHeight=Math.max(180,innerHeight-28)+"px";
- }
+document.getElementById("answer").addEventListener("keydown",e=>{
+ if(e.key==="Enter")check();
 });
 </script>
 </body>
