@@ -9,14 +9,14 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f3f5fa;color:#222b42;font-family:'Gowun Dodum',sans-serif}
-header{padding:35px 15px 40px;text-align:center;color:white;background:linear-gradient(135deg,#344ba8,#7588e8);border-radius:0 0 28px 28px}
+header{padding:34px 15px 39px;text-align:center;color:white;background:linear-gradient(135deg,#344ba8,#7588e8);border-radius:0 0 28px 28px}
 header h1{font-size:29px;margin:0}
 header p{opacity:.9;margin:8px 0 0}
-main{max-width:700px;margin:22px auto;padding:0 14px}
+main{max-width:760px;margin:22px auto;padding:0 14px}
 .card{background:white;border-radius:22px;padding:23px;margin-bottom:16px;box-shadow:0 6px 25px #1c2c5010}
 h2{margin-top:0}
 .books{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.book{border:2px solid #e8eaf2;border-radius:16px;padding:20px 8px;text-align:center;background:white;font-family:inherit;cursor:pointer}
+.book{border:2px solid #e8eaf2;border-radius:16px;padding:18px 8px;text-align:center;background:white;font-family:inherit;cursor:pointer}
 .book b{font-size:21px;display:block}
 .book.selected{border-color:#5066cb;background:#f1f3ff;color:#344ba8}
 button{font-family:inherit;font-size:16px;font-weight:bold;border:0;border-radius:13px;padding:14px;cursor:pointer}
@@ -31,11 +31,23 @@ input{width:100%;padding:16px;border:2px solid #e4e7f0;border-radius:13px;font:1
 input:focus{border-color:#5268ce}
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions button{flex:1}
-.hidden{display:none}
+.hidden{display:none!important}
 .tag{display:inline-block;background:#eef1ff;color:#4359bd;padding:5px 11px;border-radius:20px;font-size:13px}
 .score{font-size:43px;color:#455dc4;font-weight:bold;text-align:center}
 .review{border-bottom:1px solid #eee;padding:13px 0}
 .good{color:#19845a}.bad{color:#d34b58}
+.table-wrap{overflow-x:auto;margin-top:18px}
+table{width:100%;border-collapse:collapse;text-align:left;min-width:570px;font-size:14px}
+th{background:#eef1fc;position:sticky;top:0}
+th,td{padding:12px;border-bottom:1px solid #e8eaf2;vertical-align:top}
+td:last-child{color:#344ba8;font-weight:bold}
+.tabs{display:flex;gap:8px}
+.tabs button{flex:1}
+@media(max-width:450px){
+ header h1{font-size:25px}
+ .question{font-size:19px}
+ .card{padding:18px}
+}
 </style>
 </head>
 <body>
@@ -44,6 +56,7 @@ input:focus{border-color:#5268ce}
 <p>말씀을 기억하고 직접 풀어보세요</p>
 </header>
 <main>
+
 <section class="card" id="home">
 <h2>① 성경 선택</h2>
 <div class="books">
@@ -52,6 +65,7 @@ input:focus{border-color:#5268ce}
 </div>
 <p class="info">② 쉬움·보통·어려움 문제가 무작위로 섞여 출제됩니다.</p>
 <button class="primary full" onclick="start()">퀴즈 시작하기 →</button>
+<button class="light full" onclick="showAnswerSheet()">📖 정답지 보기</button>
 </section>
 
 <section class="card hidden" id="quiz">
@@ -81,6 +95,22 @@ input:focus{border-color:#5268ce}
 <h2>채점 결과</h2>
 <div id="reviewList"></div>
 <button class="primary full" onclick="location.reload()">처음으로</button>
+</section>
+
+<section class="card hidden" id="answerSheet">
+<h2>📖 성경 퀴즈 정답지</h2>
+<div class="tabs">
+<button class="book selected" onclick="showAnswers('사도행전',this)">사도행전</button>
+<button class="book" onclick="showAnswers('마태복음',this)">마태복음</button>
+</div>
+<p class="info">문제 번호와 난이도, 정답을 확인할 수 있습니다.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>번호</th><th>난이도</th><th>문제</th><th>정답</th></tr></thead>
+<tbody id="answerRows"></tbody>
+</table>
+</div>
+<button class="light full" onclick="closeAnswers()">닫기</button>
 </section>
 </main>
 
@@ -206,9 +236,10 @@ const bank={
 };
 
 let book="사도행전",questions=[],pos=0,records=[],locked=false;
+
 function pickBook(name,el){
  book=name;
- document.querySelectorAll(".book").forEach(b=>b.classList.remove("selected"));
+ document.querySelectorAll("#home .book").forEach(b=>b.classList.remove("selected"));
  el.classList.add("selected");
 }
 function shuffle(arr){
@@ -222,9 +253,7 @@ function shuffle(arr){
 function start(){
  questions=shuffle(bank[book]);
  pos=0;records=[];locked=false;
- document.getElementById("home").classList.add("hidden");
- document.getElementById("result").classList.add("hidden");
- document.getElementById("reviews").classList.add("hidden");
+ hideAll();
  document.getElementById("quiz").classList.remove("hidden");
  show();
 }
@@ -288,6 +317,33 @@ function review(){
  <p class="bad">내 답: ${x.input}</p>
  <p class="good">정답: ${x.answer}</p>
  </div>`).join(""):"<p class='good'>모든 문제를 맞혔어요!</p>";
+}
+function hideAll(){
+ ["home","quiz","result","reviews","answerSheet"].forEach(id=>
+ document.getElementById(id).classList.add("hidden"));
+}
+function showAnswerSheet(){
+ hideAll();
+ document.getElementById("answerSheet").classList.remove("hidden");
+ showAnswers(book);
+}
+function showAnswers(name,el){
+ if(el){
+ el.parentElement.querySelectorAll(".book").forEach(b=>b.classList.remove("selected"));
+ el.classList.add("selected");
+ }
+ book=name;
+ document.getElementById("answerRows").innerHTML=bank[name].map((q,i)=>`
+ <tr>
+ <td>${i+1}</td>
+ <td>${q.level}</td>
+ <td>${q.q}</td>
+ <td>${q.a[0]}</td>
+ </tr>`).join("");
+}
+function closeAnswers(){
+ hideAll();
+ document.getElementById("home").classList.remove("hidden");
 }
 document.getElementById("answer").addEventListener("keydown",e=>{
  if(e.key==="Enter")check();
