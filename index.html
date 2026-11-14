@@ -1,353 +1,253 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>성경 퀴즈</title>
+<title>제2회 성경퀴즈</title>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f3f5fa;color:#222b42;font-family:'Gowun Dodum',sans-serif}
-header{padding:34px 15px 39px;text-align:center;color:white;background:linear-gradient(135deg,#344ba8,#7588e8);border-radius:0 0 28px 28px}
-header h1{font-size:29px;margin:0}
-header p{opacity:.9;margin:8px 0 0}
+body{margin:0;background:#f4f5fa;color:#273047;font-family:'Gowun Dodum',sans-serif}
+header{background:linear-gradient(135deg,#4359ad,#8998e5);color:white;text-align:center;padding:35px 15px;border-radius:0 0 28px 28px}
+header h1{margin:0;font-size:27px}
+header p{margin:8px 0 0;font-size:14px}
 main{max-width:760px;margin:22px auto;padding:0 14px}
-.card{background:white;border-radius:22px;padding:23px;margin-bottom:16px;box-shadow:0 6px 25px #1c2c5010}
-h2{margin-top:0}
-.books{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.book{border:2px solid #e8eaf2;border-radius:16px;padding:18px 8px;text-align:center;background:white;font-family:inherit;cursor:pointer}
-.book b{font-size:21px;display:block}
-.book.selected{border-color:#5066cb;background:#f1f3ff;color:#344ba8}
+.card{background:white;border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 5px 22px #25345a10}
+h2{margin:0 0 16px}
 button{font-family:inherit;font-size:16px;font-weight:bold;border:0;border-radius:13px;padding:14px;cursor:pointer}
-.primary{background:#465dc4;color:white}
-.light{background:#edf0fb;color:#4054ad}
+.primary{background:#5065c4;color:white}
+.secondary{background:#edf0fc;color:#465bb5}
 .full{width:100%;margin-top:12px}
-.info{font-size:13px;color:#858ca0}
-.progress{height:8px;background:#edf0f6;border-radius:20px;overflow:hidden;margin:15px 0}
-.progress div{height:100%;background:#5369ce;width:0;transition:.3s}
-.question{font-size:21px;line-height:1.65;margin:25px 0}
+.hidden{display:none!important}
+.small{font-size:13px;color:#858ca0;line-height:1.6}
+.tag{display:inline-block;background:#eef0ff;color:#4c60bb;padding:6px 12px;border-radius:20px;font-size:13px}
+.progress{height:8px;background:#eceef5;border-radius:20px;margin:17px 0;overflow:hidden}
+.progress div{height:100%;background:#5b70d0;width:0;transition:.2s}
+.question{font-size:21px;line-height:1.7;margin:25px 0}
 input{width:100%;padding:16px;border:2px solid #e4e7f0;border-radius:13px;font:17px 'Gowun Dodum';outline:none}
-input:focus{border-color:#5268ce}
+input:focus{border-color:#586dcc}
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions button{flex:1}
-.hidden{display:none!important}
-.tag{display:inline-block;background:#eef1ff;color:#4359bd;padding:5px 11px;border-radius:20px;font-size:13px}
-.score{font-size:43px;color:#455dc4;font-weight:bold;text-align:center}
-.review{border-bottom:1px solid #eee;padding:13px 0}
+.feedback{margin-top:14px;line-height:1.6}
 .good{color:#19845a}.bad{color:#d34b58}
-.table-wrap{overflow-x:auto;margin-top:18px}
-table{width:100%;border-collapse:collapse;text-align:left;min-width:570px;font-size:14px}
-th{background:#eef1fc;position:sticky;top:0}
-th,td{padding:12px;border-bottom:1px solid #e8eaf2;vertical-align:top}
-td:last-child{color:#344ba8;font-weight:bold}
-.tabs{display:flex;gap:8px}
-.tabs button{flex:1}
-@media(max-width:450px){
- header h1{font-size:25px}
- .question{font-size:19px}
- .card{padding:18px}
-}
+.score{text-align:center;font-size:43px;color:#5065c4;font-weight:bold}
+.table-wrap{overflow-x:auto;margin-top:15px}
+table{border-collapse:collapse;width:100%;min-width:590px;font-size:14px}
+th,td{padding:12px;border-bottom:1px solid #e9ebf2;text-align:left;vertical-align:top}
+th{background:#eef0fc}
+td:last-child{color:#4359b1;font-weight:bold}
+.review{padding:13px 0;border-bottom:1px solid #eee;line-height:1.6}
+@media(max-width:450px){.card{padding:18px}.question{font-size:19px}}
 </style>
 </head>
 <body>
 <header>
-<h1>성경 퀴즈</h1>
-<p>말씀을 기억하고 직접 풀어보세요</p>
+<h1>📖 제2회 성경퀴즈</h1>
+<p>원본 예상문제 50문항 · 주관식 퀴즈</p>
 </header>
 <main>
-
 <section class="card" id="home">
-<h2>① 성경 선택</h2>
-<div class="books">
-<button class="book selected" onclick="pickBook('사도행전',this)"><b>사도행전</b><small>50문제</small></button>
-<button class="book" onclick="pickBook('마태복음',this)"><b>마태복음</b><small>50문제</small></button>
-</div>
-<p class="info">② 쉬움·보통·어려움 문제가 무작위로 섞여 출제됩니다.</p>
-<button class="primary full" onclick="start()">퀴즈 시작하기 →</button>
-<button class="light full" onclick="showAnswerSheet()">📖 정답지 보기</button>
+<span class="tag">BIBLE QUIZ</span>
+<h2 style="margin-top:15px">말씀 퀴즈에 도전해 보세요!</h2>
+<p>원본 문제 문장을 그대로 사용합니다. 문제 순서는 매번 무작위로 섞입니다.</p>
+<p class="small">총 50문제 · 쉬움·보통·어려움 섞어서 출제</p>
+<button class="primary full" onclick="startQuiz()">퀴즈 시작하기 →</button>
+<button class="secondary full" onclick="openAnswers()">정답지 보기</button>
 </section>
 
 <section class="card hidden" id="quiz">
-<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;justify-content:space-between">
 <span class="tag" id="level"></span>
-<span class="info" id="count"></span>
+<span class="small" id="counter"></span>
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div class="question" id="question"></div>
 <input id="answer" placeholder="정답을 입력하세요" autocomplete="off">
 <div class="actions">
-<button class="light" onclick="skip()">건너뛰기</button>
-<button class="primary" onclick="check()">정답 확인</button>
+<button class="secondary" onclick="skip()">건너뛰기</button>
+<button class="primary" onclick="checkAnswer()">정답 확인</button>
 </div>
-<p class="info" id="feedback"></p>
+<div class="feedback" id="feedback"></div>
 </section>
 
 <section class="card hidden" id="result">
 <h2 style="text-align:center">퀴즈 완료!</h2>
 <div class="score" id="score"></div>
 <p id="summary" style="text-align:center"></p>
-<button class="primary full" onclick="review()">채점 결과 보기</button>
-<button class="light full" onclick="location.reload()">처음으로</button>
+<button class="primary full" onclick="showReview()">채점 결과 보기</button>
+<button class="secondary full" onclick="goHome()">처음으로</button>
 </section>
 
-<section class="card hidden" id="reviews">
+<section class="card hidden" id="review">
 <h2>채점 결과</h2>
 <div id="reviewList"></div>
-<button class="primary full" onclick="location.reload()">처음으로</button>
+<button class="primary full" onclick="goHome()">처음으로</button>
 </section>
 
-<section class="card hidden" id="answerSheet">
-<h2>📖 성경 퀴즈 정답지</h2>
-<div class="tabs">
-<button class="book selected" onclick="showAnswers('사도행전',this)">사도행전</button>
-<button class="book" onclick="showAnswers('마태복음',this)">마태복음</button>
-</div>
-<p class="info">문제 번호와 난이도, 정답을 확인할 수 있습니다.</p>
+<section class="card hidden" id="answers">
+<h2>📋 전체 정답지</h2>
+<p class="small">원본 문제 번호와 문장, 정답입니다.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>번호</th><th>난이도</th><th>문제</th><th>정답</th></tr></thead>
 <tbody id="answerRows"></tbody>
 </table>
 </div>
-<button class="light full" onclick="closeAnswers()">닫기</button>
+<button class="secondary full" onclick="goHome()">닫기</button>
 </section>
 </main>
 
 <script>
-const make=(level,items)=>items.map(([q,a])=>({level,q,a:Array.isArray(a)?a:[a]}));
+const data = [
+[1,"보혜사 성령님은 누구를 증언하고 누구를 잘 믿을 수 있도록 도와주실까요?","예수님",1],
+[2,"우리가 무슨 일을 할 때마다 하나님께서 ( )인지 물으며 행동해야 하나요?","기뻐하시는 일",1],
+[3,"보혜사 곧 아버지께서 내 이름으로 보내실 ( ) 그가 너희에게 모든 것을 가르치고 내가 너희에게 말한 모든 것을 ( )나게 하리라","성령, 생각",2],
+[4,"성부 하나님, 성자 예수님, 성령 하나님은 ( )이신 하나님입니다.","삼위일체",2],
+[5,"성령 하나님께서 우리를 ( ) 가운데로 인도하십니다.","진리",1],
+[6,"하나님께서 우리에게 주시는 가장 좋은 선물은 무엇일까요?","성령",1],
+[7,"우리는 연약합니다. 오직 성령이 우리의 연약함과 ( )를 도우십니다.","기도",1],
+[8,"로마서 8:16 ( )안을 쓰세요. 성령이 친히 우리의 영과 더불어 우리가 ( )인 것을 증언하시나니","하나님의 자녀",2],
+[9,"성령으로 충만하면 성령님께서 알려주시는 ( )을 전할 수 있습니까?","복음",1],
+[10,"하나님의 성령을 근심하게 하는 것은 무엇일까요?","죄, 불순종",1],
+[11,"하나님은 ( )을 통해 우리에게 하나님의 뜻을 알게 하실까요? 우리의 마음을 밝히셔서 ( )을 깨닫게 하시는 분은 누구실까요?","말씀, 성령",2],
+[12,"로마서 3장 23절을 쓰세요.","모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니",3],
+[13,"(OX문제) 자신의 힘과 노력으로 하나님 나라에 들어갈 수 없어서 예수님이 세상에 오셨다.","O",1],
+[14,"싸움과 다툼이 일어나는 것은 우리 속에 무엇이 있기 때문일까요?","욕심",1],
+[15,"마음속에 일어나는 여러 가지 욕구들을 무엇으로 다스려야 할까요?","성령",2],
+[16,"베드로전서 5장 8절을 쓰세요. ( ) 너희 대적 마귀가 우는 사자 같이 두루 다니며 삼킬 자를 찾나니","근신하라 깨어라",3],
+[17,"사자가 사냥감을 노리듯이 우리를 공격할 기회를 노리는 우리의 원수는 무엇일까요?","마귀",1],
+[18,"아담 이후 모든 사람이 죄를 지었고 무엇과 무엇이 죽게 되었습니까?","몸과 영혼",2],
+[19,"만일 우리가 우리 죄를 자백하면 우리 죄를 용서하시고 우리 죄를 어떻게 해주실까요?","깨끗하게 하신다",2],
+[20,"자기의 죄나 잘못을 다른 사람이나 하나님께 스스로 고백하는 것을 무엇이라 하는가?","자백",1],
+[21,"아무리 큰 죄를 지었어도 진심으로 회개하고 악에서 돌이키면 하나님은 ( )하십니다.","용서",1],
+[22,"이스라엘 백성들은 광야에서 이동하기 쉽게 무엇을 치고 지냈을까요?","천막",1],
+[23,"하나님은 광야에서 열두 지파에게 어디로 모이고 함께 행진하라고 하셨나요?","회막",2],
+[24,"유다 백성들은 바벨론 포로로 끌려가 하나님의 은혜로 몇 년 만에 고향에 돌아왔나요?","70년",1],
+[25,"이스라엘 백성들은 절기 (명절)를 지키려고 어디에 모였나요?","예루살렘",1],
+[26,"이방의 여러 교회들이 어려워진 예루살렘 교회를 도왔어요. 서로 함께 도우는 것은 무엇 때문일까요?","연대감",2],
+[27,"사도행전 16:31을 쓰세요.","주 예수를 믿으라 그리하면 너와 네 집이 구원을 받으리라 하고",3],
+[28,"빈칸을 채워보세요. 여호와를 ( )하며 그의 길을 걷는 자마다 ( )이 있도다.","경외, 복",2],
+[29,"하나님과 화목하기 위해 내가 할 수 있는 일은 무엇인가요?","회개 기도",1],
+[30,"다툰 친구와 화목하기 위해 내가 할 수 있는 일은 무엇인가요?","내가 먼저 사과한다",1],
+[31,"이스라엘 백성에게 가나안에 가면 그들을 불쌍히 여기지 말고 어떻게 하라고 하셨나요?","진멸",2],
+[32,"임마누엘의 뜻은 무엇입니까?","하나님이 우리와 함께 계시다",1],
+[33,"예수님이 태어난 마을 이름은 무엇입니까?","베들레헴",1],
+[34,"동방박사들이 마리아를 찾아와 아기 예수께 무엇을 드렸나요?","황금, 유향, 몰약",1],
+[35,"유대 광야에서 천국이 가까이 왔다고 외친 사람은 누구입니까?","세례 요한",1],
+[36,"요한 자신은 물로 세례를 베풀었지만 자기 뒤에 오시는 분은 무엇으로 세례를 주신다고 하였나요?","성령과 불",2],
+[37,"예수님은 마귀에게 시험받기 전에 며칠을 금식하셨습니까?","40일",1],
+[38,"예수님은 마귀의 세 번째 시험에서 어떤 말로 마귀를 물리치셨습니까?","사탄아 물러가라",2],
+[39,"자신들의 아버지 세베대와 그물을 깁다가 예수님께 부름받고 제자가 된 두 사람은?","야고보, 요한",2],
+[40,"예수님은 산상수훈에서 온유한 자는 어떤 복을 받을 것이라고 하셨습니까?","땅을 기업으로 받는다",2],
+[41,"예물을 드리다가 형제에게 원망들을 만한 일이 있으면 어떻게 해야 한다고 하셨나요?","형제와 먼저 화해하라",2],
+[42,"주님은 우리가 기도 때 어디에 들어가서 문을 닫고 은밀히 기도하라고 하셨습니까?","골방",1],
+[43,"주님은 무엇을 구해야 모든 것을 우리에게 더하신다고 말씀하셨습니까?","그의 나라와 그의 의",2],
+[44,"이 문은 좁고 협착하여 그곳을 찾는 사람이 적다고 하신 이 문은 어떤 문입니까?","생명으로 인도하는 문",2],
+[45,"씨뿌리는 자의 비유에서 좋은 땅에 떨어진 씨는 몇 배의 결실을 맺게 됩니까?","100배, 60배, 30배",2],
+[46,"떡 다섯 개와 물고기 두 마리로 오천 명을 먹이고 남은 음식은 얼마나 되었나요?","12바구니",1],
+[47,"주는 그리스도시오 살아계신 하나님의 아들이라 고백한 예수님의 제자는 누구인가요?","베드로",1],
+[48,"혼인 잔치 비유에서 임금이 마련한 혼인 잔치에 참석한 사람 중 밖으로 쫓겨난 사람은 어떤 사람인가요?","예복을 입지 않은 사람",2],
+[49,"율법사가 주님께 여쭤본 계명이 가장 큰 문자 주님이 말씀하신 두 가지는 무엇인가요?","하나님사랑, 이웃사랑",2],
+[50,"빌라도에게 예수의 시체를 달라고 하여 바위 속 무덤에 넣어둔 사람은 누구입니까?","아리마대 요셉",2]
+];
 
-const bank={
-"사도행전":[
-...make("쉬움",[
-["예수님께서 승천하신 후 제자들에게 약속하신 분은 누구인가요?",["성령","성령님"]],
-["오순절에 제자들에게 임한 것은 무엇인가요?",["성령","성령님"]],
-["예수님 승천 후 제자들이 모여 기도한 곳은 어디인가요?",["다락방","마가의 다락방"]],
-["베드로의 설교를 듣고 세례를 받은 사람은 약 몇 명인가요?",["삼천 명","3000명","삼천명"]],
-["성전 미문에서 베드로와 요한이 만난 사람은 어떤 사람이었나요?",["걷지 못하는 사람","나면서 못 걷게 된 사람","앉은뱅이"]],
-["일곱 집사 중 순교한 사람은 누구인가요?","스데반"],
-["사울은 어느 도시로 가던 중 예수님을 만났나요?",["다메섹","다마스쿠스"]],
-["사울의 눈을 다시 보게 해 준 제자는 누구인가요?","아나니아"],
-["베드로가 환상을 본 도시는 어디인가요?","욥바"],
-["베드로가 방문한 이방인의 이름은 무엇인가요?","고넬료"],
-["안디옥에서 제자들이 처음 불린 이름은 무엇인가요?","그리스도인"],
-["사도행전 마지막 부분에서 바울은 어느 도시에서 복음을 전하나요?","로마"],
-["빌립이 광야 길에서 만난 사람은 어느 나라 사람이었나요?",["에티오피아","구스"]],
-["베드로가 살린 여제자의 이름은 무엇인가요?",["다비다","도르가"]],
-["바울과 바나바가 선교 여행을 시작한 교회는 어디인가요?","안디옥 교회"],
-["아나니아의 아내 이름은 무엇인가요?","삽비라"],
-["사도행전의 저자는 누구인가요?","누가"],
-["예수님 승천 후 사도들은 유다를 대신할 사람으로 누구를 뽑았나요?","맛디아"],
-["빌립보에서 바울과 함께 감옥에 갇힌 사람은 누구인가요?","실라"],
-["바울이 로마에서 복음을 전한 기간은 몇 년인가요?",["2년","이 년","두 해"]]
-]),
-...make("보통",[
-["오순절에 베드로가 인용한 선지자는 누구인가요?","요엘"],
-["사도들을 죽이지 말라고 조언한 율법교사는 누구인가요?","가말리엘"],
-["스데반이 순교할 때 그의 옷을 지키던 청년은 누구인가요?","사울"],
-["고넬료는 어떤 직책을 가진 사람이었나요?","백부장"],
-["고넬료는 어느 부대의 백부장이었나요?",["이탈리아 부대","이달리야 부대"]],
-["바울과 바나바가 구브로에서 만난 마술사의 이름은 무엇인가요?",["바예수","엘루마"]],
-["빌립보 감옥의 간수는 바울에게 무엇을 물었나요?",["내가 어떻게 하여야 구원을 받으리이까","어떻게 해야 구원을 받습니까"]],
-["바울이 아테네에서 설교한 장소는 어디인가요?","아레오바고"],
-["바울과 함께 천막 만드는 일을 한 부부는 누구인가요?",["브리스길라와 아굴라","아굴라와 브리스길라"]],
-["바울이 드로아에서 설교할 때 창문에서 떨어진 청년은 누구인가요?","유두고"],
-["바울이 예루살렘으로 가는 길에 에베소 장로들과 작별한 곳은 어디인가요?","밀레도"],
-["바울과 바나바가 루스드라에서 각각 어떤 신으로 불렸나요?",["바나바는 제우스, 바울은 헤르메스","제우스와 헤르메스"]],
-["사울이 회심한 뒤 며칠 동안 보지 못했나요?",["사흘","3일","삼일"]],
-["베드로가 욥바에서 머물렀던 무두장이의 이름은 무엇인가요?","시몬"],
-["예루살렘 회의에서 이방인 신자들에게 피하라고 권한 것 중 하나는 무엇인가요?",["우상의 제물","우상 제물"]],
-["바울과 실라가 빌립보 감옥에 있을 때 일어난 자연 현상은 무엇인가요?","지진"],
-["바울이 에베소에서 복음을 전할 때 마술 책을 불태운 사람들은 무엇을 했나요?",["책을 불태웠다","마술 책을 불태웠다"]],
-["바울이 고린도에서 만난 동역자 부부는 누구인가요?",["브리스길라와 아굴라","아굴라와 브리스길라"]],
-["바울이 예루살렘에서 체포된 후 재판을 받으러 간 총독은 누구인가요?","벨릭스"],
-["바울이 가이사에게 상소한 이유는 무엇인가요?",["로마 시민이었기 때문에","가이사에게 재판받기 위해","황제에게 상소하기 위해"]]
-]),
-...make("어려움",[
-["오순절에 베드로가 인용한 요엘서의 핵심 약속은 무엇인가요?",["내 영을 모든 육체에 부어 주리니","성령을 부어 주리니"]],
-["일곱 사람 중 안디옥 출신 개종자로 소개된 사람은 누구인가요?","니골라"],
-["사도행전 6장에서 일곱 사람 중 믿음과 성령이 충만한 사람으로 소개된 사람은 누구인가요?","스데반"],
-["바울과 바나바가 구브로에서 만난 총독은 누구인가요?","서기오 바울"],
-["바울이 루스드라에서 돌에 맞은 후 어디로 들어갔나요?","성"],
-["바울이 고린도에서 만난 유대인 회당장의 이름은 무엇인가요?","그리스보"],
-["바울이 에베소에서 두란노 서원에서 강론한 기간은 얼마인가요?",["두 해","2년"]],
-["에베소에서 바울의 손수건이나 앞치마를 가져다가 병자에게 놓았을 때 어떤 일이 일어났나요?",["병이 떠나고 악귀가 나갔다","병이 나았다"]],
-["바울이 예루살렘으로 가는 길에 머물렀던 두로에서 제자들과 며칠을 보냈나요?",["이레","7일","칠 일"]],
-["바울이 로마로 가는 배에서 만난 백부장의 이름은 무엇인가요?","율리오"]
-])
-],
-"마태복음":[
-...make("쉬움",[
-["예수님의 어머니 이름은 무엇인가요?","마리아"],
-["예수님이 태어나신 마을은 어디인가요?","베들레헴"],
-["예수님의 탄생을 알려 준 천사는 누구인가요?","천사"],
-["동방박사들은 아기 예수님께 무엇을 드렸나요?",["황금과 유향과 몰약","황금 유향 몰약"]],
-["예수님께 세례를 베푼 사람은 누구인가요?","세례 요한"],
-["예수님이 광야에서 금식하신 기간은 얼마인가요?",["40일","사십 일","사십일"]],
-["예수님이 처음 부르신 제자 중 형제인 두 사람은 누구인가요?",["베드로와 안드레","안드레와 베드로"]],
-["예수님은 제자들에게 세상의 무엇이라고 말씀하셨나요?",["소금과 빛","세상의 소금과 빛"]],
-["예수님이 가르쳐 주신 기도의 이름은 무엇인가요?","주기도문"],
-["예수님이 물 위를 걸으셨을 때 배에서 내린 제자는 누구인가요?","베드로"],
-["예수님이 나귀를 타고 예루살렘에 들어가신 사건은 무엇이라고 하나요?",["예루살렘 입성","승리의 입성"]],
-["예수님을 은 삼십에 판 제자는 누구인가요?","가룟 유다"],
-["예수님이 십자가에 못 박히신 장소는 어디인가요?",["골고다","해골의 곳"]],
-["예수님의 무덤을 찾아간 여인 중 한 명은 누구인가요?","막달라 마리아"],
-["예수님은 부활하신 후 제자들에게 무엇을 하라고 명령하셨나요?",["모든 민족을 제자로 삼으라","제자를 삼으라"]],
-["예수님이 태어나셨을 때 유대의 왕은 누구였나요?","헤롯"],
-["예수님께서 가르치신 유명한 설교는 무엇인가요?","산상수훈"],
-["예수님이 베드로에게 사람을 낚는 어부가 되게 하겠다고 말씀하신 사람은 누구인가요?","베드로"],
-["예수님이 제자들과 함께 배를 타고 가실 때 바람과 바다를 꾸짖어 잠잠하게 하셨나요?",["예","그렇다","네"]],
-["예수님의 열두 제자 중 세리였던 사람은 누구인가요?",["마태","레위"]]
-]),
-...make("보통",[
-["예수님의 족보에서 다윗의 아버지는 누구인가요?","이새"],
-["예수님이 태어나신 소식을 듣고 아기들을 죽이려 한 왕은 누구인가요?","헤롯"],
-["예수님이 광야에서 시험을 받으실 때 시험한 자는 누구인가요?",["마귀","사탄"]],
-["예수님이 산상수훈에서 복이 있다고 말씀하신 마음이 가난한 사람은 어떤 사람인가요?",["심령이 가난한 자","마음이 가난한 자"]],
-["예수님이 가르치신 기도에서 하나님의 이름이 거룩히 여김을 받도록 무엇을 구하나요?",["이름이 거룩히 여김을 받으시오며","하나님의 이름"]],
-["예수님이 물 위를 걸으실 때 베드로는 무엇을 하다가 물에 빠졌나요?",["예수님께 가려고 물 위를 걷다가","물 위를 걷다가"]],
-["예수님께서 변화산에서 함께 나타난 구약 인물 두 명은 누구인가요?",["모세와 엘리야","엘리야와 모세"]],
-["예수님께서 베드로에게 천국 열쇠를 주겠다고 말씀하신 곳은 어디인가요?",["가이사랴 빌립보","가이사랴"]],
-["예수님을 시험하며 표적을 요구한 종교 지도자들은 누구인가요?",["바리새인과 사두개인","바리새인들"]],
-["예수님께서 가장 큰 계명으로 말씀하신 첫째 계명은 무엇인가요?",["마음을 다하고 목숨을 다하고 뜻을 다하여 하나님을 사랑하라","하나님을 사랑하라"]],
-["예수님께서 가장 큰 계명 다음으로 말씀하신 계명은 무엇인가요?",["네 이웃을 네 자신과 같이 사랑하라","이웃을 사랑하라"]],
-["예수님이 예루살렘 입성 때 타신 동물은 무엇인가요?","나귀"],
-["예수님이 성전을 깨끗하게 하시며 성전을 무엇이라 부르셨나요?",["기도하는 집","내 집은 기도하는 집"]],
-["예수님을 넘겨주기 위해 유다가 받은 돈은 얼마인가요?",["은 삼십","은 30","삼십 은"]],
-["예수님을 세 번 모른다고 한 제자는 누구인가요?","베드로"],
-["예수님이 십자가에 달리셨을 때 예수님 곁에 함께 못 박힌 사람은 몇 명인가요?",["두 명","2명"]],
-["예수님의 무덤을 지키도록 명령받은 사람들은 누구인가요?",["경비병","군인"]],
-["예수님이 부활하신 뒤 제자들에게 만나자고 하신 갈릴리의 산은 어떤 산인가요?",["지정하신 산","예수님이 정하신 산"]],
-["예수님이 세례를 받으실 때 하늘에서 들린 말씀은 누구의 음성이었나요?",["하나님의 음성","아버지의 음성"]],
-["마태복음 마지막에서 예수님은 제자들과 항상 함께하겠다고 약속하신 기간은 언제까지인가요?",["세상 끝날까지","세상 끝까지"]]
-]),
-...make("어려움",[
-["마태복음 1장에서 예수님의 이름을 임마누엘이라고 부른다는 예언은 누구를 통해 주어졌나요?","이사야"],
-["동방박사들이 예루살렘에 와서 찾은 분은 누구인가요?",["유대인의 왕으로 나신 이","유대인의 왕"]],
-["예수님이 광야에서 첫 번째 시험을 받으실 때 돌을 무엇으로 만들라는 유혹을 받으셨나요?",["떡","빵"]],
-["예수님이 광야에서 성전 꼭대기에서 뛰어내리라는 시험을 받을 때 인용하신 말씀은 무엇을 하지 말라는 것이었나요?",["주 너의 하나님을 시험하지 말라","하나님을 시험하지 말라"]],
-["예수님이 산상수훈에서 화평하게 하는 자는 무엇이라 일컬음을 받는다고 하셨나요?",["하나님의 아들","하나님의 아들들이"]],
-["예수님이 변화산에서 얼굴과 옷이 어떻게 변하셨나요?",["얼굴이 해 같이 빛나고 옷이 빛과 같이 희어졌다","해 같이 빛났다"]],
-["예수님이 베드로에게 형제를 몇 번까지 용서하라고 말씀하셨나요?",["일흔 번씩 일곱 번","490번","칠십 번씩 일곱 번"]],
-["예수님께서 비유로 말씀하신 열 처녀 중 슬기로운 처녀는 몇 명인가요?",["다섯","5명"]],
-["달란트 비유에서 한 달란트를 받은 종은 그 돈을 어떻게 했나요?",["땅에 감추었다","땅에 묻었다"]],
-["마태복음에서 예수님은 마지막 심판 때 양과 염소를 무엇으로 구분하신다고 말씀하셨나요?",["오른편과 왼편","오른쪽과 왼쪽"]]
-])]
-};
+let deck=[],index=0,records=[],locked=false;
 
-let book="사도행전",questions=[],pos=0,records=[],locked=false;
-
-function pickBook(name,el){
- book=name;
- document.querySelectorAll("#home .book").forEach(b=>b.classList.remove("selected"));
- el.classList.add("selected");
+function hideAll(){
+ ["home","quiz","result","review","answers"].forEach(id=>document.getElementById(id).classList.add("hidden"));
 }
 function shuffle(arr){
  let a=[...arr];
  for(let i=a.length-1;i>0;i--){
- let j=Math.floor(Math.random()*(i+1));
- [a[i],a[j]]=[a[j],a[i]];
+  let j=Math.floor(Math.random()*(i+1));
+  [a[i],a[j]]=[a[j],a[i]];
  }
  return a;
 }
-function start(){
- questions=shuffle(bank[book]);
- pos=0;records=[];locked=false;
+function startQuiz(){
+ deck=shuffle(data);
+ index=0;records=[];
  hideAll();
  document.getElementById("quiz").classList.remove("hidden");
- show();
+ render();
 }
-function show(){
+function render(){
  locked=false;
- let q=questions[pos];
- document.getElementById("level").textContent=q.level+" 난이도 · "+book;
- document.getElementById("count").textContent=(pos+1)+" / "+questions.length;
- document.getElementById("bar").style.width=(pos/questions.length*100)+"%";
- document.getElementById("question").textContent=(pos+1)+". "+q.q;
+ const q=deck[index];
+ document.getElementById("level").textContent=["","쉬움","보통","어려움"][q[3]];
+ document.getElementById("counter").textContent=(index+1)+" / "+deck.length;
+ document.getElementById("bar").style.width=(index/deck.length*100)+"%";
+ document.getElementById("question").textContent=q[0]+". "+q[1];
  document.getElementById("answer").value="";
  document.getElementById("answer").disabled=false;
  document.getElementById("feedback").textContent="";
  document.getElementById("answer").focus();
 }
-function norm(s){
+function normalize(s){
  return s.toLowerCase().replace(/\s/g,"").replace(/[.,!?·~'"]/g,"");
 }
-function check(){
+function checkAnswer(){
  if(locked)return;
- let input=document.getElementById("answer").value.trim();
- if(!input){document.getElementById("feedback").textContent="답을 입력해 주세요.";return}
- let q=questions[pos],n=norm(input);
- let ok=q.a.some(a=>norm(a)===n);
- records.push({q:q.q,input,ok,answer:q.a[0]});
+ let val=document.getElementById("answer").value.trim();
+ if(!val){document.getElementById("feedback").textContent="정답을 입력해 주세요.";return;}
+ const q=deck[index];
+ const ok=normalize(val)===normalize(q[2]);
+ records.push({number:q[0],question:q[1],input:val,answer:q[2],ok});
  locked=true;
  document.getElementById("answer").disabled=true;
  document.getElementById("feedback").innerHTML=ok?
- '<span class="good">정답입니다!</span>':
- '<span class="bad">아쉬워요. 정답: '+q.a[0]+'</span>';
- setTimeout(next,1000);
+ '<span class="good">정답입니다! 다음 문제로 넘어갑니다.</span>':
+ '<span class="bad">오답입니다. 정답: '+q[2]+'</span>';
+ setTimeout(nextQuestion,1100);
 }
 function skip(){
  if(locked)return;
- let q=questions[pos];
- records.push({q:q.q,input:"건너뜀",ok:false,answer:q.a[0]});
+ const q=deck[index];
+ records.push({number:q[0],question:q[1],input:"건너뜀",answer:q[2],ok:false});
  locked=true;
  document.getElementById("answer").disabled=true;
- document.getElementById("feedback").innerHTML='<span class="bad">정답: '+q.a[0]+'</span>';
- setTimeout(next,1000);
+ document.getElementById("feedback").innerHTML='<span class="bad">정답: '+q[2]+'</span>';
+ setTimeout(nextQuestion,1100);
 }
-function next(){
- pos++;
- if(pos>=questions.length){finish();return}
- show();
+function nextQuestion(){
+ index++;
+ if(index>=deck.length){finish();return;}
+ render();
 }
 function finish(){
- document.getElementById("quiz").classList.add("hidden");
+ hideAll();
  document.getElementById("result").classList.remove("hidden");
  let correct=records.filter(x=>x.ok).length;
- document.getElementById("score").textContent=correct+" / "+questions.length;
- document.getElementById("summary").textContent=book+" · 정답률 "+Math.round(correct/questions.length*100)+"%";
+ document.getElementById("score").textContent=correct+" / 50";
+ document.getElementById("summary").textContent="정답률 "+Math.round(correct/50*100)+"%";
+ document.getElementById("bar").style.width="100%";
 }
-function review(){
- document.getElementById("result").classList.add("hidden");
- document.getElementById("reviews").classList.remove("hidden");
- let wrong=records.filter(x=>!x.ok);
+function showReview(){
+ hideAll();
+ document.getElementById("review").classList.remove("hidden");
+ const wrong=records.filter(x=>!x.ok);
  document.getElementById("reviewList").innerHTML=wrong.length?
- wrong.map((x,i)=>`<div class="review">
- <b>${i+1}. ${x.q}</b>
+ wrong.map(x=>`<div class="review">
+ <b>${x.number}. ${x.question}</b>
  <p class="bad">내 답: ${x.input}</p>
  <p class="good">정답: ${x.answer}</p>
  </div>`).join(""):"<p class='good'>모든 문제를 맞혔어요!</p>";
 }
-function hideAll(){
- ["home","quiz","result","reviews","answerSheet"].forEach(id=>
- document.getElementById(id).classList.add("hidden"));
-}
-function showAnswerSheet(){
+function openAnswers(){
  hideAll();
- document.getElementById("answerSheet").classList.remove("hidden");
- showAnswers(book);
+ document.getElementById("answers").classList.remove("hidden");
+ document.getElementById("answerRows").innerHTML=data.map(q=>`
+ <tr><td>${q[0]}</td><td>${["","쉬움","보통","어려움"][q[3]]}</td><td>${q[1]}</td><td>${q[2]}</td></tr>
+ `).join("");
 }
-function showAnswers(name,el){
- if(el){
- el.parentElement.querySelectorAll(".book").forEach(b=>b.classList.remove("selected"));
- el.classList.add("selected");
- }
- book=name;
- document.getElementById("answerRows").innerHTML=bank[name].map((q,i)=>`
- <tr>
- <td>${i+1}</td>
- <td>${q.level}</td>
- <td>${q.q}</td>
- <td>${q.a[0]}</td>
- </tr>`).join("");
-}
-function closeAnswers(){
+function goHome(){
  hideAll();
  document.getElementById("home").classList.remove("hidden");
 }
 document.getElementById("answer").addEventListener("keydown",e=>{
- if(e.key==="Enter")check();
+ if(e.key==="Enter")checkAnswer();
 });
 </script>
 </body>
 </html>
+
